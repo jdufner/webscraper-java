@@ -25,7 +25,7 @@ class SeleniumWrapperTest {
     private SeleniumWrapper seleniumWrapper;
 
     @Test
-    void given_wrapper_when_get_url_expect_url_passed_through() {
+    void given_wrapper_when_get_url_expect_url_passed_through() throws Exception {
         // arrange
 
         // act
@@ -36,7 +36,7 @@ class SeleniumWrapperTest {
     }
 
     @Test
-    void given_wrapper_when_get_page_content_expect_tag_present() {
+    void given_wrapper_when_get_page_content_expect_tag_present() throws Exception {
         // arrange
         when(webDriver.getPageSource()).thenReturn("<title>heise online - IT-News, Nachrichten und Hintergründe | heise online</title>");
 
