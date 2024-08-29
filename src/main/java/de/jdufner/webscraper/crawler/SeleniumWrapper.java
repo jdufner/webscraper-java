@@ -39,31 +39,74 @@ public class SeleniumWrapper {
     }
 
     private void scrollDownPageByPage() throws Exception {
-        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        long innerHeight = (Long) javascriptExecutor.executeScript("return window.innerHeight");
-        long scrollHeight = (Long) javascriptExecutor.executeScript("return document.body.scrollHeight");
+        long innerHeight = getInnerHeight();
+        long scrollHeight = getScrollHeight();
+        long pageYOffset = getPageYOffset();
+        long scrollY = getScrollY();
         long scrollPosition = 0;
-        logger.debug("innerHeight = {}, scrollHeight = {}", innerHeight, scrollHeight);
         int index = 1;
+//        logger.info("innerHeight = {}, scrollHeight = {}, scrollPosition = {}", innerHeight, scrollHeight, scrollPosition);
         while (scrollPosition < (long)(.99 * (scrollHeight - innerHeight)) && index <= 100) {
-            javascriptExecutor.executeScript("window.scrollBy(0," + index * innerHeight + ")");
+            scrollToPosition(index * innerHeight);
             Thread.sleep(1000);
-            scrollPosition = (Long) javascriptExecutor.executeScript("return window.pageYOffset + window.innerHeight");
-            long newScrollHeight = (Long) javascriptExecutor.executeScript("return document.body.scrollHeight");
+            scrollPosition = getScrollPosition();
+            long newScrollHeight = getScrollHeight();
+//            logger.info("scrollPosition = {}, newScrollHeight = {}", scrollPosition, newScrollHeight);
             if (newScrollHeight > scrollHeight) {
                 index = -1;
                 scrollHeight = newScrollHeight;
             }
             index += 1;
+
         }
+        scrollToEndOfPage();
+    }
+
+    private long getScrollY() {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+        return (Long) javascriptExecutor.executeScript("return window.scrollY");
+    }
+
+    private long getPageYOffset() {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+        return (Long) javascriptExecutor.executeScript("return window.pageYOffset");
+    }
+
+    private void scrollToPosition(long position) throws Exception {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+        javascriptExecutor.executeScript("window.scrollBy(0, " + position + ")");
+    }
+
+    private void scrollToEndOfPage() {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+    }
+
+    private long getScrollPosition() {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+        return (Long) javascriptExecutor.executeScript("return window.pageYOffset + window.innerHeight");
+    }
+
+    private long getScrollHeight() {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+        return (Long) javascriptExecutor.executeScript("return document.body.scrollHeight");
+    }
+
+    private long getInnerHeight() {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+        return (Long) javascriptExecutor.executeScript("return window.innerHeight");
     }
 
     private void consentCookies() {
         webDriver.switchTo().frame(webDriver.switchTo().activeElement());
-        List<WebElement> buttons = webDriver.findElements(By.cssSelector("button[title='Zustimmen']"));
-        buttons.stream().filter(WebElement::isDisplayed).forEach(WebElement::click);
+        clickButtonWithTitle("Zustimmen");
+        clickButtonWithTitle("Agree");
         webDriver.switchTo().defaultContent();
+    }
+
+    private void clickButtonWithTitle(String title) {
+        List<WebElement> buttons = webDriver.findElements(By.cssSelector("button[title='" + title + "']"));
+        buttons.stream().filter(WebElement::isDisplayed).forEach(WebElement::click);
     }
 
 }
