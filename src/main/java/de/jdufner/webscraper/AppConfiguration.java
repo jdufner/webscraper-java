@@ -13,6 +13,7 @@ public class AppConfiguration {
     public WebDriver getChromeDriver() {
         ChromeOptions chromeOptions = new ChromeOptions();
         chromeOptions.addArguments("--disable-search-engine-choice-screen");
+        chromeOptions.addArguments("--lang=de");
         return new ChromeDriver(chromeOptions);
     }
 

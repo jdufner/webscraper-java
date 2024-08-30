@@ -67,7 +67,7 @@ public class SeleniumWrapper {
         return (Long) javascriptExecutor.executeScript("return window.scrollY");
     }
 
-    private void scrollVerticallyBy(long verticalPixels) throws Exception {
+    private void scrollVerticallyBy(long verticalPixels) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         javascriptExecutor.executeScript("window.scrollBy(0, " + verticalPixels + ")");
     }
