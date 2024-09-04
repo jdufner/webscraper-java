@@ -2,9 +2,11 @@ package de.jdufner.webscraper.crawler;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
+@ConfigurationPropertiesScan
 public class SeleniumWrapperIT {
 
     @Autowired

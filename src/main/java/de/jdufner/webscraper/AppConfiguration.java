@@ -9,11 +9,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class AppConfiguration {
 
+    private final SeleniumConfiguration seleniumConfiguration;
+
+    public AppConfiguration(SeleniumConfiguration seleniumConfiguration) {
+        this.seleniumConfiguration = seleniumConfiguration;
+    }
+
     @Bean
     public WebDriver getChromeDriver() {
         ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--disable-search-engine-choice-screen");
-        chromeOptions.addArguments("--lang=de");
+        seleniumConfiguration.options().forEach(chromeOptions::addArguments);
         return new ChromeDriver(chromeOptions);
     }
 

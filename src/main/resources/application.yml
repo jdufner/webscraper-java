@@ -1,0 +1,46 @@
+spring:
+  application:
+    name: webscraper
+  profiles:
+    active: test
+selenium:
+  chrome:
+    options:
+      - --disable-search-engine-choice-screen
+      - --lang=de
+      - --disable-notifications
+      - --disable-infobars
+      - --disable-extensions
+#      - --headless
+#      - --incognito
+#      - --windows-size=1200x600
+#      - --disable-gpu
+#      - --disable-web-security
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: apod
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: heise
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: hot
