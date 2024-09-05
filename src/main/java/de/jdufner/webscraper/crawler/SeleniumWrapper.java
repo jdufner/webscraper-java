@@ -4,16 +4,12 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class SeleniumWrapper {
-
-    private static final Logger logger = LoggerFactory.getLogger(SeleniumWrapper.class);
 
     private final WebDriver webDriver;
 
@@ -43,7 +39,6 @@ public class SeleniumWrapper {
         long scrollHeight = getScrollHeight();
         int index = 1;
         while (getPixelsBelowWindow() >= 0.9 * innerHeight && index <= 100) {
-            logger.debug("innerHeight = {}, scrollHeight = {}, index = {}, scrollY = {}", innerHeight, scrollHeight, index, getScrollY());
             scrollVerticallyBy(innerHeight);
             index += 1;
             Thread.sleep(500);
@@ -62,11 +57,6 @@ public class SeleniumWrapper {
         return ((Number) javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight")).longValue();
     }
 
-    private long getScrollY() {
-        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return (Long) javascriptExecutor.executeScript("return window.scrollY");
-    }
-
     private void scrollVerticallyBy(long verticalPixels) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         javascriptExecutor.executeScript("window.scrollBy(0, " + verticalPixels + ")");
@@ -74,7 +64,7 @@ public class SeleniumWrapper {
 
     private void scrollToEndOfPage() {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+        javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)");
     }
 
     private long getScrollHeight() {
