@@ -8,10 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,8 +36,8 @@ public class WebCrawler {
         String createdAt = extractCreatedAt(document);
         String creator = extractCreator(document);
         String categories = extractCategories(document);
-        List<URL> links = extractLinks(webCrawlerConfiguration.startUrl(), document);
-        List<URL> images = extractImages(webCrawlerConfiguration.startUrl(), document);
+        List<URI> links = extractLinks(webCrawlerConfiguration.startUrl(), document);
+        List<URI> images = extractImages(webCrawlerConfiguration.startUrl(), document);
         logger.info("title = {}, createdAt = {}, creator = {}, categories = {}, links = {}, images = {}", title, createdAt, creator, categories, links, images);
     }
 
@@ -71,36 +69,52 @@ public class WebCrawler {
                 .collect(Collectors.joining(","));
     }
 
-    List<URL> extractLinks(String baseUrl, Document document) {
+    List<URI> extractLinks(String baseUrl, Document document) {
         return document.select("a[href]").stream()
                 .map(element -> element.attr("href"))
                 .map(uri -> WebCrawler.buildUrl(baseUrl, uri))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .map(WebCrawler::removeQueryAndFragment)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toList());
     }
 
-    List<URL> extractImages(String baseUrl, Document document) {
+    List<URI> extractImages(String baseUrl, Document document) {
         return document.select("img[src]").stream()
-            .map(element -> element.attr("src"))
-            .map(uri -> WebCrawler.buildUrl(baseUrl, uri))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .collect(Collectors.toList());
+                .map(element -> element.attr("src"))
+                .map(uri -> WebCrawler.buildUrl(baseUrl, uri))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(WebCrawler::removeQueryAndFragment)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 
-    private static Optional<URL> buildUrl(String baseUrl, String url) {
+    private static Optional<URI> removeQueryAndFragment(URI uri) {
+        try {
+            URI newUri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), null, null);
+            return Optional.of(newUri);
+        } catch (URISyntaxException e) {
+            logger.warn("URISyntaxException = {}", e.toString());
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<URI> buildUrl(String baseUrl, String url) {
         try {
             URI uri = new URI(url);
             if (uri.isAbsolute()) {
-                return Optional.of(uri.toURL());
+                return Optional.of(uri);
             } else {
                 URI baseUri = new URI(baseUrl);
                 uri = baseUri.resolve(uri);
-                return Optional.of(uri.toURL());
+                return Optional.of(uri);
             }
-        } catch (URISyntaxException | MalformedURLException e) {
-            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            logger.warn("URISyntaxException = {}", e.toString());
             return Optional.empty();
         }
     }
