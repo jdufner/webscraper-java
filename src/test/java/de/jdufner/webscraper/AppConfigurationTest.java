@@ -1,5 +1,6 @@
 package de.jdufner.webscraper;
 
+import de.jdufner.webscraper.crawler.SeleniumConfiguration;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

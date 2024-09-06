@@ -17,31 +17,39 @@ public class SeleniumWrapper {
         this.webDriver = webDriver;
     }
 
-    public String get(String url) throws Exception {
+    public String getHtml(String url) {
         webDriver.get(url);
         waitUntilCookiesConsentedAndPageFullyLoaded();
         return webDriver.getPageSource();
     }
 
-    private void waitUntilCookiesConsentedAndPageFullyLoaded() throws Exception {
-        Thread.sleep(1000);
+    private void waitUntilCookiesConsentedAndPageFullyLoaded() {
+        sleep(1000);
         consentCookies();
         checkIfPageIsFullyLoaded();
     }
 
-    private void checkIfPageIsFullyLoaded() throws Exception {
+    private void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void checkIfPageIsFullyLoaded() {
         webDriver.switchTo().defaultContent();
         scrollDownPageByPage();
     }
 
-    private void scrollDownPageByPage() throws Exception {
+    private void scrollDownPageByPage() {
         long innerHeight = getInnerHeight();
         long scrollHeight = getScrollHeight();
         int index = 1;
         while (getPixelsBelowWindow() >= 0.9 * innerHeight && index <= 100) {
             scrollVerticallyBy(innerHeight);
             index += 1;
-            Thread.sleep(500);
+            sleep(500);
             long newScrollHeight = getScrollHeight();
             if (newScrollHeight > scrollHeight) {
                 index = 1;

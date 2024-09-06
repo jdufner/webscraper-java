@@ -2,7 +2,7 @@ spring:
   application:
     name: webscraper
   profiles:
-    active: test
+    active: heise
 selenium:
   chrome:
     options:
@@ -22,13 +22,6 @@ selenium:
 spring:
   config:
     activate:
-      on-profile: test
-
----
-
-spring:
-  config:
-    activate:
       on-profile: apod
 
 ---
@@ -37,6 +30,10 @@ spring:
   config:
     activate:
       on-profile: heise
+webscraper:
+  start-url: https://www.heise.de
+  number-pages: 200
+  number-images: 100
 
 ---
 

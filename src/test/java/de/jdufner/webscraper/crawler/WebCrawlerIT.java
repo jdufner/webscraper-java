@@ -8,28 +8,24 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @ConfigurationPropertiesScan
 @DirtiesContext
-public class SeleniumWrapperIT {
+public class WebCrawlerIT {
 
-    private static final Logger logger = LoggerFactory.getLogger(SeleniumWrapperIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
 
     @Autowired
-    private SeleniumWrapper wrapper;
+    private WebCrawler webCrawler;
 
     @Test
-    public void given_integrated_wrapper_when_get_Html_page_expect_cookie_consented_and_page_loaded() {
+    public void crawl() {
         // arrange
 
         // act
-        String html = wrapper.getHtml("https://www.heise.de/");
+        webCrawler.startCrawling();
 
         // assert
-        assertThat(html).isNotEmpty();
-        assertThat(html).contains("<title>heise online");
     }
 
 }

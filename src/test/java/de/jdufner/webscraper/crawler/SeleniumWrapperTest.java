@@ -24,7 +24,7 @@ class SeleniumWrapperTest {
     private SeleniumWrapper seleniumWrapper;
 
     @Test
-    void given_wrapper_when_get_url_expect_url_passed_through() throws Exception {
+    void given_wrapper_when_get_Html_url_expect_url_passed_through() {
         // arrange
         WebDriver.TargetLocator tl = mock(WebDriver.TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(tl);
@@ -35,19 +35,17 @@ class SeleniumWrapperTest {
         when(javascriptExecutor.executeScript("return window.innerHeight")).thenReturn(100L);
         when(javascriptExecutor.executeScript("return document.body.scrollHeight")).thenReturn(100L);
         when(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight")).thenReturn(0L);
-        //when(javascriptExecutor.executeScript("return window.scrollY")).thenReturn(100L);
         when(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)")).thenReturn(0L);
 
-
         // act
-        seleniumWrapper.get("https://www.heise.de");
+        seleniumWrapper.getHtml("https://www.heise.de");
 
         // assert
         verify(webDriver).get("https://www.heise.de");
     }
 
     @Test
-    void given_wrapper_when_not_yet_scrolled_to_end_of_page_expect_scroll_down() throws Exception {
+    void given_wrapper_when_not_yet_scrolled_to_end_of_page_expect_scroll_down() {
         // arrange
         WebDriver.TargetLocator tl = mock(WebDriver.TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(tl);
@@ -61,16 +59,15 @@ class SeleniumWrapperTest {
         when(javascriptExecutor.executeScript("window.scrollBy(0, 100)")).thenReturn(0L);
         when(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)")).thenReturn(0L);
 
-
         // act
-        seleniumWrapper.get("https://www.heise.de");
+        seleniumWrapper.getHtml("https://www.heise.de");
 
         // assert
         verify(javascriptExecutor).executeScript("window.scrollBy(0, 100)");
     }
 
     @Test
-    void given_wrapper_when_get_page_content_expect_tag_present() throws Exception {
+    void given_wrapper_when_get_Html_page_content_expect_tag_present() {
         // arrange
         WebDriver.TargetLocator tl = mock(WebDriver.TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(tl);
@@ -81,13 +78,12 @@ class SeleniumWrapperTest {
         when(javascriptExecutor.executeScript("return window.innerHeight")).thenReturn(100L);
         when(javascriptExecutor.executeScript("return document.body.scrollHeight")).thenReturn(100L);
         when(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight")).thenReturn(0L);
-        //when(javascriptExecutor.executeScript("return window.scrollY")).thenReturn(100L);
         when(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)")).thenReturn(0L);
 
         when(webDriver.getPageSource()).thenReturn("<title>heise online - IT-News, Nachrichten und Hintergründe | heise online</title>");
 
         // act
-        String htmlContent = seleniumWrapper.get("https://www.heise.de");
+        String htmlContent = seleniumWrapper.getHtml("https://www.heise.de");
 
         // assert
         assertThat(htmlContent).isNotNull();
