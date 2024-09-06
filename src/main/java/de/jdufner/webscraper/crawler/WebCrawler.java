@@ -39,7 +39,8 @@ public class WebCrawler {
         String creator = extractCreator(document);
         String categories = extractCategories(document);
         List<URL> links = extractLinks(webCrawlerConfiguration.startUrl(), document);
-        logger.info("title = {}, createdAt = {}, creator = {}, categories = {}, links = {}", title, createdAt, creator, categories, links);
+        List<URL> images = extractImages(webCrawlerConfiguration.startUrl(), document);
+        logger.info("title = {}, createdAt = {}, creator = {}, categories = {}, links = {}, images = {}", title, createdAt, creator, categories, links, images);
     }
 
     String extractTitle(Document document) {
@@ -77,6 +78,15 @@ public class WebCrawler {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+    }
+
+    List<URL> extractImages(String baseUrl, Document document) {
+        return document.select("img[src]").stream()
+            .map(element -> element.attr("src"))
+            .map(uri -> WebCrawler.buildUrl(baseUrl, uri))
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .collect(Collectors.toList());
     }
 
     private static Optional<URL> buildUrl(String baseUrl, String url) {

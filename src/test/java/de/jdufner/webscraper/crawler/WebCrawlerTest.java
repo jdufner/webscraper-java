@@ -56,6 +56,7 @@ class WebCrawlerTest {
                   <a>Category 2</a>
                 </div>
                 <a href="./test.html">test.html</a>
+                <img src="./test.jpg">
               </body>
             </html>""");
 
@@ -168,6 +169,24 @@ class WebCrawlerTest {
 
         // assert
         assertThat(urls).containsExactly(new URI("https://www.spiegel.de/test.html").toURL());
+    }
+
+    @Test
+    public void given_html_when_extract_images_then_expect_urls() throws Exception {
+        // arrange
+        Document document = Jsoup.parse("""
+            <html>
+              <body>
+                <h1>A Header</>
+                <img src="./test.jpg">
+              </body>
+            </html>""");
+
+        // act
+        List<URL> urls = webCrawler.extractImages("https://www.spiegel.de", document);
+
+        // assert
+        assertThat(urls).containsExactly(new URI("https://www.spiegel.de/test.jpg").toURL());
     }
 
 }
