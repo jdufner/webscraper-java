@@ -13,7 +13,7 @@ public class SeleniumWrapper {
 
     private final WebDriver webDriver;
 
-    SeleniumWrapper(WebDriver webDriver) {
+    public SeleniumWrapper(WebDriver webDriver) {
         this.webDriver = webDriver;
     }
 

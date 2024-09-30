@@ -16,28 +16,3 @@ selenium:
 #      - --windows-size=1200x600
 #      - --disable-gpu
 #      - --disable-web-security
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: apod
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: heise
-webscraper:
-  start-url: https://www.heise.de
-  number-pages: 200
-  number-images: 100
-
----
-
-spring:
-  config:
-    activate:
-      on-profile: hot
