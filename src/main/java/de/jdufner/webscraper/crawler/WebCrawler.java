@@ -106,13 +106,11 @@ public class WebCrawler {
     private static Optional<URI> buildUrl(String baseUrl, String url) {
         try {
             URI uri = new URI(url);
-            if (uri.isAbsolute()) {
-                return Optional.of(uri);
-            } else {
+            if (!uri.isAbsolute()) {
                 URI baseUri = new URI(baseUrl);
                 uri = baseUri.resolve(uri);
-                return Optional.of(uri);
             }
+            return Optional.of(uri);
         } catch (URISyntaxException e) {
             logger.warn("URISyntaxException = {}", e.toString());
             return Optional.empty();
