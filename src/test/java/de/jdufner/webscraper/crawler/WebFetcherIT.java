@@ -11,19 +11,19 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest
 @ConfigurationPropertiesScan
 @DirtiesContext
-public class WebCrawlerIT {
+public class WebFetcherIT {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebCrawlerIT.class);
+    private static final Logger logger = LoggerFactory.getLogger(WebFetcherIT.class);
 
     @Autowired
-    private WebCrawler webCrawler;
+    private WebFetcher webFetcher;
 
     @Test
-    public void crawl() {
+    public void fetch() {
         // arrange
 
         // act
-        webCrawler.crawl();
+        webFetcher.get("https://www.heise.de");
 
         // assert
     }
