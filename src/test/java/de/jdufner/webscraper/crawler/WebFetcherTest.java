@@ -9,6 +9,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,12 +85,19 @@ class WebFetcherTest {
     @Test
     public void given_html_when_extract_create_at_then_expect_datetime() {
         // arrange
+        String timestamp = "2024-09-05T21:30:00+02:00";
+        Date date = null;
+        try {
+            date = WebFetcher.DATE_FORMAT.parse(timestamp);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
         Document document = Jsoup.parse("""
                 <html>
                   <body>
                     <h1>A Header</>
-                    <div class="a-publish-info">
-                      <time datetime="2024-09-05T21:30:00+02:00">
+                    <div class="a-publish-info">"""
+                + "        <time datetime=\"" + timestamp + "\">" + """
                         <span>2024-09-05</span>
                         <span>21:30</span>
                       </time>
@@ -97,10 +106,10 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        String createdAt = webFetcher.extractCreatedAt(document);
+        Date createdAt = webFetcher.extractCreatedAt(document);
 
         // assert
-        assertThat(createdAt).isEqualTo("2024-09-05T21:30:00+02:00");
+        assertThat(createdAt).isEqualTo(date);
     }
 
     @Test

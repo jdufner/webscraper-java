@@ -3,6 +3,7 @@ package de.jdufner.webscraper.crawler;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,10 @@ import org.springframework.util.StringUtils;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,6 +23,7 @@ import java.util.stream.Collectors;
 public class WebFetcher {
 
     private static final Logger logger = LoggerFactory.getLogger(WebFetcher.class);
+    static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 
     private final SeleniumWrapper seleniumWrapper;
 
@@ -25,13 +31,13 @@ public class WebFetcher {
         this.seleniumWrapper = seleniumWrapper;
     }
 
-    public HtmlPage get(String url) {
+    public HtmlPage get(@NonNull String url) {
         logger.info("crawl url = {}", url);
         URI uri = URI.create(url);
         String html = seleniumWrapper.getHtml(url);
         Document document = Jsoup.parse(html);
         String title = extractTitle(document);
-        String createdAt = extractCreatedAt(document);
+        Date createdAt = extractCreatedAt(document);
         String creator = extractCreator(document);
         String categories = extractCategories(document);
         List<URI> links = extractLinks(url, document);
@@ -50,10 +56,20 @@ public class WebFetcher {
                 .collect(Collectors.joining(" "));
     }
 
-    String extractCreatedAt(Document document) {
+    Date extractCreatedAt(Document document) {
         return document.select("div.a-publish-info time[datetime]").stream()
                 .map(element -> element.attr("datetime"))
-                .collect(Collectors.joining(" "));
+                .map(this::parseString)
+                .findFirst()
+                .orElse(null);
+    }
+
+    Date parseString(String s) {
+        try {
+            return DATE_FORMAT.parse(s);
+        } catch (ParseException e) {
+            return null;
+        }
     }
 
     String extractCreator(Document document) {
