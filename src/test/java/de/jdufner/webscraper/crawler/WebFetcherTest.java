@@ -12,6 +12,7 @@ import java.net.URI;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -63,7 +64,7 @@ class WebFetcherTest {
     }
 
     @Test
-    public void given_html_when_extract_title_then_expect_title() {
+    public void given_html_when_title_present_then_expect_title() {
         // arrange
         Document document = Jsoup.parse("""
                 <html>
@@ -76,14 +77,32 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        String title = webFetcher.extractTitle(document);
+        Optional<String> title = webFetcher.extractTitle(document);
 
         // assert
-        assertThat(title).isEqualTo("This is a title");
+        assertThat(title.orElse(null)).isEqualTo("This is a title");
     }
 
     @Test
-    public void given_html_when_extract_create_at_then_expect_datetime() {
+    public void given_html_when_title_not_present_then_expect_null() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <head></head>
+                  <body>
+                    <h1>A Header</>
+                  </body>
+                </html>""");
+
+        // act
+        Optional<String> title = webFetcher.extractTitle(document);
+
+        // assert
+        assertThat(title.orElse(null)).isNull();
+    }
+
+    @Test
+    public void given_html_when_create_at_present_then_expect_datetime() {
         // arrange
         String timestamp = "2024-09-05T21:30:00+02:00";
         Date date = null;
@@ -106,14 +125,66 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        Date createdAt = webFetcher.extractCreatedAt(document);
+        Optional<Date> createdAt = webFetcher.extractCreatedAt(document);
 
         // assert
-        assertThat(createdAt).isEqualTo(date);
+        assertThat(createdAt.orElse(null)).isEqualTo(date);
     }
 
     @Test
-    public void given_html_when_extract_creator_then_expect_name() {
+    public void given_html_when_create_at_present_in_wrong_format_then_expect_null() {
+        // arrange
+        String timestamp = "05.09.2024 21:30:00";
+        Date date = null;
+        try {
+            date = WebFetcher.DATE_FORMAT.parse(timestamp);
+        } catch (ParseException ignored) {
+        }
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                    <div class="a-publish-info">"""
+                + "        <time datetime=\"" + timestamp + "\">" + """
+                        <span>2024-09-05</span>
+                        <span>21:30</span>
+                      </time>
+                    </div>
+                  </body>
+                </html>""");
+
+        // act
+        Optional<Date> createdAt = webFetcher.extractCreatedAt(document);
+
+        // assert
+        assertThat(createdAt.orElse(null)).isEqualTo(date);
+    }
+
+    @Test
+    public void given_html_when_create_at_not_present_then_expect_null() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</h1>
+                    <div class="a-publish-info">
+                      <time>
+                        <span>2024-09-05</span>
+                        <span>21:30</span>
+                      </time>
+                    </div>
+                  </body>
+                </html>""");
+
+        // act
+        Optional<Date> createdAt = webFetcher.extractCreatedAt(document);
+
+        // assert
+        assertThat(createdAt.orElse(null)).isNull();
+    }
+
+    @Test
+    public void given_html_when_creator_present_then_expect_list_of_names() {
         // arrange
         Document document = Jsoup.parse("""
                 <html>
@@ -128,14 +199,55 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        String creator = webFetcher.extractCreator(document);
+        List<String> creators = webFetcher.extractCreators(document);
 
         // assert
-        assertThat(creator).isEqualTo("Vorname Nachname");
+        assertThat(creators).containsExactly("Vorname Nachname");
     }
 
     @Test
-    public void given_html_when_extract_categories_then_expect_categories() {
+    public void given_html_when_multiple_creators_present_then_expect_list_of_names() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                    <div class="creator">
+                      <ul>
+                        <li>Vorname1 Nachname1</li>
+                        <li>Vorname2 Nachname2</li>
+                      </ul>
+                    </div>
+                  </body>
+                </html>""");
+
+        // act
+        List<String> creators = webFetcher.extractCreators(document);
+
+        // assert
+        assertThat(creators).containsExactly("Vorname1 Nachname1","Vorname2 Nachname2");
+    }
+
+    @Test
+    public void given_html_when_creator_not_present_then_expect_empty_list() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                    </div>
+                  </body>
+                </html>""");
+
+        // act
+        List<String> creators = webFetcher.extractCreators(document);
+
+        // assert
+        assertThat(creators).isEmpty();
+    }
+
+    @Test
+    public void given_html_when_categories_present_then_expect_list_of_categories() {
         // arrange
         Document document = Jsoup.parse("""
                 <html>
@@ -149,10 +261,47 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        String categories = webFetcher.extractCategories(document);
+        List<String> categories = webFetcher.extractCategories(document);
 
         // assert
-        assertThat(categories).isEqualTo("Category 1,Category 2");
+        assertThat(categories).containsExactly("Category 1", "Category 2");
+    }
+
+    @Test
+    public void given_html_when_one_category_present_then_expect_list_of_categories() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                    <div class="content-categories">
+                      <a>Category 1</a>
+                    </div>
+                  </body>
+                </html>""");
+
+        // act
+        List<String> categories = webFetcher.extractCategories(document);
+
+        // assert
+        assertThat(categories).containsExactly("Category 1");
+    }
+
+    @Test
+    public void given_html_when_no_category_present_then_expect_empty_list() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                  </body>
+                </html>""");
+
+        // act
+        List<String> categories = webFetcher.extractCategories(document);
+
+        // assert
+        assertThat(categories).isEmpty();
     }
 
     @Test

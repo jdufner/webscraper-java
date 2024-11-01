@@ -36,52 +36,53 @@ public class WebFetcher {
         URI uri = URI.create(url);
         String html = seleniumWrapper.getHtml(url);
         Document document = Jsoup.parse(html);
-        String title = extractTitle(document);
-        Date createdAt = extractCreatedAt(document);
-        String creator = extractCreator(document);
-        String categories = extractCategories(document);
+        Optional<String> title = extractTitle(document);
+        Optional<Date> createdAt = extractCreatedAt(document);
+        List<String> creators = extractCreators(document);
+        List<String> categories = extractCategories(document);
         List<URI> links = extractLinks(url, document);
         List<URI> images = extractImages(url, document);
-        logger.info("title = {}, createdAt = {}, creator = {}, categories = {}, links = {}, images = {}", title, createdAt, creator, categories, links, images);
-        return new HtmlPage(uri, html, title, createdAt, creator, categories, links, images);
+        logger.info("title = {}, createdAt = {}, creator = {}, categories = {}, links = {}, images = {}", title, createdAt, creators, categories, links, images);
+        return new HtmlPage(uri, html, title.orElse(null), createdAt.orElse(null), creators, categories, links, images);
     }
 
-    String extractTitle(Document document) {
+    @NonNull Optional<String> extractTitle(@NonNull Document document) {
         return document.select("head title").stream()
                 .map(Element::text)
                 .map(title -> StringUtils.trimLeadingCharacter(title, ' '))
                 .map(title -> StringUtils.trimTrailingCharacter(title, ' '))
                 .map(title -> title.replaceAll("\t", " "))
                 .map(title -> title.replaceAll("\r", ""))
-                .collect(Collectors.joining(" "));
+                .findFirst();
     }
 
-    Date extractCreatedAt(Document document) {
+    @NonNull Optional<Date> extractCreatedAt(@NonNull Document document) {
         return document.select("div.a-publish-info time[datetime]").stream()
                 .map(element -> element.attr("datetime"))
                 .map(this::parseString)
+                .filter(Optional::isPresent)
                 .findFirst()
-                .orElse(null);
+                .orElse(Optional.empty());
     }
 
-    Date parseString(String s) {
+    private @NonNull Optional<Date> parseString(@NonNull String s) {
         try {
-            return DATE_FORMAT.parse(s);
+            return Optional.of(DATE_FORMAT.parse(s));
         } catch (ParseException e) {
-            return null;
+            return Optional.empty();
         }
     }
 
-    String extractCreator(Document document) {
+    @NonNull List<String> extractCreators(@NonNull Document document) {
         return document.select("div.creator ul li").stream()
                 .map(Element::text)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.toList());
     }
 
-    String extractCategories(Document document) {
+    @NonNull List<String> extractCategories(@NonNull Document document) {
         return document.select("div.content-categories a").stream()
                 .map(Element::text)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.toList());
     }
 
     List<URI> extractLinks(String baseUrl, Document document) {

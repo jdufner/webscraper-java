@@ -7,8 +7,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
-import java.util.Collections;
 
+import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -29,7 +29,7 @@ public class WebCrawlerTest {
         String url = "https://www.google.com";
         when(webCrawlerConfiguration.startUrl()).thenReturn(url);
         when(webCrawlerConfiguration.numberPages()).thenReturn(100);
-        when(webFetcher.get(url)).thenReturn(new HtmlPage(URI.create(url), "", "", null, "", "", Collections.<URI>emptyList(), Collections.<URI>emptyList()));
+        when(webFetcher.get(url)).thenReturn(new HtmlPage(URI.create(url), "", "", null, emptyList(), emptyList(), emptyList(), emptyList()));
 
         // act
         webCrawler.crawl();
