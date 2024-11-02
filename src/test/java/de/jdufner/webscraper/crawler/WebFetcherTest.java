@@ -305,7 +305,7 @@ class WebFetcherTest {
     }
 
     @Test
-    public void given_html_when_extract_links_then_expect_urls() throws Exception {
+    public void given_html_when_relative_link_present_then_expect_url() {
         // arrange
         Document document = Jsoup.parse("""
                 <html>
@@ -319,11 +319,65 @@ class WebFetcherTest {
         List<URI> urls = webFetcher.extractLinks("https://www.spiegel.de", document);
 
         // assert
-        assertThat(urls).containsExactly(new URI("https://www.spiegel.de/test.html"));
+        assertThat(urls).containsExactly(URI.create("https://www.spiegel.de/test.html"));
     }
 
     @Test
-    public void given_html_when_extract_images_then_expect_urls() throws Exception {
+    public void given_html_when_absolute_link_present_then_expect_url() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                    <a href="https://www.google.com/">Google</a>
+                  </body>
+                </html>""");
+
+        // act
+        List<URI> urls = webFetcher.extractLinks("https://www.spiegel.de", document);
+
+        // assert
+        assertThat(urls).containsExactly(URI.create("https://www.google.com/"));
+    }
+
+    @Test
+    public void given_html_when_absolute_links_present_then_expect_urls() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                    <a href="https://www.google.com/">Google</a>
+                    <a href="https://www.heise.de/">Heise Medien</a>
+                  </body>
+                </html>""");
+
+        // act
+        List<URI> urls = webFetcher.extractLinks("https://www.spiegel.de", document);
+
+        // assert
+        assertThat(urls).containsExactly(URI.create("https://www.google.com/"),URI.create("https://www.heise.de/"));
+    }
+
+    @Test
+    public void given_html_when_no_links_present_then_expect_no_urls() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                  </body>
+                </html>""");
+
+        // act
+        List<URI> urls = webFetcher.extractLinks("https://www.spiegel.de", document);
+
+        // assert
+        assertThat(urls).isEmpty();
+    }
+
+    @Test
+    public void given_html_when_relative_image_then_expect_url() {
         // arrange
         Document document = Jsoup.parse("""
                 <html>
@@ -337,7 +391,25 @@ class WebFetcherTest {
         List<URI> urls = webFetcher.extractImages("https://www.spiegel.de", document);
 
         // assert
-        assertThat(urls).containsExactly(new URI("https://www.spiegel.de/test.jpg"));
+        assertThat(urls).containsExactly(URI.create("https://www.spiegel.de/test.jpg"));
+    }
+
+    @Test
+    public void given_html_when_absolute_image_then_expect_url() {
+        // arrange
+        Document document = Jsoup.parse("""
+                <html>
+                  <body>
+                    <h1>A Header</>
+                    <img src="https://www.google.com/test.jpg">
+                  </body>
+                </html>""");
+
+        // act
+        List<URI> urls = webFetcher.extractImages("https://www.spiegel.de", document);
+
+        // assert
+        assertThat(urls).containsExactly(URI.create("https://www.google.com/test.jpg"));
     }
 
 }

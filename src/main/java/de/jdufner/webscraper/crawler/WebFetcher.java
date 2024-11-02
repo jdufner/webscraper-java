@@ -27,12 +27,12 @@ public class WebFetcher {
 
     private final SeleniumWrapper seleniumWrapper;
 
-    public WebFetcher(SeleniumWrapper seleniumWrapper) {
+    public WebFetcher(@NonNull SeleniumWrapper seleniumWrapper) {
         this.seleniumWrapper = seleniumWrapper;
     }
 
-    public HtmlPage get(@NonNull String url) {
-        logger.info("crawl url = {}", url);
+    public @NonNull HtmlPage get(@NonNull String url) {
+        logger.info("get url = {}", url);
         URI uri = URI.create(url);
         String html = seleniumWrapper.getHtml(url);
         Document document = Jsoup.parse(html);
@@ -85,7 +85,7 @@ public class WebFetcher {
                 .collect(Collectors.toList());
     }
 
-    List<URI> extractLinks(String baseUrl, Document document) {
+    @NonNull List<URI> extractLinks(@NonNull String baseUrl, @NonNull Document document) {
         return document.select("a[href]").stream()
                 .map(element -> element.attr("href"))
                 .map(uri -> buildUrl(baseUrl, uri))
@@ -97,7 +97,7 @@ public class WebFetcher {
                 .collect(Collectors.toList());
     }
 
-    List<URI> extractImages(String baseUrl, Document document) {
+    @NonNull List<URI> extractImages(@NonNull String baseUrl, @NonNull Document document) {
         return document.select("img[src]").stream()
                 .map(element -> element.attr("src"))
                 .map(uri -> buildUrl(baseUrl, uri))
@@ -109,7 +109,7 @@ public class WebFetcher {
                 .collect(Collectors.toList());
     }
 
-    private static Optional<URI> removeQueryAndFragment(URI uri) {
+    private static @NonNull Optional<URI> removeQueryAndFragment(@NonNull URI uri) {
         try {
             URI newUri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), null, null);
             return Optional.of(newUri);
@@ -119,7 +119,7 @@ public class WebFetcher {
         }
     }
 
-    private static Optional<URI> buildUrl(String baseUrl, String url) {
+    private static @NonNull Optional<URI> buildUrl(@NonNull String baseUrl, @NonNull String url) {
         URI uri = URI.create(url);
         if (!uri.isAbsolute()) {
             URI baseUri = URI.create(baseUrl);
