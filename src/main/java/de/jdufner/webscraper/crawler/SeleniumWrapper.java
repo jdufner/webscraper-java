@@ -13,6 +13,8 @@ public class SeleniumWrapper {
 
     private final WebDriver webDriver;
 
+    private boolean cookieConsented = false;
+
     public SeleniumWrapper(WebDriver webDriver) {
         this.webDriver = webDriver;
     }
@@ -86,10 +88,13 @@ public class SeleniumWrapper {
     }
 
     private void consentCookies() {
-        webDriver.switchTo().frame(webDriver.switchTo().activeElement());
-        clickButtonWithTitle("Zustimmen");
-        clickButtonWithTitle("Agree");
-        webDriver.switchTo().defaultContent();
+        if (!cookieConsented) {
+            webDriver.switchTo().frame(webDriver.switchTo().activeElement());
+            clickButtonWithTitle("Zustimmen");
+            clickButtonWithTitle("Agree");
+            webDriver.switchTo().defaultContent();
+            cookieConsented = true;
+        }
     }
 
     private void clickButtonWithTitle(String title) {

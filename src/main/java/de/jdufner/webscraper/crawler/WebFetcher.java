@@ -35,15 +35,17 @@ public class WebFetcher {
         logger.info("get url = {}", url);
         URI uri = URI.create(url);
         String html = seleniumWrapper.getHtml(url);
+        Date downloadedAt = new Date();
         Document document = Jsoup.parse(html);
         Optional<String> title = extractTitle(document);
         Optional<Date> createdAt = extractCreatedAt(document);
-        List<String> creators = extractCreators(document);
+        List<String> authors = extractAuthors(document);
         List<String> categories = extractCategories(document);
         List<URI> links = extractLinks(url, document);
         List<URI> images = extractImages(url, document);
-        logger.info("title = {}, createdAt = {}, creator = {}, categories = {}, links = {}, images = {}", title, createdAt, creators, categories, links, images);
-        return new HtmlPage(uri, html, title.orElse(null), createdAt.orElse(null), creators, categories, links, images);
+        logger.info("title = {}, createdAt = {}, authors = {}, categories = {}, links = {}, images = {}",
+                title, createdAt, authors, categories, links, images);
+        return new HtmlPage(uri, html, downloadedAt, title.orElse(null), createdAt.orElse(null), authors, categories, links, images);
     }
 
     @NonNull Optional<String> extractTitle(@NonNull Document document) {
@@ -73,7 +75,7 @@ public class WebFetcher {
         }
     }
 
-    @NonNull List<String> extractCreators(@NonNull Document document) {
+    @NonNull List<String> extractAuthors(@NonNull Document document) {
         return document.select("div.creator ul li").stream()
                 .map(Element::text)
                 .collect(Collectors.toList());

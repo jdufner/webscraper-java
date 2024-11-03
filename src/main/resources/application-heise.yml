@@ -4,8 +4,8 @@ spring:
       on-profile: heise
 webscraper:
   start-url: https://www.heise.de
-  number-pages: 200
-  number-images: 100
+  number-pages: 2
+  number-images: 10
   white-list:
     - https://www.heise.de
   black-list:

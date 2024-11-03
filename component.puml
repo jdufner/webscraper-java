@@ -1,0 +1,8 @@
+@startuml
+
+package "crawler" {
+[WebCrawler] -> [WebFetcher]
+[WebCrawler] --> [Repository]
+}
+
+@enduml

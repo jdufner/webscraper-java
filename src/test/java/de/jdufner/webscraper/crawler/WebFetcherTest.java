@@ -199,10 +199,10 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<String> creators = webFetcher.extractCreators(document);
+        List<String> authors = webFetcher.extractAuthors(document);
 
         // assert
-        assertThat(creators).containsExactly("Vorname Nachname");
+        assertThat(authors).containsExactly("Vorname Nachname");
     }
 
     @Test
@@ -222,10 +222,10 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<String> creators = webFetcher.extractCreators(document);
+        List<String> authors = webFetcher.extractAuthors(document);
 
         // assert
-        assertThat(creators).containsExactly("Vorname1 Nachname1","Vorname2 Nachname2");
+        assertThat(authors).containsExactly("Vorname1 Nachname1","Vorname2 Nachname2");
     }
 
     @Test
@@ -240,10 +240,10 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<String> creators = webFetcher.extractCreators(document);
+        List<String> authors = webFetcher.extractAuthors(document);
 
         // assert
-        assertThat(creators).isEmpty();
+        assertThat(authors).isEmpty();
     }
 
     @Test
