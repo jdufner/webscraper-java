@@ -24,7 +24,7 @@ public class HsqldbRepository implements Repository {
     }
 
     @Override
-    public void saveHtmlPage(@NonNull HtmlPage htmlPage) {
+    public void save(@NonNull HtmlPage htmlPage) {
         Number documentId = saveDocument(htmlPage);
         saveAuthors(htmlPage, documentId);
         saveCategories(htmlPage, documentId);

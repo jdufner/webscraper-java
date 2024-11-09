@@ -14,18 +14,20 @@ public class WebCrawler {
 
     private final WebCrawlerConfiguration webCrawlerConfiguration;
     private final WebFetcher webFetcher;
+    private final Repository repository;
 
-    public WebCrawler(@NonNull WebCrawlerConfiguration webCrawlerConfiguration, @NonNull WebFetcher webFetcher, @NonNull Repository repository) {
+    public WebCrawler(@NonNull WebCrawlerConfiguration webCrawlerConfiguration, @NonNull WebFetcher webFetcher, @NonNull HsqldbRepository repository) {
         this.webCrawlerConfiguration = webCrawlerConfiguration;
         this.webFetcher = webFetcher;
+        this.repository = repository;
     }
 
     public void crawl() {
         logger.info("startUrl = {}, numberPages = {}", webCrawlerConfiguration.startUrl(), webCrawlerConfiguration.numberPages());
         for (int i = 0; i < webCrawlerConfiguration.numberPages(); i++) {
-            String url = webCrawlerConfiguration.startUrl();
-            HtmlPage htmlPage = webFetcher.get(url);
-            // pageRepository.save(htmlPage);
+            URI uri = getNextUri(i);
+            HtmlPage htmlPage = webFetcher.get(uri.toString());
+            repository.save(htmlPage);
         }
     }
 

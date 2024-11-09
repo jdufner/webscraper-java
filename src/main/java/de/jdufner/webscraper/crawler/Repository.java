@@ -4,6 +4,6 @@ import org.jspecify.annotations.NonNull;
 
 public interface Repository {
 
-    void saveHtmlPage(@NonNull HtmlPage htmlPage);
+    void save(@NonNull HtmlPage htmlPage);
 
 }

@@ -29,7 +29,7 @@ public class HsqldbRepositoryIT {
                 asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
 
         // act
-        hsqldbRepository.saveHtmlPage(htmlPage);
+        hsqldbRepository.save(htmlPage);
 
         // assert
 
@@ -42,7 +42,7 @@ public class HsqldbRepositoryIT {
                 emptyList(), emptyList(), emptyList(), emptyList());
 
         // act
-        hsqldbRepository.saveHtmlPage(htmlPage);
+        hsqldbRepository.save(htmlPage);
 
         // assert
 

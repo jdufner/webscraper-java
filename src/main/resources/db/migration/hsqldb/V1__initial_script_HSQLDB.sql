@@ -1,7 +1,7 @@
 create table if not exists DOCUMENTS (
     id integer identity primary key,
     url varchar(1000) not null,
-    content varchar(1000000) not null,
+    content varchar(10000000) not null,
     downloaded_at timestamp not null,
     created_at timestamp
 );
