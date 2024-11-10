@@ -32,6 +32,11 @@ public class HsqldbRepository implements Repository {
         saveImages(htmlPage, documentId);
     }
 
+    @Override
+    public URI getNextImageUri() {
+        return URI.create("https://localhost/test.jpg");
+    }
+
     private void saveAuthors(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
         for (String author: htmlPage.authors()) {
             ResultSetExtractor<Number> rse = rs -> {

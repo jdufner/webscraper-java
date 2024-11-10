@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ConfigurationPropertiesScan
 @DirtiesContext
-public class SeleniumWrapperIT {
+class SeleniumWrapperIT {
 
     private static final Logger logger = LoggerFactory.getLogger(SeleniumWrapperIT.class);
 

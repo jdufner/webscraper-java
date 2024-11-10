@@ -105,7 +105,7 @@ class WebFetcherTest {
     public void given_html_when_create_at_present_then_expect_datetime() {
         // arrange
         String timestamp = "2024-09-05T21:30:00+02:00";
-        Date date = null;
+        Date date;
         try {
             date = WebFetcher.DATE_FORMAT.parse(timestamp);
         } catch (ParseException e) {

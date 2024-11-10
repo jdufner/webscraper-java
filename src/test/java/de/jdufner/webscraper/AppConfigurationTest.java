@@ -1,6 +1,7 @@
 package de.jdufner.webscraper;
 
 import de.jdufner.webscraper.crawler.SeleniumConfiguration;
+import org.asynchttpclient.AsyncHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,6 +11,7 @@ import org.openqa.selenium.WebDriver;
 
 import java.util.Arrays;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -22,7 +24,7 @@ class AppConfigurationTest {
     private AppConfiguration appConfiguration;
 
     @Test
-    public void when_get_chrome_driver_given_selenium_configuration_expect_arguments_added() {
+    void when_get_chrome_driver_given_selenium_configuration_expect_arguments_added() {
         WebDriver webDriver = null;
         try {
             // arrange
@@ -38,7 +40,17 @@ class AppConfigurationTest {
                 webDriver.quit();
             }
         }
+    }
 
+    @Test
+    void when_call_dsl_static_builder_expect_async_http_client() {
+        // arrange
+
+        // act
+        AsyncHttpClient asc = appConfiguration.getAsyncHttpClient();
+
+        // assert
+        assertThat(asc).isInstanceOf(AsyncHttpClient.class);
     }
 
 }

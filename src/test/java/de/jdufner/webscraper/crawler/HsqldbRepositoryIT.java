@@ -13,7 +13,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
 @SpringBootTest
-public class HsqldbRepositoryIT {
+class HsqldbRepositoryIT {
 
     @Autowired
     private HsqldbRepository hsqldbRepository;

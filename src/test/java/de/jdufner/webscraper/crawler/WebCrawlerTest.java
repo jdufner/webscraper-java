@@ -13,7 +13,7 @@ import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class WebCrawlerTest {
+class WebCrawlerTest {
 
     @Mock
     private WebCrawlerConfiguration webCrawlerConfiguration;

@@ -11,7 +11,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest
 @ConfigurationPropertiesScan
 @DirtiesContext
-public class WebFetcherIT {
+class WebFetcherIT {
 
     private static final Logger logger = LoggerFactory.getLogger(WebFetcherIT.class);
 

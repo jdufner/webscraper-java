@@ -86,6 +86,11 @@
 			<version>${jsoup.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.asynchttpclient</groupId>
+			<artifactId>async-http-client</artifactId>
+			<version>2.2.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.jspecify</groupId>
 			<artifactId>jspecify</artifactId>
 			<version>1.0.0</version>
