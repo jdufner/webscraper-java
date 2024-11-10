@@ -21,6 +21,9 @@ public class WebCrawlerTest {
     @Mock
     private WebFetcher webFetcher;
 
+    @Mock
+    private HsqldbRepository repository;
+
     @InjectMocks
     private WebCrawler webCrawler;
 
