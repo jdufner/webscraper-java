@@ -96,6 +96,7 @@ public class WebFetcher {
                 .map(WebFetcher::removeQueryAndFragment)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .distinct()
                 .collect(Collectors.toList());
     }
 
@@ -108,6 +109,7 @@ public class WebFetcher {
                 .map(WebFetcher::removeQueryAndFragment)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
+                .distinct()
                 .collect(Collectors.toList());
     }
 
