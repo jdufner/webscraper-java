@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler;
 
+import org.jspecify.annotations.NonNull;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -15,11 +16,11 @@ public class SeleniumWrapper {
 
     private boolean cookieConsented = false;
 
-    public SeleniumWrapper(WebDriver webDriver) {
+    public SeleniumWrapper(@NonNull WebDriver webDriver) {
         this.webDriver = webDriver;
     }
 
-    public String getHtml(String url) {
+    public @NonNull String getHtml(@NonNull String url) {
         webDriver.get(url);
         waitUntilCookiesConsentedAndPageFullyLoaded();
         return webDriver.getPageSource();
@@ -31,7 +32,7 @@ public class SeleniumWrapper {
         checkIfPageIsFullyLoaded();
     }
 
-    private void sleep(long millis) {
+    private void sleep(@NonNull long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
@@ -67,7 +68,7 @@ public class SeleniumWrapper {
         return ((Number) javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight")).longValue();
     }
 
-    private void scrollVerticallyBy(long verticalPixels) {
+    private void scrollVerticallyBy(@NonNull long verticalPixels) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         javascriptExecutor.executeScript("window.scrollBy(0, " + verticalPixels + ")");
     }
@@ -97,7 +98,7 @@ public class SeleniumWrapper {
         }
     }
 
-    private void clickButtonWithTitle(String title) {
+    private void clickButtonWithTitle(@NonNull String title) {
         List<WebElement> buttons = webDriver.findElements(By.cssSelector("button[title='" + title + "']"));
         buttons.stream().filter(WebElement::isDisplayed).forEach(WebElement::click);
     }

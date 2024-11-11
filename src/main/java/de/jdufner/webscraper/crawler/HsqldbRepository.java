@@ -33,7 +33,7 @@ public class HsqldbRepository implements Repository {
     }
 
     @Override
-    public URI getNextImageUri() {
+    public @NonNull URI getNextImageUri() {
         return URI.create("https://localhost/test.jpg");
     }
 
@@ -129,7 +129,7 @@ public class HsqldbRepository implements Repository {
         }
     }
 
-    private Number saveDocument(HtmlPage htmlPage) {
+    private @NonNull Number saveDocument(@NonNull HtmlPage htmlPage) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator psc = con -> {
             PreparedStatement ps = con.prepareStatement("INSERT INTO documents (URL, CONTENT, DOWNLOADED_AT, CREATED_AT) VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -143,7 +143,7 @@ public class HsqldbRepository implements Repository {
         return keyHolder.getKey();
     }
 
-    private static Timestamp convert(@Nullable Date date) {
+    private static @Nullable Timestamp convert(@Nullable Date date) {
         if (date == null) {
             return null;
         }

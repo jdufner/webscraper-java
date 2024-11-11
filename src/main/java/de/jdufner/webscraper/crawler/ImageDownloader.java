@@ -35,7 +35,7 @@ public class ImageDownloader {
         logger.debug("Downloaded {}", file.getAbsolutePath());
     }
 
-    private static File getFileName(@NonNull URI uri) {
+    private static @NonNull File getFileName(@NonNull URI uri) {
         String filename = uri.getPath();
         filename = checkSecurity(filename);
         File file = new File(filename);
@@ -43,7 +43,7 @@ public class ImageDownloader {
         return file;
     }
 
-    private static String checkSecurity(@NonNull String filename) {
+    private static @NonNull String checkSecurity(@NonNull String filename) {
         String temp = filename;
         temp = removeIllegalCharacters(temp);
         temp = removeDirectoryUpRepeatedly(temp);

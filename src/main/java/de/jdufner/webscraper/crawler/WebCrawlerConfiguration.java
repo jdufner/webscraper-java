@@ -1,7 +1,8 @@
 package de.jdufner.webscraper.crawler;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "webscraper")
-public record WebCrawlerConfiguration(String startUrl, int numberPages, int numberImages) {
+public record WebCrawlerConfiguration(@NonNull String startUrl, int numberPages, int numberImages) {
 }

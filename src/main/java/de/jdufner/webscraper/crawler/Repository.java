@@ -8,5 +8,5 @@ public interface Repository {
 
     void save(@NonNull HtmlPage htmlPage);
 
-    URI getNextImageUri();
+    @NonNull URI getNextImageUri();
 }

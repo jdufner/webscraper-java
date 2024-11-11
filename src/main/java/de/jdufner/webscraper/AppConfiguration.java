@@ -3,6 +3,7 @@ package de.jdufner.webscraper;
 import de.jdufner.webscraper.crawler.SeleniumConfiguration;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Dsl;
+import org.jspecify.annotations.NonNull;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -14,19 +15,19 @@ public class AppConfiguration {
 
     private final SeleniumConfiguration seleniumConfiguration;
 
-    public AppConfiguration(SeleniumConfiguration seleniumConfiguration) {
+    public AppConfiguration(@NonNull SeleniumConfiguration seleniumConfiguration) {
         this.seleniumConfiguration = seleniumConfiguration;
     }
 
     @Bean
-    public WebDriver getChromeDriver() {
+    public @NonNull WebDriver getChromeDriver() {
         ChromeOptions chromeOptions = new ChromeOptions();
         seleniumConfiguration.options().forEach(chromeOptions::addArguments);
         return new ChromeDriver(chromeOptions);
     }
 
     @Bean
-    public AsyncHttpClient getAsyncHttpClient() {
+    public @NonNull AsyncHttpClient getAsyncHttpClient() {
         return Dsl.asyncHttpClient();
     }
 
