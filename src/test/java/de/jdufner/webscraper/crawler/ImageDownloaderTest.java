@@ -1,18 +1,17 @@
 package de.jdufner.webscraper.crawler;
 
-import org.assertj.core.api.Assertions;
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.BoundRequestBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.File;
 import java.net.URI;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ImageDownloaderTest {
@@ -21,7 +20,7 @@ class ImageDownloaderTest {
     private HsqldbRepository repository;
 
     @Mock
-    private AsyncHttpClient asyncHttpClient;
+    private ImageGetterAhc imageGetter;
 
     @InjectMocks
     private ImageDownloader imageDownloader;
@@ -32,27 +31,156 @@ class ImageDownloaderTest {
         String url = "https://test.com/image.jpg";
         URI uri = URI.create(url);
         when(repository.getNextImageUri()).thenReturn(uri);
-        when(asyncHttpClient.prepareGet(anyString())).thenReturn(mock(BoundRequestBuilder.class));
 
         // act
         imageDownloader.downloadAll();
 
         // assert
-        verify(asyncHttpClient).prepareGet(url);
+        verify(imageGetter).download(uri, new File("./image.jpg"));
     }
 
     @Test
-    void when_download_expect_output_file_created() {
+    void given_string_when_contains_legal_chars_only_expect_same_string() {
         // arrange
-        String url = "https://test.com/image.jpg";
-        URI uri = URI.create(url);
-        when(asyncHttpClient.prepareGet(anyString())).thenReturn(mock(BoundRequestBuilder.class));
+        String potentiallyFraudFilename = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_/";
 
         // act
-        imageDownloader.download(uri);
+        String result = ImageDownloader.removeIllegalCharacters(potentiallyFraudFilename);
 
         // assert
-        //when(asyncHttpClient.prepareGet(anyString())).thenReturn(mock(BoundRequestBuilder.class));
+        assertThat(result).isEqualTo(potentiallyFraudFilename);
+    }
+
+    @Test
+    void given_string_when_contains_illegal_chars_only_expect_cleaned_string() {
+        // arrange
+        String potentiallyFraudFilename = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_/?*äöüÄÖÜ";
+
+        // act
+        String result = ImageDownloader.removeIllegalCharacters(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_/________");
+    }
+
+    @Test
+    void given_string_when_contains_no_dir_up_expect_same_string() {
+        // arrange
+        String potentiallyFraudFilename = "abc";
+
+        // act
+        String result = ImageDownloader.removeDirectoryUpRepeatedly(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo(potentiallyFraudFilename);
+    }
+
+    @Test
+    void given_string_when_contains_dir_up_expect_cleaned_string() {
+        // arrange
+        String potentiallyFraudFilename = "../abc";
+
+        // act
+        String result = ImageDownloader.removeDirectoryUpRepeatedly(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("abc");
+    }
+
+    @Test
+    void given_string_when_contains_nested_dir_up_expect_cleaned_string() {
+        // arrange
+        String potentiallyFraudFilename = "....//abc";
+
+        // act
+        String result = ImageDownloader.removeDirectoryUpRepeatedly(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("abc");
+    }
+
+    @Test
+    void given_string_when_contains_multiple_dir_up_expect_cleaned_string() {
+        // arrange
+        String potentiallyFraudFilename = "../../abc";
+
+        // act
+        String result = ImageDownloader.removeDirectoryUpRepeatedly(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("abc");
+    }
+
+    @Test
+    void given_string_when_contains_no_multiple_directory_separators_in_a_row_expect_same_string() {
+        // arrange
+        String potentiallyFraudFilename = "./abc/def/filename.ext";
+
+        // act
+        String result = ImageDownloader.removeMultipleDirectorySeparators(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("./abc/def/filename.ext");
+    }
+
+    @Test
+    void given_string_when_contains_multiple_directory_separators_in_a_row_expect_single_directory_separator() {
+        // arrange
+        String potentiallyFraudFilename = "./abc///def//filename.ext";
+
+        // act
+        String result = ImageDownloader.removeMultipleDirectorySeparators(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("./abc/def/filename.ext");
+    }
+
+    @Test
+    void given_string_when_contains_no_multiple_dots_in_a_row_expect_single_dot() {
+        // arrange
+        String potentiallyFraudFilename = "./abc/def/filename.ext";
+
+        // act
+        String result = ImageDownloader.removeMultipleDots(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("./abc/def/filename.ext");
+    }
+
+    @Test
+    void given_string_when_contains_multiple_dots_in_a_row_expect_single_dot() {
+        // arrange
+        String potentiallyFraudFilename = "./abc/def/filename..ext";
+
+        // act
+        String result = ImageDownloader.removeMultipleDots(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("./abc/def/filename.ext");
+    }
+
+    @Test
+    void given_string_starts_with_top_level_directory_expect_relative_directory() {
+        // arrange
+        String potentiallyFraudFilename = "/abc/def/filename.ext";
+
+        // act
+        String result = ImageDownloader.fixTopLevelDirectory(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("./abc/def/filename.ext");
+    }
+
+    @Test
+    void given_string_starts_with_no_directory_expect_relative_directory() {
+        // arrange
+        String potentiallyFraudFilename = "abc/def/filename.ext";
+
+        // act
+        String result = ImageDownloader.fixTopLevelDirectory(potentiallyFraudFilename);
+
+        // assert
+        assertThat(result).isEqualTo("./abc/def/filename.ext");
     }
 
 }
