@@ -1,4 +1,4 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.web;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;

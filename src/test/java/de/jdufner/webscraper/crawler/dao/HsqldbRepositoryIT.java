@@ -1,5 +1,6 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.dao;
 
+import de.jdufner.webscraper.crawler.data.HtmlPage;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

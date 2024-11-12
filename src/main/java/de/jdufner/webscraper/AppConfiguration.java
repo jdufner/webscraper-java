@@ -1,6 +1,6 @@
 package de.jdufner.webscraper;
 
-import de.jdufner.webscraper.crawler.SeleniumConfiguration;
+import de.jdufner.webscraper.crawler.web.SeleniumConfiguration;
 import org.asynchttpclient.AsyncHttpClient;
 import org.asynchttpclient.Dsl;
 import org.jspecify.annotations.NonNull;

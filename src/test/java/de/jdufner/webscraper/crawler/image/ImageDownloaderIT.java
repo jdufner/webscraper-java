@@ -1,4 +1,4 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.image;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

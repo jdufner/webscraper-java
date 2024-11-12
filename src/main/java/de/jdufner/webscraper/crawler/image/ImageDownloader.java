@@ -1,5 +1,7 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.image;
 
+import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
+import de.jdufner.webscraper.crawler.dao.Repository;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +31,30 @@ public class ImageDownloader {
     void download(@NonNull URI uri) {
         File file = getFileName(uri);
         logger.debug("Downloading {}", file.getAbsolutePath());
-        // TODO: skip other than jpeg and png files
-        // TODO: check if file already exists and append _1, _2, _3 .. until a valid filename found
+        hasImageExtension(file);
+        file = validateFilename(file);
         imageGetter.download(uri, file);
         logger.debug("Downloaded {}", file.getAbsolutePath());
+    }
+
+    static File validateFilename(File file) {
+        String fileName = file.getName();
+        String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
+        String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+        int index = 1;
+        while (file.exists()) {
+            file = new File(file.getParentFile(), baseName + "_" + index + "." + extension);
+            index++;
+        }
+        return file;
+    }
+
+    static boolean hasImageExtension(File file) {
+        String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1).toLowerCase();
+        if (extension.equals("png") || extension.equals("jpg") || extension.equals("jpeg")) {
+            return true;
+        }
+        return false;
     }
 
     private static @NonNull File getFileName(@NonNull URI uri) {

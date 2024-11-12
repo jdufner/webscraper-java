@@ -1,4 +1,4 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.image;
 
 import org.asynchttpclient.AsyncCompletionHandler;
 import org.asynchttpclient.AsyncHttpClient;

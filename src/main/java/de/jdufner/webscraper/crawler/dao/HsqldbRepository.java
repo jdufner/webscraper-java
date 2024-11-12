@@ -1,5 +1,6 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.dao;
 
+import de.jdufner.webscraper.crawler.data.HtmlPage;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.JdbcTemplate;

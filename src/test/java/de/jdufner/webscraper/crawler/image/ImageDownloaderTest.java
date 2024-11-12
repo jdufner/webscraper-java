@@ -1,5 +1,6 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.image;
 
+import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -181,6 +182,83 @@ class ImageDownloaderTest {
 
         // assert
         assertThat(result).isEqualTo("./abc/def/filename.ext");
+    }
+
+    @Test
+    void given_filename_when_filename_not_exists_expect_filename_valid() {
+        // arrange
+        File file = new File("./path/basename.ext");
+
+        // act
+        File validatedFilename = ImageDownloader.validateFilename(file);
+
+        // assert
+        assertThat(validatedFilename).isEqualTo(file);
+    }
+
+    @Test
+    void given_filename_when_filename_exists_expect_increased_filename_valid() throws Exception {
+        // arrange
+        File file = new File("./basename.ext");
+        file.createNewFile();
+
+        try {
+            // act
+            File validatedFilename = ImageDownloader.validateFilename(file);
+
+            // assert
+            assertThat(validatedFilename).isEqualTo(new File("./basename_1.ext"));
+        } finally {
+            file.delete();
+        }
+    }
+
+    @Test
+    void given_filename_when_filename_has_no_image_extension_expect_false() {
+        // arrange
+        File file = new File("./basename.ext");
+
+        // act
+        boolean hasImageExtension = ImageDownloader.hasImageExtension(file);
+
+        // assert
+        assertThat(hasImageExtension).isFalse();
+    }
+
+    @Test
+    void given_filename_when_filename_has_png_extension_expect_true() {
+        // arrange
+        File file = new File("./image.png");
+
+        // act
+        boolean hasImageExtension = ImageDownloader.hasImageExtension(file);
+
+        // assert
+        assertThat(hasImageExtension).isTrue();
+    }
+
+    @Test
+    void given_filename_when_filename_has_jpg_extension_expect_true() {
+        // arrange
+        File file = new File("./image.jpg");
+
+        // act
+        boolean hasImageExtension = ImageDownloader.hasImageExtension(file);
+
+        // assert
+        assertThat(hasImageExtension).isTrue();
+    }
+
+    @Test
+    void given_filename_when_filename_has_jpeg_extension_expect_true() {
+        // arrange
+        File file = new File("./image.jpeg");
+
+        // act
+        boolean hasImageExtension = ImageDownloader.hasImageExtension(file);
+
+        // assert
+        assertThat(hasImageExtension).isTrue();
     }
 
 }

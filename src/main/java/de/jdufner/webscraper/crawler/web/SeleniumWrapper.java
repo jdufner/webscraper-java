@@ -1,4 +1,4 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.web;
 
 import org.jspecify.annotations.NonNull;
 import org.openqa.selenium.By;

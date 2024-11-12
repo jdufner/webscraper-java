@@ -1,5 +1,6 @@
-package de.jdufner.webscraper.crawler;
+package de.jdufner.webscraper.crawler.web;
 
+import de.jdufner.webscraper.crawler.data.HtmlPage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
