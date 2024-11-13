@@ -15,17 +15,21 @@ public class ImageDownloader {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageDownloader.class);
 
+    private final ImageDownloaderConfiguration imageDownloaderConfiguration;
     private final Repository repository;
     private final ImageGetter imageGetter;
 
-    public ImageDownloader(@NonNull HsqldbRepository repository, @NonNull ImageGetterAhc imageGetter) {
+    public ImageDownloader(@NonNull ImageDownloaderConfiguration imageDownloaderConfiguration, @NonNull HsqldbRepository repository, @NonNull ImageGetterAhc imageGetter) {
+        this.imageDownloaderConfiguration = imageDownloaderConfiguration;
         this.repository = repository;
         this.imageGetter = imageGetter;
     }
 
     void downloadAll() {
-        URI uri = repository.getNextImageUri();
-        download(uri);
+        for(int i = 0; i < imageDownloaderConfiguration.numberPages(); i++) {
+            URI uri = repository.getNextImageUri();
+            download(uri);
+        }
     }
 
     void download(@NonNull URI uri) {
@@ -51,10 +55,7 @@ public class ImageDownloader {
 
     static boolean hasImageExtension(File file) {
         String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1).toLowerCase();
-        if (extension.equals("png") || extension.equals("jpg") || extension.equals("jpeg")) {
-            return true;
-        }
-        return false;
+        return extension.equals("png") || extension.equals("jpg") || extension.equals("jpeg");
     }
 
     private static @NonNull File getFileName(@NonNull URI uri) {

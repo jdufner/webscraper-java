@@ -1,4 +1,4 @@
-package de.jdufner.webscraper.crawler.web;
+package de.jdufner.webscraper.crawler;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;

@@ -11,11 +11,13 @@ import java.io.File;
 import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ImageDownloaderTest {
+
+    @Mock
+    private ImageDownloaderConfiguration configuration;
 
     @Mock
     private HsqldbRepository repository;
@@ -27,8 +29,9 @@ class ImageDownloaderTest {
     private ImageDownloader imageDownloader;
 
     @Test
-    void when_download_all_expect_url() {
+    void given_configuration_when_download_all_expect_url_multiple_times() {
         // arrange
+        when(configuration.numberPages()).thenReturn(2);
         String url = "https://test.com/image.jpg";
         URI uri = URI.create(url);
         when(repository.getNextImageUri()).thenReturn(uri);
@@ -37,7 +40,7 @@ class ImageDownloaderTest {
         imageDownloader.downloadAll();
 
         // assert
-        verify(imageGetter).download(uri, new File("./image.jpg"));
+        verify(imageGetter, times(2)).download(uri, new File("./image.jpg"));
     }
 
     @Test

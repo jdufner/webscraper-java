@@ -13,7 +13,7 @@ class ImageDownloaderIT {
     private ImageDownloader imageDownloader;
 
     @Test
-    void when_download_expect_output_file_created() {
+    void given_configuration_when_download_expect_output_file_created() {
         // arrange
         URI uri = URI.create("https://apod.nasa.gov/apod/image/2409/iss071e564695_4096.jpg");
 

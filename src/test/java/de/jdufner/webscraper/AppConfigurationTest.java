@@ -1,6 +1,6 @@
 package de.jdufner.webscraper;
 
-import de.jdufner.webscraper.crawler.web.SeleniumConfiguration;
+import de.jdufner.webscraper.crawler.SeleniumConfiguration;
 import org.asynchttpclient.AsyncHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
