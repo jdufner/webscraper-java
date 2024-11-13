@@ -10,18 +10,19 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.Collections;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class SeleniumWrapperTest {
+class WebdriverWrapperTest {
 
     @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
     @InjectMocks
-    private SeleniumWrapper seleniumWrapper;
+    private WebdriverWrapper webdriverWrapper;
 
     @Test
     void given_wrapper_when_get_Html_url_expect_url_passed_through() {
@@ -32,13 +33,13 @@ class SeleniumWrapperTest {
         when(webDriver.findElements(any())).thenReturn(Collections.emptyList());
 
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        when(javascriptExecutor.executeScript("return window.innerHeight")).thenReturn(100L);
-        when(javascriptExecutor.executeScript("return document.body.scrollHeight")).thenReturn(100L);
-        when(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight")).thenReturn(0L);
-        when(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)")).thenReturn(0L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return window.innerHeight"))).thenReturn(100L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight"))).thenReturn(100L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight"))).thenReturn(0L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)"))).thenReturn(0L);
 
         // act
-        seleniumWrapper.getHtml("https://www.heise.de");
+        webdriverWrapper.getHtml("https://www.heise.de");
 
         // assert
         verify(webDriver).get("https://www.heise.de");
@@ -53,14 +54,14 @@ class SeleniumWrapperTest {
         when(webDriver.findElements(any())).thenReturn(Collections.emptyList());
 
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        when(javascriptExecutor.executeScript("return window.innerHeight")).thenReturn(100L);
-        when(javascriptExecutor.executeScript("return document.body.scrollHeight")).thenReturn(100L);
-        when(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight")).thenReturn(100L).thenReturn(0L);
-        when(javascriptExecutor.executeScript("window.scrollBy(0, 100)")).thenReturn(0L);
-        when(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)")).thenReturn(0L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return window.innerHeight"))).thenReturn(100L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight"))).thenReturn(100L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight"))).thenReturn(100L).thenReturn(0L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("window.scrollBy(0, 100)"))).thenReturn(0L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)"))).thenReturn(0L);
 
         // act
-        seleniumWrapper.getHtml("https://www.heise.de");
+        webdriverWrapper.getHtml("https://www.heise.de");
 
         // assert
         verify(javascriptExecutor).executeScript("window.scrollBy(0, 100)");
@@ -75,15 +76,15 @@ class SeleniumWrapperTest {
         when(webDriver.findElements(any())).thenReturn(Collections.emptyList());
 
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        when(javascriptExecutor.executeScript("return window.innerHeight")).thenReturn(100L);
-        when(javascriptExecutor.executeScript("return document.body.scrollHeight")).thenReturn(100L);
-        when(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight")).thenReturn(0L);
-        when(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)")).thenReturn(0L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return window.innerHeight"))).thenReturn(100L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight"))).thenReturn(100L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight"))).thenReturn(0L);
+        when(Objects.requireNonNull(javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)"))).thenReturn(0L);
 
-        when(webDriver.getPageSource()).thenReturn("<title>heise online - IT-News, Nachrichten und Hintergründe | heise online</title>");
+        when(Objects.requireNonNull(webDriver.getPageSource())).thenReturn("<title>heise online - IT-News, Nachrichten und Hintergründe | heise online</title>");
 
         // act
-        String htmlContent = seleniumWrapper.getHtml("https://www.heise.de");
+        String htmlContent = webdriverWrapper.getHtml("https://www.heise.de");
 
         // assert
         assertThat(htmlContent).isNotNull();

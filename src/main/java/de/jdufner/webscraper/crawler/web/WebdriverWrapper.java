@@ -8,22 +8,23 @@ import org.openqa.selenium.WebElement;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
-public class SeleniumWrapper {
+public class WebdriverWrapper {
 
     private final WebDriver webDriver;
 
     private boolean cookieConsented = false;
 
-    public SeleniumWrapper(@NonNull WebDriver webDriver) {
+    public WebdriverWrapper(@NonNull WebDriver webDriver) {
         this.webDriver = webDriver;
     }
 
     public @NonNull String getHtml(@NonNull String url) {
         webDriver.get(url);
         waitUntilCookiesConsentedAndPageFullyLoaded();
-        return webDriver.getPageSource();
+        return Objects.requireNonNull(webDriver.getPageSource());
     }
 
     private void waitUntilCookiesConsentedAndPageFullyLoaded() {
@@ -32,7 +33,7 @@ public class SeleniumWrapper {
         checkIfPageIsFullyLoaded();
     }
 
-    private void sleep(@NonNull long millis) {
+    private void sleep(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
@@ -65,10 +66,10 @@ public class SeleniumWrapper {
 
     private long getPixelsBelowWindow() {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return ((Number) javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight")).longValue();
+        return (Long) Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight"));
     }
 
-    private void scrollVerticallyBy(@NonNull long verticalPixels) {
+    private void scrollVerticallyBy(long verticalPixels) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         javascriptExecutor.executeScript("window.scrollBy(0, " + verticalPixels + ")");
     }
@@ -80,12 +81,12 @@ public class SeleniumWrapper {
 
     private long getScrollHeight() {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return (Long) javascriptExecutor.executeScript("return document.body.scrollHeight");
+        return (Long) Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight"));
     }
 
     private long getInnerHeight() {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return (Long) javascriptExecutor.executeScript("return window.innerHeight");
+        return (Long) Objects.requireNonNull(javascriptExecutor.executeScript("return window.innerHeight"));
     }
 
     private void consentCookies() {

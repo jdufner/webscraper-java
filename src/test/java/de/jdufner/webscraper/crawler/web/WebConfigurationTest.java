@@ -1,6 +1,5 @@
-package de.jdufner.webscraper;
+package de.jdufner.webscraper.crawler.web;
 
-import org.asynchttpclient.AsyncHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -10,17 +9,16 @@ import org.openqa.selenium.WebDriver;
 
 import java.util.Arrays;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class AppConfigurationTest {
+class WebConfigurationTest {
 
     @Mock
     private WebdriverConfiguration webdriverConfiguration;
 
     @InjectMocks
-    private AppConfiguration appConfiguration;
+    private WebConfiguration webConfiguration;
 
     @Test
     void when_get_chrome_driver_given_selenium_configuration_expect_arguments_added() {
@@ -30,7 +28,7 @@ class AppConfigurationTest {
             when(webdriverConfiguration.options()).thenReturn(Arrays.asList("--disable-search-engine-choice-screen", "--disable-notifications", "--disable-infobars", "--disable-extensions"));
 
             // act
-            webDriver = appConfiguration.getChromeDriver();
+            webDriver = webConfiguration.getChromeDriver();
 
             // assert
             verify(webdriverConfiguration, times(1)).options();
@@ -39,17 +37,6 @@ class AppConfigurationTest {
                 webDriver.quit();
             }
         }
-    }
-
-    @Test
-    void when_call_dsl_static_builder_expect_async_http_client() {
-        // arrange
-
-        // act
-        AsyncHttpClient asc = appConfiguration.getAsyncHttpClient();
-
-        // assert
-        assertThat(asc).isInstanceOf(AsyncHttpClient.class);
     }
 
 }

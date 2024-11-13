@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 class WebFetcherTest {
 
     @Mock
-    private SeleniumWrapper seleniumWrapper;
+    private WebdriverWrapper webdriverWrapper;
 
     @InjectMocks
     private WebFetcher webFetcher;
@@ -29,7 +29,7 @@ class WebFetcherTest {
     @Test
     public void given_webfetcher_when_get_html_then_expect_jsoup_document() {
         // arrange
-        when(seleniumWrapper.getHtml("https://www.spiegel.de")).thenReturn("""
+        when(webdriverWrapper.getHtml("https://www.spiegel.de")).thenReturn("""
                 <html>
                   <head>
                     <title>This is a title</title>

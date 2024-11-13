@@ -26,16 +26,16 @@ public class WebFetcher {
     private static final Logger logger = LoggerFactory.getLogger(WebFetcher.class);
     static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 
-    private final SeleniumWrapper seleniumWrapper;
+    private final WebdriverWrapper webdriverWrapper;
 
-    public WebFetcher(@NonNull SeleniumWrapper seleniumWrapper) {
-        this.seleniumWrapper = seleniumWrapper;
+    public WebFetcher(@NonNull WebdriverWrapper webdriverWrapper) {
+        this.webdriverWrapper = webdriverWrapper;
     }
 
     public @NonNull HtmlPage get(@NonNull String url) {
         logger.info("get url = {}", url);
         URI uri = URI.create(url);
-        String html = seleniumWrapper.getHtml(url);
+        String html = webdriverWrapper.getHtml(url);
         Date downloadedAt = new Date();
         Document document = Jsoup.parse(html);
         Optional<String> title = extractTitle(document);

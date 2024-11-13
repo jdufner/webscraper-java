@@ -1,19 +1,18 @@
 package de.jdufner.webscraper.crawler.web;
 
+import de.jdufner.webscraper.crawler.data.HtmlPage;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest
 @ConfigurationPropertiesScan
 @DirtiesContext
 class WebFetcherIT {
-
-    private static final Logger logger = LoggerFactory.getLogger(WebFetcherIT.class);
 
     @Autowired
     private WebFetcher webFetcher;
@@ -23,9 +22,10 @@ class WebFetcherIT {
         // arrange
 
         // act
-        webFetcher.get("https://www.heise.de");
+        HtmlPage htmlPage = webFetcher.get("https://www.heise.de");
 
         // assert
+        assertThat(htmlPage).isNotNull();
     }
 
 }

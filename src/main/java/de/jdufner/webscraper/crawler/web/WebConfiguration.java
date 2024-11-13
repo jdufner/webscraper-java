@@ -1,7 +1,5 @@
-package de.jdufner.webscraper;
+package de.jdufner.webscraper.crawler.web;
 
-import org.asynchttpclient.AsyncHttpClient;
-import org.asynchttpclient.Dsl;
 import org.jspecify.annotations.NonNull;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -10,11 +8,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class AppConfiguration {
+public class WebConfiguration {
 
     private final WebdriverConfiguration webdriverConfiguration;
 
-    public AppConfiguration(@NonNull WebdriverConfiguration webdriverConfiguration) {
+    public WebConfiguration(@NonNull WebdriverConfiguration webdriverConfiguration) {
         this.webdriverConfiguration = webdriverConfiguration;
     }
 
@@ -25,9 +23,5 @@ public class AppConfiguration {
         return new ChromeDriver(chromeOptions);
     }
 
-    @Bean
-    public @NonNull AsyncHttpClient getAsyncHttpClient() {
-        return Dsl.asyncHttpClient();
-    }
 
 }
