@@ -1,6 +1,5 @@
 package de.jdufner.webscraper;
 
-import de.jdufner.webscraper.crawler.SeleniumConfiguration;
 import org.asynchttpclient.AsyncHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +17,7 @@ import static org.mockito.Mockito.*;
 class AppConfigurationTest {
 
     @Mock
-    private SeleniumConfiguration seleniumConfiguration;
+    private WebdriverConfiguration webdriverConfiguration;
 
     @InjectMocks
     private AppConfiguration appConfiguration;
@@ -28,13 +27,13 @@ class AppConfigurationTest {
         WebDriver webDriver = null;
         try {
             // arrange
-            when(seleniumConfiguration.options()).thenReturn(Arrays.asList("--disable-search-engine-choice-screen", "--disable-notifications", "--disable-infobars", "--disable-extensions"));
+            when(webdriverConfiguration.options()).thenReturn(Arrays.asList("--disable-search-engine-choice-screen", "--disable-notifications", "--disable-infobars", "--disable-extensions"));
 
             // act
             webDriver = appConfiguration.getChromeDriver();
 
             // assert
-            verify(seleniumConfiguration, times(1)).options();
+            verify(webdriverConfiguration, times(1)).options();
         } finally {
             if (webDriver != null) {
                 webDriver.quit();
