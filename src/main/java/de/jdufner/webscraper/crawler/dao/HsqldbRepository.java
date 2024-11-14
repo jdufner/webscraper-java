@@ -152,8 +152,10 @@ public class HsqldbRepository implements Repository {
 
     @Override
     public @NonNull Image getNextImage() {
-        return Objects.requireNonNull(jdbcTemplate.queryForObject("select ID, URL from IMAGES where SKIP = false and DOWNLOADED = false order by ID limit 1",
-                (rs, rowNum) -> new Image(rs.getInt("id"), URI.create(rs.getString("url")))));
+        return Objects.requireNonNull(
+                jdbcTemplate.queryForObject("select ID, URL from IMAGES where SKIP = false and DOWNLOADED = false order by ID limit 1",
+                (rs, rowNum) -> new Image(rs.getInt("id"), URI.create(rs.getString("url"))))
+        );
     }
 
     @Override
@@ -163,8 +165,10 @@ public class HsqldbRepository implements Repository {
 
     @Override
     public @NonNull Link getNextLink() {
-        return Objects.requireNonNull(jdbcTemplate.queryForObject("select ID, URL from LINKS where SKIP = false and DOWNLOADED = false order by ID limit 1",
-                (rs, rowNum) -> new Link(rs.getInt("id"), URI.create(rs.getString("url")))));
+        return Objects.requireNonNull(
+                jdbcTemplate.queryForObject("select ID, URL from LINKS where SKIP = false and DOWNLOADED = false order by ID limit 1",
+                (rs, rowNum) -> new Link(rs.getInt("id"), URI.create(rs.getString("url"))))
+        );
     }
 
     @Override
