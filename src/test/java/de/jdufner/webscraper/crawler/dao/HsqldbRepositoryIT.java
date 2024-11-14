@@ -3,8 +3,6 @@ package de.jdufner.webscraper.crawler.dao;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,8 +22,6 @@ class HsqldbRepositoryIT {
 
     @Autowired
     JdbcTemplate jdbcTemplate;
-
-    private static final Logger logger = LoggerFactory.getLogger(HsqldbRepositoryIT.class);
 
     @Test
     public void when_html_page_fully_populated_expect_everything_saved() {
@@ -58,13 +54,13 @@ class HsqldbRepositoryIT {
     @Test
     public void when_get_next_image_expect_image() {
         // arrange
-        jdbcTemplate.update("insert into IMAGES (URL) values (?)", new Object[] { "https://www.google.com/image.jpg" });
+        jdbcTemplate.update("insert into IMAGES (URL) values (?)", "https://www.google.com/image.jpg");
 
         // act
         Image image = hsqldbRepository.getNextImage();
 
         // assert
-        assertThat(image.uri()).isEqualTo("https://www.google.com/image.jpg");
+        assertThat(image.uri()).isEqualTo(URI.create("https://www.google.com/image.jpg"));
     }
 
 }
