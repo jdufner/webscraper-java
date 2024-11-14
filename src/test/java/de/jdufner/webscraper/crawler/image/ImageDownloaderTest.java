@@ -1,6 +1,7 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
+import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,13 +35,27 @@ class ImageDownloaderTest {
         when(configuration.numberPages()).thenReturn(2);
         String url = "https://test.com/image.jpg";
         URI uri = URI.create(url);
-        when(repository.getNextImageUri()).thenReturn(uri);
+        Image image = new Image(1, uri);
+        when(repository.getNextImageUri()).thenReturn(image);
 
         // act
         imageDownloader.downloadAll();
 
         // assert
         verify(imageGetter, times(2)).download(uri, new File("./image.jpg"));
+    }
+
+    @Test
+    void given_configuration_when_download_expect_file() {
+        // arrange
+        String url = "https://test.com/image.jpg";
+        URI uri = URI.create(url);
+
+        // act
+        File file = imageDownloader.download(uri);
+
+        // assert
+        assertThat(file.getName()).isEqualTo("image.jpg");
     }
 
     @Test

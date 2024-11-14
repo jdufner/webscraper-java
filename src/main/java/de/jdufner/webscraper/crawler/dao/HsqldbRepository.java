@@ -1,6 +1,7 @@
 package de.jdufner.webscraper.crawler.dao;
 
 import de.jdufner.webscraper.crawler.data.HtmlPage;
+import de.jdufner.webscraper.crawler.data.Image;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,10 +11,12 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.net.URI;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.Date;
+import java.util.Objects;
 
 @Service
 public class HsqldbRepository implements Repository {
@@ -31,11 +34,6 @@ public class HsqldbRepository implements Repository {
         saveCategories(htmlPage, documentId);
         saveLinks(htmlPage, documentId);
         saveImages(htmlPage, documentId);
-    }
-
-    @Override
-    public @NonNull URI getNextImageUri() {
-        return URI.create("https://localhost/test.jpg");
     }
 
     private void saveAuthors(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
@@ -141,7 +139,7 @@ public class HsqldbRepository implements Repository {
             return ps;
         };
         jdbcTemplate.update(psc, keyHolder);
-        return keyHolder.getKey();
+        return Objects.requireNonNull(keyHolder.getKey());
     }
 
     private static @Nullable Timestamp convert(@Nullable Date date) {
@@ -149,6 +147,21 @@ public class HsqldbRepository implements Repository {
             return null;
         }
         return new Timestamp(date.getTime());
+    }
+
+    @Override
+    public @NonNull Image getNextImageUri() {
+        return Objects.requireNonNull(jdbcTemplate.queryForObject("select ID, URL from IMAGES where SKIP = false and DOWNLOADED = false order by id limit 1", (rs, rowNum) -> {
+            if (rs.next()) {
+                return new Image(rs.getInt("id"), URI.create(rs.getString("url")));
+            }
+            throw new RuntimeException("No image found!");
+        }));
+    }
+
+    @Override
+    public void setDownloadedFilename(@NonNull Image image, @NonNull File file) {
+        jdbcTemplate.update("update IMAGES set DOWNLOADED = true, FILENAME = ? where ID = ?", file.getPath(), image.id());
     }
 
 }

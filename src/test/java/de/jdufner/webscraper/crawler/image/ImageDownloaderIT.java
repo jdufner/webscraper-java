@@ -4,7 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
 import java.net.URI;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class ImageDownloaderIT {
@@ -18,10 +21,10 @@ class ImageDownloaderIT {
         URI uri = URI.create("https://apod.nasa.gov/apod/image/2409/iss071e564695_4096.jpg");
 
         // act
-        imageDownloader.download(uri);
+        File file = imageDownloader.download(uri);
 
         // assert
-        //when(asyncHttpClient.prepareGet(anyString())).thenReturn(mock(BoundRequestBuilder.class));
+        assertThat(file).exists();
     }
 
 }

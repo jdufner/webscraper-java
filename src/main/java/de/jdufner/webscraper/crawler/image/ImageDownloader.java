@@ -2,6 +2,7 @@ package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
 import de.jdufner.webscraper.crawler.dao.Repository;
+import de.jdufner.webscraper.crawler.data.Image;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,18 +28,25 @@ public class ImageDownloader {
 
     void downloadAll() {
         for(int i = 0; i < imageDownloaderConfiguration.numberPages(); i++) {
-            URI uri = repository.getNextImageUri();
-            download(uri);
+            Image image = repository.getNextImageUri();
+            File file = download(image.uri());
+            repository.setDownloadedFilename(image, file);
         }
     }
 
-    void download(@NonNull URI uri) {
+    @NonNull File download(@NonNull URI uri) {
+        logger.debug("Downloading {}", uri);
+        File file = buildAndValidateFilename(uri);
+        imageGetter.download(uri, file);
+        logger.debug("Downloaded {}", file.getPath());
+        return file;
+    }
+
+    private static File buildAndValidateFilename(URI uri) {
         File file = getFileName(uri);
-        logger.debug("Downloading {}", file.getAbsolutePath());
         hasImageExtension(file);
         file = validateFilename(file);
-        imageGetter.download(uri, file);
-        logger.debug("Downloaded {}", file.getAbsolutePath());
+        return file;
     }
 
     static File validateFilename(File file) {
