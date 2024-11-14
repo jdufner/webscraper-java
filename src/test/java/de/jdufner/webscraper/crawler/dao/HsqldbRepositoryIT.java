@@ -1,23 +1,29 @@
 package de.jdufner.webscraper.crawler.dao;
 
 import de.jdufner.webscraper.crawler.data.HtmlPage;
+import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.net.URI;
 import java.util.Date;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class HsqldbRepositoryIT {
 
     @Autowired
     private HsqldbRepository hsqldbRepository;
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
 
     private static final Logger logger = LoggerFactory.getLogger(HsqldbRepositoryIT.class);
 
@@ -47,6 +53,18 @@ class HsqldbRepositoryIT {
 
         // assert
 
+    }
+
+    @Test
+    public void when_get_next_image_expect_image() {
+        // arrange
+        jdbcTemplate.update("insert into IMAGES (URL) values (?)", new Object[] { "https://www.google.com/image.jpg" });
+
+        // act
+        Image image = hsqldbRepository.getNextImage();
+
+        // assert
+        assertThat(image.uri()).isEqualTo("https://www.google.com/image.jpg");
     }
 
 }
