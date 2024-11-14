@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -36,7 +37,7 @@ class ImageDownloaderTest {
         String url = "https://test.com/image.jpg";
         URI uri = URI.create(url);
         Image image = new Image(1, uri);
-        when(repository.getNextImage()).thenReturn(image);
+        when(repository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
 
         // act
         imageDownloader.downloadAll();

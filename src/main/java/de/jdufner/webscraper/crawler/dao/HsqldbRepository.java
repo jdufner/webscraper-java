@@ -18,6 +18,7 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class HsqldbRepository implements Repository {
@@ -38,7 +39,7 @@ public class HsqldbRepository implements Repository {
     }
 
     private void saveAuthors(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
-        for (String author: htmlPage.authors()) {
+        for (String author : htmlPage.authors()) {
             ResultSetExtractor<Number> rse = rs -> {
                 if (rs.next()) {
                     return rs.getLong("ID");
@@ -61,7 +62,7 @@ public class HsqldbRepository implements Repository {
     }
 
     private void saveCategories(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
-        for (String category: htmlPage.categories()) {
+        for (String category : htmlPage.categories()) {
             ResultSetExtractor<Number> rse = rs -> {
                 if (rs.next()) {
                     return rs.getLong("ID");
@@ -151,10 +152,16 @@ public class HsqldbRepository implements Repository {
     }
 
     @Override
-    public @NonNull Image getNextImage() {
+    public @NonNull Optional<Image> getNextImageIfAvailable() {
         return Objects.requireNonNull(
-                jdbcTemplate.queryForObject("select ID, URL from IMAGES where SKIP = false and DOWNLOADED = false order by ID limit 1",
-                (rs, rowNum) -> new Image(rs.getInt("id"), URI.create(rs.getString("url"))))
+                jdbcTemplate.query(
+                        "select ID, URL from IMAGES where SKIP = false and DOWNLOADED = false order by ID limit 1",
+                        rs -> {
+                            if (rs.next()) {
+                                return Optional.of(new Image(rs.getInt("ID"), URI.create(rs.getString("URL"))));
+                            }
+                            return Optional.empty();
+                        })
         );
     }
 
@@ -164,10 +171,16 @@ public class HsqldbRepository implements Repository {
     }
 
     @Override
-    public @NonNull Link getNextLink() {
+    public @NonNull Optional<Link> getNextLinkIfAvailable() {
         return Objects.requireNonNull(
-                jdbcTemplate.queryForObject("select ID, URL from LINKS where SKIP = false and DOWNLOADED = false order by ID limit 1",
-                (rs, rowNum) -> new Link(rs.getInt("id"), URI.create(rs.getString("url"))))
+                jdbcTemplate.query(
+                        "select ID, URL from LINKS where SKIP = false and DOWNLOADED = false order by ID limit 1",
+                        rs -> {
+                            if (rs.next()) {
+                                return Optional.of(new Link(rs.getInt("id"), URI.create(rs.getString("url"))));
+                            }
+                            return Optional.empty();
+                        })
         );
     }
 

@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -57,10 +58,23 @@ class HsqldbRepositoryIT {
         jdbcTemplate.update("insert into IMAGES (URL) values (?)", "https://www.google.com/image.jpg");
 
         // act
-        Image image = hsqldbRepository.getNextImage();
+        Optional<Image> image = hsqldbRepository.getNextImageIfAvailable();
 
         // assert
-        assertThat(image.uri()).isEqualTo(URI.create("https://www.google.com/image.jpg"));
+        assertThat(image.isPresent()).isTrue();
+        assertThat(image.get().uri()).isEqualTo(URI.create("https://www.google.com/image.jpg"));
+    }
+
+    @Test
+    public void when_get_no_images_available_expect_null() {
+        // arrange
+        jdbcTemplate.update("delete from IMAGES");
+
+        // act
+        Optional<Image> image = hsqldbRepository.getNextImageIfAvailable();
+
+        // assert
+        assertThat(image.isEmpty()).isTrue();
     }
 
 }

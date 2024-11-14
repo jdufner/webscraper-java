@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Optional;
 
 @Service
 public class ImageDownloader {
@@ -28,9 +29,11 @@ public class ImageDownloader {
 
     void downloadAll() {
         for(int i = 0; i < imageDownloaderConfiguration.numberPages(); i++) {
-            Image image = repository.getNextImage();
-            File file = download(image.uri());
-            repository.setImageDownloadedAndFilename(image, file);
+            Optional<Image> image = repository.getNextImageIfAvailable();
+            if (image.isPresent()) {
+                File file = download(image.get().uri());
+                repository.setImageDownloadedAndFilename(image.get(), file);
+            }
         }
     }
 

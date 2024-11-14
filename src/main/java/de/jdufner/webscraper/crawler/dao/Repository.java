@@ -6,16 +6,17 @@ import de.jdufner.webscraper.crawler.data.Link;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;
+import java.util.Optional;
 
 public interface Repository {
 
     void save(@NonNull HtmlPage htmlPage);
 
-    @NonNull Image getNextImage();
+    @NonNull Optional<Image> getNextImageIfAvailable();
 
     void setImageDownloadedAndFilename(@NonNull Image image, @NonNull File file);
 
-    @NonNull Link getNextLink();
+    @NonNull Optional<Link> getNextLinkIfAvailable();
 
     void setLinkDownloaded(@NonNull Link link);
 

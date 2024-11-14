@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,14 +46,14 @@ class WebCrawlerTest {
         Link link = new Link(1, URI.create("https://www.continue.com"));
         HtmlPage htmlPageContinue = new HtmlPage(link.uri(), "", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(link.uri().toString())).thenReturn(htmlPageContinue);
-        when(repository.getNextLink()).thenReturn(link);
+        when(repository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
 
         // act
         webCrawler.crawl();
 
         // assert
         verify(webFetcher, times(1)).get(url);
-        verify(repository, times(3)).getNextLink();
+        verify(repository, times(3)).getNextLinkIfAvailable();
         verify(webFetcher, times(3)).get(link.uri().toString());
         ArgumentCaptor<HtmlPage> savedHtmlPages = ArgumentCaptor.forClass(HtmlPage.class);
         verify(repository, times(4)).save(savedHtmlPages.capture());
