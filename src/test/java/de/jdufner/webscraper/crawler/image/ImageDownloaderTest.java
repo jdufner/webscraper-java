@@ -36,7 +36,7 @@ class ImageDownloaderTest {
         String url = "https://test.com/image.jpg";
         URI uri = URI.create(url);
         Image image = new Image(1, uri);
-        when(repository.getNextImageUri()).thenReturn(image);
+        when(repository.getNextImage()).thenReturn(image);
 
         // act
         imageDownloader.downloadAll();

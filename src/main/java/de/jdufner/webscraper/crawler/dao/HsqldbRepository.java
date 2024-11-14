@@ -2,6 +2,7 @@ package de.jdufner.webscraper.crawler.dao;
 
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Image;
+import de.jdufner.webscraper.crawler.data.Link;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -150,8 +151,8 @@ public class HsqldbRepository implements Repository {
     }
 
     @Override
-    public @NonNull Image getNextImageUri() {
-        return Objects.requireNonNull(jdbcTemplate.queryForObject("select ID, URL from IMAGES where SKIP = false and DOWNLOADED = false order by id limit 1", (rs, rowNum) -> {
+    public @NonNull Image getNextImage() {
+        return Objects.requireNonNull(jdbcTemplate.queryForObject("select ID, URL from IMAGES where SKIP = false and DOWNLOADED = false order by ID limit 1", (rs, rowNum) -> {
             if (rs.next()) {
                 return new Image(rs.getInt("id"), URI.create(rs.getString("url")));
             }
@@ -160,8 +161,23 @@ public class HsqldbRepository implements Repository {
     }
 
     @Override
-    public void setDownloadedFilename(@NonNull Image image, @NonNull File file) {
+    public void setImageDownloadedAndFilename(@NonNull Image image, @NonNull File file) {
         jdbcTemplate.update("update IMAGES set DOWNLOADED = true, FILENAME = ? where ID = ?", file.getPath(), image.id());
+    }
+
+    @Override
+    public @NonNull Link getNextLink() {
+        return Objects.requireNonNull(jdbcTemplate.queryForObject("select ID, URL from LINKS where SKIP = false and DOWNLOADED = false order by ID limit 1", (rs, rowNum) -> {
+            if (rs.next()) {
+                return new Link(rs.getInt("id"), URI.create(rs.getString("url")));
+            }
+            throw new RuntimeException("No link found!");
+        }));
+    }
+
+    @Override
+    public void setLinkDownloaded(@NonNull Link link) {
+        jdbcTemplate.update("update LINKS set DOWNLOADED = true where ID = ?", link.id());
     }
 
 }

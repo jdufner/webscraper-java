@@ -3,6 +3,7 @@ package de.jdufner.webscraper.crawler.web;
 import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
 import de.jdufner.webscraper.crawler.dao.Repository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
+import de.jdufner.webscraper.crawler.data.Link;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,18 +28,24 @@ public class WebCrawler {
 
     public void crawl() {
         logger.info("startUrl = {}, numberPages = {}", webCrawlerConfiguration.startUrl(), webCrawlerConfiguration.numberPages());
-        for (int i = 0; i < webCrawlerConfiguration.numberPages(); i++) {
-            URI uri = getNextUri(i);
-            HtmlPage htmlPage = webFetcher.get(uri.toString());
-            repository.save(htmlPage);
-        }
+        downloadInitialUrl();
+        downloadLinks();
     }
 
-    private @NonNull URI getNextUri(int index) {
-        if (index > 0) {
-            // return pageRepository.getNextUri();
+    private void downloadInitialUrl() {
+        URI uri = URI.create(webCrawlerConfiguration.startUrl());
+        HtmlPage htmlPage = webFetcher.get(uri.toString());
+        repository.save(htmlPage);
+    }
+
+    private void downloadLinks() {
+        for (int i = 0; i < webCrawlerConfiguration.numberPages(); i++) {
+            logger.info("Index {}", i);
+            Link link = repository.getNextLink();
+            HtmlPage htmlPage = webFetcher.get(link.uri().toString());
+            repository.save(htmlPage);
+            repository.setLinkDownloaded(link);
         }
-        return URI.create(webCrawlerConfiguration.startUrl());
     }
 
 }

@@ -28,9 +28,9 @@ public class ImageDownloader {
 
     void downloadAll() {
         for(int i = 0; i < imageDownloaderConfiguration.numberPages(); i++) {
-            Image image = repository.getNextImageUri();
+            Image image = repository.getNextImage();
             File file = download(image.uri());
-            repository.setDownloadedFilename(image, file);
+            repository.setImageDownloadedAndFilename(image, file);
         }
     }
 
