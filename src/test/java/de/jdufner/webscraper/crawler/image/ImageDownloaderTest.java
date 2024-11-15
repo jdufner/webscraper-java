@@ -38,11 +38,11 @@ class ImageDownloaderTest {
     void given_configuration_when_download_all_expect_url_multiple_times() {
         // arrange
         when(configuration.numberPages()).thenReturn(2);
-        when(siteConfiguration.isValidAndNotBlocked(any())).thenReturn(true);
         String url = "https://test.com/image.jpg";
         URI uri = URI.create(url);
         Image image = new Image(1, uri);
         when(repository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
+        when(siteConfiguration.isValidAndNotBlocked(any())).thenReturn(true);
 
         // act
         imageDownloader.downloadAll();

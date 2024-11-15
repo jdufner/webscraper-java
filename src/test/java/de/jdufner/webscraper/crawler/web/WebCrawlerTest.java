@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler.web;
 
+import de.jdufner.webscraper.crawler.config.SiteConfiguration;
 import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Link;
@@ -16,6 +17,7 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -25,6 +27,9 @@ class WebCrawlerTest {
 
     @Mock
     private WebCrawlerConfiguration webCrawlerConfiguration;
+
+    @Mock
+    private SiteConfiguration siteConfiguration;
 
     @Mock
     private WebFetcher webFetcher;
@@ -47,6 +52,7 @@ class WebCrawlerTest {
         HtmlPage htmlPageContinue = new HtmlPage(link.uri(), "", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(link.uri().toString())).thenReturn(htmlPageContinue);
         when(repository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
+        when(siteConfiguration.isValidAndNotBlocked(any())).thenReturn(true);
 
         // act
         webCrawler.crawl();
