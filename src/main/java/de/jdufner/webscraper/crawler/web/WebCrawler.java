@@ -41,9 +41,9 @@ public class WebCrawler {
 
     private void downloadLinks() {
         for (int i = 0; i < webCrawlerConfiguration.numberPages(); i++) {
-            logger.info("Index {}", i);
             Optional<Link> link = repository.getNextLinkIfAvailable();
             if (link.isPresent()) {
+                // TODO check against white and black list
                 HtmlPage htmlPage = webFetcher.get(link.get().uri().toString());
                 repository.save(htmlPage);
                 repository.setLinkDownloaded(link.get());

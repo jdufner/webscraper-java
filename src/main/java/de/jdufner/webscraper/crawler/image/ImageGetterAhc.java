@@ -28,6 +28,7 @@ public class ImageGetterAhc implements ImageGetter {
     public void download(@NonNull URI uri, @NonNull File file) {
         try {
             FileOutputStream fos = new FileOutputStream(file);
+            // TODO how to keep a session to reuse the connection?
             asyncHttpClient.prepareGet(uri.toString()).execute(
                             new AsyncCompletionHandler<FileOutputStream>() {
 

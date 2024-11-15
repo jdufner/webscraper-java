@@ -31,6 +31,7 @@ public class ImageDownloader {
         for(int i = 0; i < imageDownloaderConfiguration.numberPages(); i++) {
             Optional<Image> image = repository.getNextImageIfAvailable();
             if (image.isPresent()) {
+                // TODO check against white and black list
                 File file = download(image.get().uri());
                 repository.setImageDownloadedAndFilename(image.get(), file);
             }
