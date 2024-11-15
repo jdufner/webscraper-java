@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler.image;
 
+import de.jdufner.webscraper.crawler.config.SiteConfiguration;
 import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
@@ -22,7 +23,7 @@ class ImageDownloaderTest {
     private ImageDownloaderConfiguration configuration;
 
     @Mock
-    private ImageSiteConfiguration imageSiteConfiguration;
+    private SiteConfiguration siteConfiguration;
 
     @Mock
     private HsqldbRepository repository;
@@ -37,7 +38,7 @@ class ImageDownloaderTest {
     void given_configuration_when_download_all_expect_url_multiple_times() {
         // arrange
         when(configuration.numberPages()).thenReturn(2);
-        when(imageSiteConfiguration.isValidAndNotBlocked(any())).thenReturn(true);
+        when(siteConfiguration.isValidAndNotBlocked(any())).thenReturn(true);
         String url = "https://test.com/image.jpg";
         URI uri = URI.create(url);
         Image image = new Image(1, uri);

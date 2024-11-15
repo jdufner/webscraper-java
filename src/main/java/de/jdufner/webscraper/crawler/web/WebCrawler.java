@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler.web;
 
+import de.jdufner.webscraper.crawler.config.SiteConfiguration;
 import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
 import de.jdufner.webscraper.crawler.dao.Repository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
@@ -17,12 +18,21 @@ public class WebCrawler {
 
     private static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
 
+    @NonNull
     private final WebCrawlerConfiguration webCrawlerConfiguration;
+    @NonNull
+    private final SiteConfiguration siteConfiguration;
+    @NonNull
     private final WebFetcher webFetcher;
+    @NonNull
     private final Repository repository;
 
-    public WebCrawler(@NonNull WebCrawlerConfiguration webCrawlerConfiguration, @NonNull WebFetcher webFetcher, @NonNull HsqldbRepository repository) {
+    public WebCrawler(@NonNull WebCrawlerConfiguration webCrawlerConfiguration,
+                      @NonNull SiteConfiguration siteConfiguration,
+                      @NonNull WebFetcher webFetcher,
+                      @NonNull HsqldbRepository repository) {
         this.webCrawlerConfiguration = webCrawlerConfiguration;
+        this.siteConfiguration = siteConfiguration;
         this.webFetcher = webFetcher;
         this.repository = repository;
     }
@@ -44,9 +54,13 @@ public class WebCrawler {
             Optional<Link> link = repository.getNextLinkIfAvailable();
             if (link.isPresent()) {
                 // TODO check against white and black list
-                HtmlPage htmlPage = webFetcher.get(link.get().uri().toString());
-                repository.save(htmlPage);
-                repository.setLinkDownloaded(link.get());
+                if (siteConfiguration.isValidAndNotBlocked(link.get().uri())) {
+                    HtmlPage htmlPage = webFetcher.get(link.get().uri().toString());
+                    repository.save(htmlPage);
+                    repository.setLinkDownloaded(link.get());
+                } else {
+                    repository.setLinkSkip(link.get());
+                }
             }
         }
     }

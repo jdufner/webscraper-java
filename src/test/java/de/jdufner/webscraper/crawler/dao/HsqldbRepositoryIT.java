@@ -146,6 +146,7 @@ class HsqldbRepositoryIT {
     @Test
     public void given_image_when_image_exists_expect_skip_updated() {
         // arrange
+        jdbcTemplate.update("delete from IMAGES");
         Image image = new Image(-2, URI.create("https://localhost/"));
         jdbcTemplate.update("insert into IMAGES (ID, URL) values (?, ?)", image.id(), image.uri().toString());
 
@@ -158,6 +159,26 @@ class HsqldbRepositoryIT {
                 (rs, rowNum) -> rs.getBoolean("SKIP"),
                 image.id()
         );
+        assertThat(skipped).isTrue();
+    }
+
+    @Test
+    public void given_link_when_link_exists_expect_skip_updated() {
+        // arrange
+        jdbcTemplate.update("delete from LINKS");
+        Link link = new Link(-2, URI.create("https://localhost/"));
+        jdbcTemplate.update("insert into LINKS (ID, URL) values (?, ?)", link.id(), link.uri().toString());
+
+        // act
+        hsqldbRepository.setLinkSkip(link);
+
+        // assert
+        Boolean skipped = jdbcTemplate.queryForObject(
+                "select SKIP from LINKS where id = ?",
+                (rs, rowNum) -> rs.getBoolean("SKIP"),
+                link.id()
+        );
+        assertThat(skipped).isTrue();
     }
 
 }

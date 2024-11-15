@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler.image;
 
+import de.jdufner.webscraper.crawler.config.SiteConfiguration;
 import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
 import de.jdufner.webscraper.crawler.dao.Repository;
 import de.jdufner.webscraper.crawler.data.Image;
@@ -20,18 +21,18 @@ public class ImageDownloader {
     @NonNull
     private final ImageDownloaderConfiguration imageDownloaderConfiguration;
     @NonNull
-    private final ImageSiteConfiguration imageSiteConfiguration;
+    private final SiteConfiguration siteConfiguration;
     @NonNull
     private final Repository repository;
     @NonNull
     private final ImageGetter imageGetter;
 
     public ImageDownloader(@NonNull ImageDownloaderConfiguration imageDownloaderConfiguration,
-                           @NonNull ImageSiteConfiguration imageSiteConfiguration,
+                           @NonNull SiteConfiguration siteConfiguration,
                            @NonNull HsqldbRepository repository,
                            @NonNull ImageGetterAhc imageGetter) {
         this.imageDownloaderConfiguration = imageDownloaderConfiguration;
-        this.imageSiteConfiguration = imageSiteConfiguration;
+        this.siteConfiguration = siteConfiguration;
         this.repository = repository;
         this.imageGetter = imageGetter;
     }
@@ -45,7 +46,7 @@ public class ImageDownloader {
     private void downloadNextImage() {
         Optional<Image> image = repository.getNextImageIfAvailable();
         if (image.isPresent()) {
-            if (imageSiteConfiguration.isValidAndNotBlocked(image.get().uri())) {
+            if (siteConfiguration.isValidAndNotBlocked(image.get().uri())) {
                 File file = download(image.get().uri());
                 repository.setImageDownloadedAndFilename(image.get(), file);
             } else {

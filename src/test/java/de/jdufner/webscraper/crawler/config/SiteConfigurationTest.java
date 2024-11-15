@@ -1,4 +1,4 @@
-package de.jdufner.webscraper.crawler.image;
+package de.jdufner.webscraper.crawler.config;
 
 import org.junit.jupiter.api.Test;
 
@@ -6,14 +6,14 @@ import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ImageSiteConfigurationTest {
+class SiteConfigurationTest {
 
     @Test
     void given_list_when_uri_is_in_list_expect_true() {
         // arrange
         String[] whiteList = {"https://www.google.com"};
         String[] blackList = {};
-        ImageSiteConfiguration config = new ImageSiteConfiguration(whiteList, blackList);
+        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
 
         URI uri = URI.create("https://www.google.com");
 
@@ -29,7 +29,7 @@ class ImageSiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://www.google.com"};
         String[] blackList = {};
-        ImageSiteConfiguration config = new ImageSiteConfiguration(whiteList, blackList);
+        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
 
         URI uri = URI.create("https://www.google.com/");
 
@@ -45,7 +45,7 @@ class ImageSiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://www.google.com"};
         String[] blackList = {};
-        ImageSiteConfiguration config = new ImageSiteConfiguration(whiteList, blackList);
+        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
 
         URI uri = URI.create("http://www.google.com/");
 
@@ -61,7 +61,7 @@ class ImageSiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://start.duckduckgo.com"};
         String[] blackList = {};
-        ImageSiteConfiguration config = new ImageSiteConfiguration(whiteList, blackList);
+        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
 
         URI uri = URI.create("https://www.google.com");
 
