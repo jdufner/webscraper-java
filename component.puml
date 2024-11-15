@@ -1,8 +1,11 @@
 @startuml
 
 package "crawler" {
-[WebCrawler] -> [WebFetcher]
-[WebCrawler] --> [Repository]
+    [image] --> [dao]
+    [image] --> [data]
+    [web] --> [dao]
+    [web] --> [data]
+    [dao] --> [data]
 }
 
 @enduml
