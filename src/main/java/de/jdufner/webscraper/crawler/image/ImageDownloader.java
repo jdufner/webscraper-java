@@ -38,12 +38,18 @@ public class ImageDownloader {
 
     void downloadAll() {
         for(int i = 0; i < imageDownloaderConfiguration.numberPages(); i++) {
-            Optional<Image> image = repository.getNextImageIfAvailable();
-            if (image.isPresent()) {
-                if (imageSiteConfiguration.isValidAndNotBlocked(image.get().uri())) {
-                    File file = download(image.get().uri());
-                    repository.setImageDownloadedAndFilename(image.get(), file);
-                }
+            downloadNextImage();
+        }
+    }
+
+    private void downloadNextImage() {
+        Optional<Image> image = repository.getNextImageIfAvailable();
+        if (image.isPresent()) {
+            if (imageSiteConfiguration.isValidAndNotBlocked(image.get().uri())) {
+                File file = download(image.get().uri());
+                repository.setImageDownloadedAndFilename(image.get(), file);
+            } else {
+                repository.setImageSkip(image.get());
             }
         }
     }

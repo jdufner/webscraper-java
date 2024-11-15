@@ -143,4 +143,21 @@ class HsqldbRepositoryIT {
         assertThat(downloaded).isTrue();
     }
 
+    @Test
+    public void given_image_when_image_exists_expect_skip_updated() {
+        // arrange
+        Image image = new Image(-2, URI.create("https://localhost/"));
+        jdbcTemplate.update("insert into IMAGES (ID, URL) values (?, ?)", image.id(), image.uri().toString());
+
+        // act
+        hsqldbRepository.setImageSkip(image);
+
+        // assert
+        Boolean skipped = jdbcTemplate.queryForObject(
+                "select SKIP from IMAGES where id = ?",
+                (rs, rowNum) -> rs.getBoolean("SKIP"),
+                image.id()
+        );
+    }
+
 }

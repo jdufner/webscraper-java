@@ -189,4 +189,9 @@ public class HsqldbRepository implements Repository {
         jdbcTemplate.update("update LINKS set DOWNLOADED = true where ID = ?", link.id());
     }
 
+    @Override
+    public void setImageSkip(@NonNull Image image) {
+        jdbcTemplate.update("update IMAGES set SKIP = true where ID = ?", image.id());
+    }
+
 }

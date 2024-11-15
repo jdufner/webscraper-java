@@ -20,4 +20,6 @@ public interface Repository {
 
     void setLinkDownloaded(@NonNull Link link);
 
+    void setImageSkip(@NonNull Image image);
+
 }
