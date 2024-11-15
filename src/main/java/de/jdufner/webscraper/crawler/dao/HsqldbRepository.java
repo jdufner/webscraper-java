@@ -40,14 +40,14 @@ public class HsqldbRepository implements Repository {
 
     private void saveAuthors(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
         for (String author : htmlPage.authors()) {
-            ResultSetExtractor<Number> rse = rs -> {
+            ResultSetExtractor<Optional<Number>> rse = rs -> {
                 if (rs.next()) {
-                    return rs.getLong("ID");
+                    return Optional.of(rs.getLong("ID"));
                 }
-                return null;
+                return Optional.empty();
             };
-            Number authorId = jdbcTemplate.query("select ID from AUTHORS where NAME = ?", rse, author);
-            if (authorId == null) {
+            Optional<Number> authorId = (Objects.requireNonNull(jdbcTemplate.query("select ID from AUTHORS where NAME = ?", rse, author)));
+            if (authorId.isEmpty()) {
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 PreparedStatementCreator psc = con -> {
                     PreparedStatement ps = con.prepareStatement("INSERT INTO AUTHORS (NAME) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -55,22 +55,22 @@ public class HsqldbRepository implements Repository {
                     return ps;
                 };
                 jdbcTemplate.update(psc, keyHolder);
-                authorId = keyHolder.getKey();
+                authorId = Optional.of(Objects.requireNonNull(keyHolder.getKey()));
             }
-            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_AUTHORS (DOCUMENT_ID, AUTHOR_ID) values (?, ?)", documentId, authorId);
+            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_AUTHORS (DOCUMENT_ID, AUTHOR_ID) values (?, ?)", documentId, authorId.get());
         }
     }
 
     private void saveCategories(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
         for (String category : htmlPage.categories()) {
-            ResultSetExtractor<Number> rse = rs -> {
+            ResultSetExtractor<Optional<Number>> rse = rs -> {
                 if (rs.next()) {
-                    return rs.getLong("ID");
+                    return Optional.of(rs.getLong("ID"));
                 }
-                return null;
+                return Optional.empty();
             };
-            Number categoryId = jdbcTemplate.query("select ID from CATEGORIES where NAME = ?", rse, category);
-            if (categoryId == null) {
+            Optional<Number> categoryId = Objects.requireNonNull(jdbcTemplate.query("select ID from CATEGORIES where NAME = ?", rse, category));
+            if (categoryId.isEmpty()) {
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 PreparedStatementCreator psc = con -> {
                     PreparedStatement ps = con.prepareStatement("INSERT INTO CATEGORIES (NAME) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -78,22 +78,22 @@ public class HsqldbRepository implements Repository {
                     return ps;
                 };
                 jdbcTemplate.update(psc, keyHolder);
-                categoryId = keyHolder.getKey();
+                categoryId = Optional.of(Objects.requireNonNull(keyHolder.getKey()));
             }
-            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_CATEGORIES (DOCUMENT_ID, CATEGORY_ID) values (?, ?)", documentId, categoryId);
+            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_CATEGORIES (DOCUMENT_ID, CATEGORY_ID) values (?, ?)", documentId, categoryId.get());
         }
     }
 
     private void saveLinks(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
         for (URI link : htmlPage.links()) {
-            ResultSetExtractor<Number> rse = rs -> {
+            ResultSetExtractor<Optional<Number>> rse = rs -> {
                 if (rs.next()) {
-                    return rs.getLong("ID");
+                    return Optional.of(rs.getLong("ID"));
                 }
-                return null;
+                return Optional.empty();
             };
-            Number linkId = jdbcTemplate.query("SELECT ID FROM links WHERE URL = ?", rse, link.toString());
-            if (linkId == null) {
+            Optional<Number> linkId = Objects.requireNonNull(jdbcTemplate.query("SELECT ID FROM links WHERE URL = ?", rse, link.toString()));
+            if (linkId.isEmpty()) {
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 PreparedStatementCreator psc = con -> {
                     PreparedStatement ps = con.prepareStatement("INSERT INTO links (URL) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -101,22 +101,22 @@ public class HsqldbRepository implements Repository {
                     return ps;
                 };
                 jdbcTemplate.update(psc, keyHolder);
-                linkId = keyHolder.getKey();
+                linkId = Optional.of(Objects.requireNonNull(keyHolder.getKey()));
             }
-            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_LINKS (DOCUMENT_ID, LINK_ID) values (?, ?)", documentId, linkId);
+            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_LINKS (DOCUMENT_ID, LINK_ID) values (?, ?)", documentId, linkId.get());
         }
     }
 
     private void saveImages(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
         for (URI image : htmlPage.images()) {
-            ResultSetExtractor<Number> rse = rs -> {
+            ResultSetExtractor<Optional<Number>> rse = rs -> {
                 if (rs.next()) {
-                    return rs.getLong("ID");
+                    return Optional.of(rs.getLong("ID"));
                 }
-                return null;
+                return Optional.empty();
             };
-            Number imageId = jdbcTemplate.query("SELECT ID FROM IMAGES WHERE URL = ?", rse, image.toString());
-            if (imageId == null) {
+            Optional<Number> imageId = Objects.requireNonNull(jdbcTemplate.query("SELECT ID FROM IMAGES WHERE URL = ?", rse, image.toString()));
+            if (imageId.isEmpty()) {
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 PreparedStatementCreator psc = con -> {
                     PreparedStatement ps = con.prepareStatement("INSERT INTO IMAGES (URL) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -124,9 +124,9 @@ public class HsqldbRepository implements Repository {
                     return ps;
                 };
                 jdbcTemplate.update(psc, keyHolder);
-                imageId = keyHolder.getKey();
+                imageId = Optional.of(Objects.requireNonNull(keyHolder.getKey()));
             }
-            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_IMAGES (DOCUMENT_ID, IMAGE_ID) values (?, ?)", documentId, imageId);
+            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_IMAGES (DOCUMENT_ID, IMAGE_ID) values (?, ?)", documentId, imageId.get());
         }
     }
 
