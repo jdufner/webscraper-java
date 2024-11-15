@@ -17,12 +17,21 @@ public class ImageDownloader {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageDownloader.class);
 
+    @NonNull
     private final ImageDownloaderConfiguration imageDownloaderConfiguration;
+    @NonNull
+    private final ImageSiteConfiguration imageSiteConfiguration;
+    @NonNull
     private final Repository repository;
+    @NonNull
     private final ImageGetter imageGetter;
 
-    public ImageDownloader(@NonNull ImageDownloaderConfiguration imageDownloaderConfiguration, @NonNull HsqldbRepository repository, @NonNull ImageGetterAhc imageGetter) {
+    public ImageDownloader(@NonNull ImageDownloaderConfiguration imageDownloaderConfiguration,
+                           @NonNull ImageSiteConfiguration imageSiteConfiguration,
+                           @NonNull HsqldbRepository repository,
+                           @NonNull ImageGetterAhc imageGetter) {
         this.imageDownloaderConfiguration = imageDownloaderConfiguration;
+        this.imageSiteConfiguration = imageSiteConfiguration;
         this.repository = repository;
         this.imageGetter = imageGetter;
     }
@@ -31,9 +40,10 @@ public class ImageDownloader {
         for(int i = 0; i < imageDownloaderConfiguration.numberPages(); i++) {
             Optional<Image> image = repository.getNextImageIfAvailable();
             if (image.isPresent()) {
-                // TODO check against white and black list
-                File file = download(image.get().uri());
-                repository.setImageDownloadedAndFilename(image.get(), file);
+                if (imageSiteConfiguration.isValidAndNotBlocked(image.get().uri())) {
+                    File file = download(image.get().uri());
+                    repository.setImageDownloadedAndFilename(image.get(), file);
+                }
             }
         }
     }
@@ -46,14 +56,14 @@ public class ImageDownloader {
         return file;
     }
 
-    private static File buildAndValidateFilename(URI uri) {
+    private static @NonNull File buildAndValidateFilename(URI uri) {
         File file = getFileName(uri);
         hasImageExtension(file);
         file = validateFilename(file);
         return file;
     }
 
-    static File validateFilename(File file) {
+    static @NonNull File validateFilename(File file) {
         String fileName = file.getName();
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1);

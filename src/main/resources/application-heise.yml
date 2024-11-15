@@ -9,9 +9,10 @@ webscraper:
     web:
       start-url: https://www.heise.de
       number-pages: 2
-      white-list:
+    sites:
+      whitelist:
         - https://www.heise.de
-      black-list:
+      blacklist:
         - https://aktionen.heise.de/
         - https://blog.heise-academy.de/
         - https://business-services.heise.de/
