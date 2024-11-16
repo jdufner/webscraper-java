@@ -51,16 +51,19 @@ public class WebCrawler {
 
     private void downloadLinks() {
         for (int i = 0; i < webCrawlerConfiguration.numberPages(); i++) {
-            Optional<Link> link = repository.getNextLinkIfAvailable();
-            if (link.isPresent()) {
-                // TODO check against white and black list
-                if (siteConfiguration.isValidAndNotBlocked(link.get().uri())) {
-                    HtmlPage htmlPage = webFetcher.get(link.get().uri().toString());
-                    repository.save(htmlPage);
-                    repository.setLinkDownloaded(link.get());
-                } else {
-                    repository.setLinkSkip(link.get());
-                }
+            downloadNextLink();
+        }
+    }
+
+    private void downloadNextLink() {
+        Optional<Link> link = repository.getNextLinkIfAvailable();
+        if (link.isPresent()) {
+            if (siteConfiguration.isValidAndNotBlocked(link.get().uri())) {
+                HtmlPage htmlPage = webFetcher.get(link.get().uri().toString());
+                repository.save(htmlPage);
+                repository.setLinkDownloaded(link.get());
+            } else {
+                repository.setLinkSkip(link.get());
             }
         }
     }
