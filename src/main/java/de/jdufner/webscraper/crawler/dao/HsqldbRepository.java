@@ -30,12 +30,13 @@ public class HsqldbRepository implements Repository {
     }
 
     @Override
-    public void save(@NonNull HtmlPage htmlPage) {
+    public int save(@NonNull HtmlPage htmlPage) {
         Number documentId = saveDocument(htmlPage);
         saveAuthors(htmlPage, documentId);
         saveCategories(htmlPage, documentId);
         saveLinks(htmlPage, documentId);
         saveImages(htmlPage, documentId);
+        return documentId.intValue();
     }
 
     private void saveAuthors(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {

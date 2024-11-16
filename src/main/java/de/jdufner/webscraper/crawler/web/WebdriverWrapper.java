@@ -66,7 +66,7 @@ public class WebdriverWrapper {
 
     private long getPixelsBelowWindow() {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return (Long) Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight"));
+        return ((Number) Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight"))).longValue();
     }
 
     private void scrollVerticallyBy(long verticalPixels) {

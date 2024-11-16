@@ -46,11 +46,13 @@ public class WebCrawler {
     private void downloadInitialUrl() {
         URI uri = URI.create(webCrawlerConfiguration.startUrl());
         HtmlPage htmlPage = webFetcher.get(uri.toString());
-        repository.save(htmlPage);
+        int documentId = repository.save(htmlPage);
+        repository.setLinkDownloaded(new Link(documentId, uri));
     }
 
     private void downloadLinks() {
         for (int i = 0; i < webCrawlerConfiguration.numberPages(); i++) {
+            // TODO don't count skipped or failed downloads
             downloadNextLink();
         }
     }
@@ -62,8 +64,10 @@ public class WebCrawler {
                 HtmlPage htmlPage = webFetcher.get(link.get().uri().toString());
                 repository.save(htmlPage);
                 repository.setLinkDownloaded(link.get());
+                // TODO return a status e.g. DOWNLOADED
             } else {
                 repository.setLinkSkip(link.get());
+                // TODO return a status e.g. SKIPPED
             }
         }
     }

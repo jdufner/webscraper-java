@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public interface Repository {
 
-    void save(@NonNull HtmlPage htmlPage);
+    int save(@NonNull HtmlPage htmlPage);
 
     @NonNull Optional<Image> getNextImageIfAvailable();
 
