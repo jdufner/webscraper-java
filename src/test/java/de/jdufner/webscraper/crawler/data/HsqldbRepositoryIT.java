@@ -1,5 +1,6 @@
-package de.jdufner.webscraper.crawler.dao;
+package de.jdufner.webscraper.crawler.data;
 
+import de.jdufner.webscraper.crawler.data.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Image;
 import de.jdufner.webscraper.crawler.data.Link;

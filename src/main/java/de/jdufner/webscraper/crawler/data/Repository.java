@@ -1,8 +1,5 @@
-package de.jdufner.webscraper.crawler.dao;
+package de.jdufner.webscraper.crawler.data;
 
-import de.jdufner.webscraper.crawler.data.HtmlPage;
-import de.jdufner.webscraper.crawler.data.Image;
-import de.jdufner.webscraper.crawler.data.Link;
 import org.jspecify.annotations.NonNull;
 
 import java.io.File;

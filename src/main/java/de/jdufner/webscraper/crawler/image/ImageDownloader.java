@@ -1,8 +1,8 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfiguration;
-import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
-import de.jdufner.webscraper.crawler.dao.Repository;
+import de.jdufner.webscraper.crawler.data.HsqldbRepository;
+import de.jdufner.webscraper.crawler.data.Repository;
 import de.jdufner.webscraper.crawler.data.Image;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;

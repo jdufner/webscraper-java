@@ -1,7 +1,7 @@
 package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.config.SiteConfiguration;
-import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
+import de.jdufner.webscraper.crawler.data.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Link;
 import org.junit.jupiter.api.Test;

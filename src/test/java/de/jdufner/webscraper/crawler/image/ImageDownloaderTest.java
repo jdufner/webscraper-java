@@ -1,7 +1,7 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfiguration;
-import de.jdufner.webscraper.crawler.dao.HsqldbRepository;
+import de.jdufner.webscraper.crawler.data.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
