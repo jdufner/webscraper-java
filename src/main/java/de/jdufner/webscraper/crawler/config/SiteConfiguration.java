@@ -17,7 +17,17 @@ public record SiteConfiguration(@NonNull String[] whiteList, @NonNull String[] b
     boolean isInArray(@NonNull String[] uris, @NonNull URI uri) {
         return stream(uris)
                 .map(URI::create)
-                .anyMatch(aUri -> aUri.getHost().equals(uri.getHost()) && removeTrailingSlash(aUri.getPath()).equals(removeTrailingSlash(uri.getPath())));
+                .anyMatch(aUri -> aUri.getHost().equals(uri.getHost()) && isInParentPath(aUri.getPath(), uri.getPath()));
+    }
+
+    private static boolean isInParentPath(@NonNull String parentPath, @NonNull String path) {
+        if (removeTrailingSlash(parentPath).isEmpty()) {
+            return true;
+        }
+        if (removeTrailingSlash(path).startsWith(removeTrailingSlash(parentPath))) {
+            return true;
+        }
+        return false;
     }
 
     private static @NonNull String removeTrailingSlash(@NonNull String path) {

@@ -412,4 +412,73 @@ class WebFetcherTest {
         assertThat(urls).containsExactly(URI.create("https://www.google.com/test.jpg"));
     }
 
+    @Test
+    public void given_base_url_and_link_when_link_absolute_then_expect_absolute_url() {
+        // arrange
+        String baseUrl = "https://localhost";
+        String link = "https://link";
+
+        // act
+        Optional<URI> uri = WebFetcher.buildUrl(baseUrl, link);
+
+        // assert
+        assertThat(uri).isPresent();
+        assertThat(uri.get().toString()).isEqualTo(link);
+    }
+
+    @Test
+    public void given_base_url_and_link_when_link_root_then_expect_host_plus_url() {
+        // arrange
+        String baseUrl = "https://localhost/path";
+        String link = "/link";
+
+        // act
+        Optional<URI> uri = WebFetcher.buildUrl(baseUrl, link);
+
+        // assert
+        assertThat(uri).isPresent();
+        assertThat(uri.get().toString()).isEqualTo("https://localhost/link");
+    }
+
+    @Test
+    public void given_base_url_and_link_when_link_relative_then_expect_base_url_plus_link() {
+        // arrange
+        String baseUrl = "https://localhost/path";
+        String link = "link";
+
+        // act
+        Optional<URI> uri = WebFetcher.buildUrl(baseUrl, link);
+
+        // assert
+        assertThat(uri).isPresent();
+        assertThat(uri.get().toString()).isEqualTo("https://localhost/path/link");
+    }
+
+    @Test
+    public void given_base_url_and_link_when_link_relative_with_leading_path_then_expect_base_url_plus_link() {
+        // arrange
+        String baseUrl = "https://localhost/path";
+        String link = "./link";
+
+        // act
+        Optional<URI> uri = WebFetcher.buildUrl(baseUrl, link);
+
+        // assert
+        assertThat(uri).isPresent();
+        assertThat(uri.get().toString()).isEqualTo("https://localhost/path/link");
+    }
+
+    @Test
+    public void given_base_url_and_link_when_link_contains_illegal_chars_then_expect_empty_uri() {
+        // arrange
+        String baseUrl = "https://localhost/path";
+        String link = "${url}";
+
+        // act
+        Optional<URI> uri = WebFetcher.buildUrl(baseUrl, link);
+
+        // assert
+        assertThat(uri).isEmpty();
+    }
+
 }

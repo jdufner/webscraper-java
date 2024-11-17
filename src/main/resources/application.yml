@@ -27,3 +27,11 @@ webdriver:
 #      - --windows-size=1200x600
 #      - --disable-gpu
 #      - --disable-web-security
+logging:
+  level:
+    de:
+      jdufner:
+        webscraper:
+          crawler:
+            web:
+              WebFetcher: DEBUG

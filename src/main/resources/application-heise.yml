@@ -8,7 +8,7 @@ webscraper:
       number-images: 100
     web:
       start-url: https://www.heise.de
-      number-pages: 2
+      number-pages: 30
     sites:
       whitelist:
         - https://www.heise.de

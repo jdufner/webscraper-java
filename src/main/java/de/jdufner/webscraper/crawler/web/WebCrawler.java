@@ -2,9 +2,9 @@ package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.config.SiteConfiguration;
 import de.jdufner.webscraper.crawler.data.HsqldbRepository;
-import de.jdufner.webscraper.crawler.data.Repository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Link;
+import de.jdufner.webscraper.crawler.data.Repository;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +15,10 @@ import java.util.Optional;
 
 @Service
 public class WebCrawler {
+
+    private enum LinkStatus {
+        DOWNLOADED, SKIPPED, UNAVAILABLE
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
 
@@ -51,25 +55,33 @@ public class WebCrawler {
     }
 
     private void downloadLinks() {
-        for (int i = 0; i < webCrawlerConfiguration.numberPages(); i++) {
-            // TODO don't count skipped or failed downloads
-            downloadNextLink();
+        int i = 0;
+        while (i < webCrawlerConfiguration.numberPages()) {
+            LinkStatus linkStatus = downloadNextLink();
+            if (linkStatus == LinkStatus.DOWNLOADED) {
+                i++;
+            }
+            if (linkStatus == LinkStatus.UNAVAILABLE) {
+                return;
+            }
         }
     }
 
-    private void downloadNextLink() {
+    private LinkStatus downloadNextLink() {
         Optional<Link> link = repository.getNextLinkIfAvailable();
         if (link.isPresent()) {
             if (siteConfiguration.isValidAndNotBlocked(link.get().uri())) {
                 HtmlPage htmlPage = webFetcher.get(link.get().uri().toString());
                 repository.save(htmlPage);
                 repository.setLinkDownloaded(link.get());
-                // TODO return a status e.g. DOWNLOADED
+                return LinkStatus.DOWNLOADED;
             } else {
+                logger.info("Link skipped {}", link.get().uri());
                 repository.setLinkSkip(link.get());
-                // TODO return a status e.g. SKIPPED
+                return LinkStatus.SKIPPED;
             }
         }
+        return LinkStatus.UNAVAILABLE;
     }
 
 }

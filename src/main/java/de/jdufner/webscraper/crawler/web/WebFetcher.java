@@ -50,7 +50,8 @@ public class WebFetcher {
         return new HtmlPage(uri, html, downloadedAt, title.orElse(null), createdAt.orElse(null), authors, categories, links, images);
     }
 
-    @NonNull Optional<String> extractTitle(@NonNull Document document) {
+    @NonNull
+    Optional<String> extractTitle(@NonNull Document document) {
         return document.select("head title").stream()
                 .map(Element::text)
                 .map(title -> StringUtils.trimLeadingCharacter(title, ' '))
@@ -60,7 +61,8 @@ public class WebFetcher {
                 .findFirst();
     }
 
-    @NonNull Optional<Date> extractCreatedAt(@NonNull Document document) {
+    @NonNull
+    Optional<Date> extractCreatedAt(@NonNull Document document) {
         return document.select("div.a-publish-info time[datetime]").stream()
                 .map(element -> element.attr("datetime"))
                 .map(this::parseString)
@@ -77,19 +79,22 @@ public class WebFetcher {
         }
     }
 
-    @NonNull List<String> extractAuthors(@NonNull Document document) {
+    @NonNull
+    List<String> extractAuthors(@NonNull Document document) {
         return document.select("div.creator ul li").stream()
                 .map(Element::text)
                 .collect(Collectors.toList());
     }
 
-    @NonNull List<String> extractCategories(@NonNull Document document) {
+    @NonNull
+    List<String> extractCategories(@NonNull Document document) {
         return document.select("div.content-categories a").stream()
                 .map(Element::text)
                 .collect(Collectors.toList());
     }
 
-    @NonNull List<URI> extractLinks(@NonNull String baseUrl, @NonNull Document document) {
+    @NonNull
+    List<URI> extractLinks(@NonNull String baseUrl, @NonNull Document document) {
         return document.select("a[href]").stream()
                 .map(element -> element.attr("href"))
                 .map(uri -> buildUrl(baseUrl, uri))
@@ -102,7 +107,8 @@ public class WebFetcher {
                 .collect(Collectors.toList());
     }
 
-    @NonNull List<URI> extractImages(@NonNull String baseUrl, @NonNull Document document) {
+    @NonNull
+    List<URI> extractImages(@NonNull String baseUrl, @NonNull Document document) {
         return document.select("img[src]").stream()
                 .map(element -> element.attr("src"))
                 .map(uri -> buildUrl(baseUrl, uri))
@@ -125,13 +131,23 @@ public class WebFetcher {
         }
     }
 
-    private static @NonNull Optional<URI> buildUrl(@NonNull String baseUrl, @NonNull String url) {
-        URI uri = URI.create(url);
-        if (!uri.isAbsolute()) {
-            URI baseUri = URI.create(baseUrl);
-            uri = baseUri.resolve(uri);
+    static @NonNull Optional<URI> buildUrl(@NonNull String baseUrl, @NonNull String url) {
+        logger.debug("build url from baseUrl = {}, url = {}", baseUrl, url);
+        try {
+            URI uri = URI.create(url);
+            if (!uri.isAbsolute()) {
+                if (uri.getPath().startsWith("/")) {
+                    URI baseUri = URI.create(baseUrl);
+                    uri = baseUri.resolve(uri);
+                } else {
+                    uri = URI.create(baseUrl + (url.startsWith("./") ? url.substring(1) : "/" + url));
+                }
+            }
+            logger.debug("built url = {}", uri);
+            return Optional.of(uri);
+        } catch (IllegalArgumentException e) {
+            return Optional.empty();
         }
-        return Optional.of(uri);
     }
 
 }
