@@ -39,6 +39,7 @@ public class WebFetcher {
         Date downloadedAt = new Date();
         Document document = Jsoup.parse(html);
         Optional<String> title = extractTitle(document);
+        // TODO createdAt, authors, and categories are specific to a document, therefore it should be done somewhere else
         Optional<Date> createdAt = extractCreatedAt(document);
         List<String> authors = extractAuthors(document);
         List<String> categories = extractCategories(document);
