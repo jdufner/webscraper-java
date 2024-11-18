@@ -46,7 +46,7 @@ public class ImageDownloader {
     private void downloadNextImage() {
         Optional<Image> image = repository.getNextImageIfAvailable();
         if (image.isPresent()) {
-            if (siteConfiguration.isValidAndNotBlocked(image.get().uri())) {
+            if (siteConfiguration.isEligibleAndNotBlocked(image.get().uri())) {
                 File file = download(image.get().uri());
                 repository.setImageDownloadedAndFilename(image.get(), file);
             } else {

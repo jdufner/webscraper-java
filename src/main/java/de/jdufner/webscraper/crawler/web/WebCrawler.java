@@ -16,7 +16,7 @@ import java.util.Optional;
 @Service
 public class WebCrawler {
 
-    private enum LinkStatus {
+    enum LinkStatus {
         DOWNLOADED, SKIPPED, UNAVAILABLE
     }
 
@@ -47,17 +47,17 @@ public class WebCrawler {
         downloadLinks();
     }
 
-    private void downloadInitialUrl() {
+    void downloadInitialUrl() {
         URI uri = URI.create(webCrawlerConfiguration.startUrl());
         HtmlPage htmlPage = webFetcher.get(uri.toString());
         int documentId = repository.save(htmlPage);
         repository.setLinkDownloaded(new Link(documentId, uri));
     }
 
-    private void downloadLinks() {
+    void downloadLinks() {
         int i = 0;
         while (i < webCrawlerConfiguration.numberPages()) {
-            LinkStatus linkStatus = downloadNextLink();
+            LinkStatus linkStatus = downloadEligibleNextLink();
             if (linkStatus == LinkStatus.DOWNLOADED) {
                 i++;
             }
@@ -67,21 +67,30 @@ public class WebCrawler {
         }
     }
 
-    private LinkStatus downloadNextLink() {
-        Optional<Link> link = repository.getNextLinkIfAvailable();
-        if (link.isPresent()) {
-            if (siteConfiguration.isValidAndNotBlocked(link.get().uri())) {
-                HtmlPage htmlPage = webFetcher.get(link.get().uri().toString());
-                repository.save(htmlPage);
-                repository.setLinkDownloaded(link.get());
-                return LinkStatus.DOWNLOADED;
+    @NonNull LinkStatus downloadEligibleNextLink() {
+        Optional<Link> optionalLink = repository.getNextLinkIfAvailable();
+        if (optionalLink.isPresent()) {
+            Link link = optionalLink.get();
+            if (siteConfiguration.isEligibleAndNotBlocked(link.uri())) {
+                return downloadAndSave(link);
             } else {
-                logger.info("Link skipped {}", link.get().uri());
-                repository.setLinkSkip(link.get());
-                return LinkStatus.SKIPPED;
+                return skip(link);
             }
         }
         return LinkStatus.UNAVAILABLE;
+    }
+
+    @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
+        HtmlPage htmlPage = webFetcher.get(link.uri().toString());
+        repository.save(htmlPage);
+        repository.setLinkDownloaded(link);
+        return LinkStatus.DOWNLOADED;
+    }
+
+    @NonNull LinkStatus skip(@NonNull Link link) {
+        logger.info("Link skipped {}", link.uri());
+        repository.setLinkSkip(link);
+        return LinkStatus.SKIPPED;
     }
 
 }
