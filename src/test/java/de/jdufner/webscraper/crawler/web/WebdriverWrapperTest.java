@@ -17,6 +17,9 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class WebdriverWrapperTest {
 
+    @Mock
+    private WebCrawlerConfigurationProperties config;
+
     @Mock(extraInterfaces = JavascriptExecutor.class)
     private WebDriver webDriver;
 
@@ -40,10 +43,10 @@ class WebdriverWrapperTest {
         doReturn("<html></html>").when(webDriver).getPageSource();
 
         // act
-        webdriverWrapper.getHtml("https://www.heise.de");
+        webdriverWrapper.getHtml("https://localhost");
 
         // assert
-        verify(webDriver).get("https://www.heise.de");
+        verify(webDriver).get("https://localhost");
     }
 
     @Test
@@ -64,7 +67,7 @@ class WebdriverWrapperTest {
         doReturn("<html></html>").when(webDriver).getPageSource();
 
         // act
-        webdriverWrapper.getHtml("https://www.heise.de");
+        webdriverWrapper.getHtml("https://localhost");
 
         // assert
         verify(javascriptExecutor).executeScript("window.scrollBy(0, 100)");
@@ -84,15 +87,15 @@ class WebdriverWrapperTest {
         doReturn(0L).when(javascriptExecutor).executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight");
         doReturn(0L).when(javascriptExecutor).executeScript("window.scrollTo(0, document.body.scrollHeight)");
 
-        doReturn("<title>heise online - IT-News, Nachrichten und Hintergründe | heise online</title>").when(webDriver).getPageSource();
+        doReturn("<title>Page Title</title>").when(webDriver).getPageSource();
 
         // act
-        String htmlContent = webdriverWrapper.getHtml("https://www.heise.de");
+        String htmlContent = webdriverWrapper.getHtml("https://localhost");
 
         // assert
         assertThat(htmlContent).isNotNull();
         assertThat(htmlContent).isNotEmpty();
-        assertThat(htmlContent).contains("<title>heise online");
+        assertThat(htmlContent).contains("<title>Page Title");
     }
 
 }

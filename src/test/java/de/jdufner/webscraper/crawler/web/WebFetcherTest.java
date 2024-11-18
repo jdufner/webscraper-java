@@ -29,7 +29,7 @@ class WebFetcherTest {
     @Test
     public void given_webfetcher_when_get_html_then_expect_jsoup_document() {
         // arrange
-        when(webdriverWrapper.getHtml("https://www.spiegel.de")).thenReturn("""
+        when(webdriverWrapper.getHtml("https://localhost")).thenReturn("""
                 <html>
                   <head>
                     <title>This is a title</title>
@@ -57,7 +57,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        webFetcher.get("https://www.spiegel.de");
+        webFetcher.get("https://localhost");
 
         // assert
 
@@ -316,10 +316,10 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractLinks("https://www.spiegel.de", document);
+        List<URI> urls = webFetcher.extractLinks("https://localhost", document);
 
         // assert
-        assertThat(urls).containsExactly(URI.create("https://www.spiegel.de/test.html"));
+        assertThat(urls).containsExactly(URI.create("https://localhost/test.html"));
     }
 
     @Test
@@ -334,7 +334,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractLinks("https://www.spiegel.de", document);
+        List<URI> urls = webFetcher.extractLinks("https://localhost", document);
 
         // assert
         assertThat(urls).containsExactly(URI.create("https://www.google.com/"));
@@ -353,7 +353,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractLinks("https://www.spiegel.de", document);
+        List<URI> urls = webFetcher.extractLinks("https://localhost", document);
 
         // assert
         assertThat(urls).containsExactly(URI.create("https://www.google.com/"),URI.create("https://www.heise.de/"));
@@ -370,7 +370,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractLinks("https://www.spiegel.de", document);
+        List<URI> urls = webFetcher.extractLinks("https://localhost", document);
 
         // assert
         assertThat(urls).isEmpty();
@@ -388,10 +388,10 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractImages("https://www.spiegel.de", document);
+        List<URI> urls = webFetcher.extractImages("https://localhost", document);
 
         // assert
-        assertThat(urls).containsExactly(URI.create("https://www.spiegel.de/test.jpg"));
+        assertThat(urls).containsExactly(URI.create("https://localhost/test.jpg"));
     }
 
     @Test
@@ -406,7 +406,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractImages("https://www.spiegel.de", document);
+        List<URI> urls = webFetcher.extractImages("https://localhost", document);
 
         // assert
         assertThat(urls).containsExactly(URI.create("https://www.google.com/test.jpg"));

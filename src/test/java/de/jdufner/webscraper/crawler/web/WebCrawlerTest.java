@@ -70,7 +70,7 @@ class WebCrawlerTest {
         // arrange
         URI uri = URI.create("https://localhost");
         when(webCrawlerConfigurationProperties.startUrl()).thenReturn(uri.toString());
-        HtmlPage htmlPage = new HtmlPage(uri, "<html></hrml>", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
+        HtmlPage htmlPage = new HtmlPage(uri, "<html></html>", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(uri.toString())).thenReturn(htmlPage);
         when(repository.save(htmlPage)).thenReturn(1);
 
@@ -144,7 +144,6 @@ class WebCrawlerTest {
     @Test
     public void given_webcrawler_when_next_link_not_available_expect_status_unavailable() {
         // arrange
-        Link link = new Link(1, URI.create("https://localhost"));
         when(repository.getNextLinkIfAvailable()).thenReturn(Optional.empty());
 
         // act
