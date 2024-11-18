@@ -9,6 +9,35 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SiteConfigurationPropertiesTest {
 
     @Test
+    void given_lists_when_whitelisted_expect_ok() {
+        // arrange
+        String[] whiteList = {"https://localhost"};
+        String[] blackList = {};
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
+
+        // act
+        boolean eligibleAndNotBlocked = config.isEligibleAndNotBlocked(URI.create("https://localhost"));
+
+        // assert
+        assertThat(eligibleAndNotBlocked).isTrue();
+    }
+
+    @Test
+    void given_lists_when_blacklisted_expect_ok() {
+        // arrange
+        String[] whiteList = {};
+        String[] blackList = {"https://localhost"};
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
+
+        // act
+        boolean eligibleAndNotBlocked = config.isEligibleAndNotBlocked(URI.create("https://localhost"));
+
+        // assert
+        assertThat(eligibleAndNotBlocked).isFalse();
+    }
+
+
+    @Test
     void given_list_when_uri_is_in_list_expect_true() {
         // arrange
         String[] whiteList = {"https://localhost"};

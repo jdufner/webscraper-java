@@ -24,10 +24,7 @@ public record SiteConfigurationProperties(@NonNull String[] whiteList, @NonNull 
         if (removeTrailingSlash(parentPath).isEmpty()) {
             return true;
         }
-        if (removeTrailingSlash(path).startsWith(removeTrailingSlash(parentPath))) {
-            return true;
-        }
-        return false;
+        return removeTrailingSlash(path).startsWith(removeTrailingSlash(parentPath));
     }
 
     private static @NonNull String removeTrailingSlash(@NonNull String path) {
