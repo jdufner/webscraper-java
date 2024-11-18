@@ -10,16 +10,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class WebConfiguration {
 
-    private final WebdriverConfiguration webdriverConfiguration;
+    private final WebdriverConfigurationProperties webdriverConfigurationProperties;
 
-    public WebConfiguration(@NonNull WebdriverConfiguration webdriverConfiguration) {
-        this.webdriverConfiguration = webdriverConfiguration;
+    public WebConfiguration(@NonNull WebdriverConfigurationProperties webdriverConfigurationProperties) {
+        this.webdriverConfigurationProperties = webdriverConfigurationProperties;
     }
 
     @Bean
     public @NonNull WebDriver getChromeDriver() {
         ChromeOptions chromeOptions = new ChromeOptions();
-        webdriverConfiguration.options().forEach(chromeOptions::addArguments);
+        webdriverConfigurationProperties.options().forEach(chromeOptions::addArguments);
         return new ChromeDriver(chromeOptions);
     }
 

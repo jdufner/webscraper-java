@@ -1,6 +1,6 @@
 package de.jdufner.webscraper.crawler.web;
 
-import de.jdufner.webscraper.crawler.config.SiteConfiguration;
+import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Link;
@@ -23,32 +23,32 @@ public class WebCrawler {
     private static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
 
     @NonNull
-    private final WebCrawlerConfiguration webCrawlerConfiguration;
+    private final WebCrawlerConfigurationProperties webCrawlerConfigurationProperties;
     @NonNull
-    private final SiteConfiguration siteConfiguration;
+    private final SiteConfigurationProperties siteConfigurationProperties;
     @NonNull
     private final WebFetcher webFetcher;
     @NonNull
     private final Repository repository;
 
-    public WebCrawler(@NonNull WebCrawlerConfiguration webCrawlerConfiguration,
-                      @NonNull SiteConfiguration siteConfiguration,
+    public WebCrawler(@NonNull WebCrawlerConfigurationProperties webCrawlerConfigurationProperties,
+                      @NonNull SiteConfigurationProperties siteConfigurationProperties,
                       @NonNull WebFetcher webFetcher,
                       @NonNull HsqldbRepository repository) {
-        this.webCrawlerConfiguration = webCrawlerConfiguration;
-        this.siteConfiguration = siteConfiguration;
+        this.webCrawlerConfigurationProperties = webCrawlerConfigurationProperties;
+        this.siteConfigurationProperties = siteConfigurationProperties;
         this.webFetcher = webFetcher;
         this.repository = repository;
     }
 
     public void crawl() {
-        logger.info("startUrl = {}, numberPages = {}", webCrawlerConfiguration.startUrl(), webCrawlerConfiguration.numberPages());
+        logger.info("startUrl = {}, numberPages = {}", webCrawlerConfigurationProperties.startUrl(), webCrawlerConfigurationProperties.numberPages());
         downloadInitialUrl();
         downloadLinks();
     }
 
     void downloadInitialUrl() {
-        URI uri = URI.create(webCrawlerConfiguration.startUrl());
+        URI uri = URI.create(webCrawlerConfigurationProperties.startUrl());
         HtmlPage htmlPage = webFetcher.get(uri.toString());
         int documentId = repository.save(htmlPage);
         repository.setLinkDownloaded(new Link(documentId, uri));
@@ -56,7 +56,7 @@ public class WebCrawler {
 
     void downloadLinks() {
         int i = 0;
-        while (i < webCrawlerConfiguration.numberPages()) {
+        while (i < webCrawlerConfigurationProperties.numberPages()) {
             LinkStatus linkStatus = downloadEligibleNextLink();
             if (linkStatus == LinkStatus.DOWNLOADED) {
                 i++;
@@ -71,7 +71,7 @@ public class WebCrawler {
         Optional<Link> optionalLink = repository.getNextLinkIfAvailable();
         if (optionalLink.isPresent()) {
             Link link = optionalLink.get();
-            if (siteConfiguration.isEligibleAndNotBlocked(link.uri())) {
+            if (siteConfigurationProperties.isEligibleAndNotBlocked(link.uri())) {
                 return downloadAndSave(link);
             } else {
                 return skip(link);

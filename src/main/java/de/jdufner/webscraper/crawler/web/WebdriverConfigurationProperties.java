@@ -6,5 +6,5 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import java.util.List;
 
 @ConfigurationProperties(prefix = "webdriver.chrome")
-public record WebdriverConfiguration(@NonNull List<String> options) {
+public record WebdriverConfigurationProperties(@NonNull List<String> options) {
 }

@@ -1,6 +1,6 @@
 package de.jdufner.webscraper.crawler.web;
 
-import de.jdufner.webscraper.crawler.config.SiteConfiguration;
+import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Link;
@@ -24,10 +24,10 @@ import static org.mockito.Mockito.*;
 class WebCrawlerTest {
 
     @Mock
-    private WebCrawlerConfiguration webCrawlerConfiguration;
+    private WebCrawlerConfigurationProperties webCrawlerConfigurationProperties;
 
     @Mock
-    private SiteConfiguration siteConfiguration;
+    private SiteConfigurationProperties siteConfigurationProperties;
 
     @Mock
     private WebFetcher webFetcher;
@@ -42,15 +42,15 @@ class WebCrawlerTest {
     public void given_webcrawler_when_crawl_expect_html_page() {
         // arrange
         String url = "https://www.start.com";
-        when(webCrawlerConfiguration.startUrl()).thenReturn(url);
-        when(webCrawlerConfiguration.numberPages()).thenReturn(3);
+        when(webCrawlerConfigurationProperties.startUrl()).thenReturn(url);
+        when(webCrawlerConfigurationProperties.numberPages()).thenReturn(3);
         HtmlPage htmlPageStart = new HtmlPage(URI.create(url), "", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(url)).thenReturn(htmlPageStart);
         Link link = new Link(1, URI.create("https://www.continue.com"));
         HtmlPage htmlPageContinue = new HtmlPage(link.uri(), "", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(link.uri().toString())).thenReturn(htmlPageContinue);
         when(repository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
-        when(siteConfiguration.isEligibleAndNotBlocked(any())).thenReturn(true);
+        when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
 
         // act
         webCrawler.crawl();
@@ -69,7 +69,7 @@ class WebCrawlerTest {
     public void given_webcrawler_when_initial_url_expect_downloaded() {
         // arrange
         URI uri = URI.create("https://localhost");
-        when(webCrawlerConfiguration.startUrl()).thenReturn(uri.toString());
+        when(webCrawlerConfigurationProperties.startUrl()).thenReturn(uri.toString());
         HtmlPage htmlPage = new HtmlPage(uri, "<html></hrml>", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(uri.toString())).thenReturn(htmlPage);
         when(repository.save(htmlPage)).thenReturn(1);
@@ -84,7 +84,7 @@ class WebCrawlerTest {
     @Test
     public void given_webcrawler_when_no_links_available_expect_nothing_saved() {
         // arrange
-        when(webCrawlerConfiguration.numberPages()).thenReturn(100);
+        when(webCrawlerConfigurationProperties.numberPages()).thenReturn(100);
         when(repository.getNextLinkIfAvailable()).thenReturn(Optional.empty());
 
         // act
@@ -98,10 +98,10 @@ class WebCrawlerTest {
     @Test
     public void given_webcrawler_when_links_available_expect_html_page_saved() {
         // arrange
-        when(webCrawlerConfiguration.numberPages()).thenReturn(1);
+        when(webCrawlerConfigurationProperties.numberPages()).thenReturn(1);
         Link link = new Link(-1, URI.create("http://localhost"));
         when(repository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
-        when(siteConfiguration.isEligibleAndNotBlocked(any())).thenReturn(true);
+        when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
         HtmlPage htmlPage = new HtmlPage(link.uri(), "<html></html>", new Date(), "test", null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(link.uri().toString())).thenReturn(htmlPage);
 
@@ -118,7 +118,7 @@ class WebCrawlerTest {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         when(repository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
-        when(siteConfiguration.isEligibleAndNotBlocked(link.uri())).thenReturn(true);
+        when(siteConfigurationProperties.isEligibleAndNotBlocked(link.uri())).thenReturn(true);
 
         // act
         WebCrawler.LinkStatus linkStatus = webCrawler.downloadEligibleNextLink();
@@ -132,7 +132,7 @@ class WebCrawlerTest {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         when(repository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
-        when(siteConfiguration.isEligibleAndNotBlocked(link.uri())).thenReturn(false);
+        when(siteConfigurationProperties.isEligibleAndNotBlocked(link.uri())).thenReturn(false);
 
         // act
         WebCrawler.LinkStatus linkStatus = webCrawler.downloadEligibleNextLink();

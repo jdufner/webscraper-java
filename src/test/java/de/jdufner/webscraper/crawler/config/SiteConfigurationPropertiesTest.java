@@ -6,14 +6,14 @@ import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class SiteConfigurationTest {
+class SiteConfigurationPropertiesTest {
 
     @Test
     void given_list_when_uri_is_in_list_expect_true() {
         // arrange
         String[] whiteList = {"https://localhost"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("https://localhost");
 
@@ -29,7 +29,7 @@ class SiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://localhost"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("https://localhost/");
 
@@ -45,7 +45,7 @@ class SiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://localhost/"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("https://localhost");
 
@@ -61,7 +61,7 @@ class SiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://localhost"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("http://localhost/");
 
@@ -77,7 +77,7 @@ class SiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://whitelist"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("https://localhost");
 
@@ -93,7 +93,7 @@ class SiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://localhost"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("https://localhost/path");
 
@@ -109,7 +109,7 @@ class SiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://localhost/path"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("https://localhost");
 
@@ -125,7 +125,7 @@ class SiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://localhost/path"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("https://localhost/path");
 
@@ -141,7 +141,7 @@ class SiteConfigurationTest {
         // arrange
         String[] whiteList = {"https://localhost/path1"};
         String[] blackList = {};
-        SiteConfiguration config = new SiteConfiguration(whiteList, blackList);
+        SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         URI uri = URI.create("https://localhost/path2");
 

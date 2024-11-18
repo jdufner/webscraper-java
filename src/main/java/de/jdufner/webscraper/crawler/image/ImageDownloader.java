@@ -1,6 +1,6 @@
 package de.jdufner.webscraper.crawler.image;
 
-import de.jdufner.webscraper.crawler.config.SiteConfiguration;
+import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.Repository;
 import de.jdufner.webscraper.crawler.data.Image;
@@ -19,26 +19,26 @@ public class ImageDownloader {
     private static final Logger logger = LoggerFactory.getLogger(ImageDownloader.class);
 
     @NonNull
-    private final ImageDownloaderConfiguration imageDownloaderConfiguration;
+    private final ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties;
     @NonNull
-    private final SiteConfiguration siteConfiguration;
+    private final SiteConfigurationProperties siteConfigurationProperties;
     @NonNull
     private final Repository repository;
     @NonNull
     private final ImageGetter imageGetter;
 
-    public ImageDownloader(@NonNull ImageDownloaderConfiguration imageDownloaderConfiguration,
-                           @NonNull SiteConfiguration siteConfiguration,
+    public ImageDownloader(@NonNull ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties,
+                           @NonNull SiteConfigurationProperties siteConfigurationProperties,
                            @NonNull HsqldbRepository repository,
                            @NonNull ImageGetterAhc imageGetter) {
-        this.imageDownloaderConfiguration = imageDownloaderConfiguration;
-        this.siteConfiguration = siteConfiguration;
+        this.imageDownloaderConfigurationProperties = imageDownloaderConfigurationProperties;
+        this.siteConfigurationProperties = siteConfigurationProperties;
         this.repository = repository;
         this.imageGetter = imageGetter;
     }
 
     void downloadAll() {
-        for(int i = 0; i < imageDownloaderConfiguration.numberImages(); i++) {
+        for(int i = 0; i < imageDownloaderConfigurationProperties.numberImages(); i++) {
             downloadNextImage();
         }
     }
@@ -46,7 +46,7 @@ public class ImageDownloader {
     private void downloadNextImage() {
         Optional<Image> image = repository.getNextImageIfAvailable();
         if (image.isPresent()) {
-            if (siteConfiguration.isEligibleAndNotBlocked(image.get().uri())) {
+            if (siteConfigurationProperties.isEligibleAndNotBlocked(image.get().uri())) {
                 File file = download(image.get().uri());
                 repository.setImageDownloadedAndFilename(image.get(), file);
             } else {

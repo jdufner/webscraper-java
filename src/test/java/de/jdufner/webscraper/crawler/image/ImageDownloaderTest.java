@@ -1,6 +1,6 @@
 package de.jdufner.webscraper.crawler.image;
 
-import de.jdufner.webscraper.crawler.config.SiteConfiguration;
+import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.HsqldbRepository;
 import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
@@ -20,10 +20,10 @@ import static org.mockito.Mockito.*;
 class ImageDownloaderTest {
 
     @Mock
-    private ImageDownloaderConfiguration configuration;
+    private ImageDownloaderConfigurationProperties configuration;
 
     @Mock
-    private SiteConfiguration siteConfiguration;
+    private SiteConfigurationProperties siteConfigurationProperties;
 
     @Mock
     private HsqldbRepository repository;
@@ -42,7 +42,7 @@ class ImageDownloaderTest {
         URI uri = URI.create(url);
         Image image = new Image(1, uri);
         when(repository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
-        when(siteConfiguration.isEligibleAndNotBlocked(any())).thenReturn(true);
+        when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
 
         // act
         imageDownloader.downloadAll();

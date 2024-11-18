@@ -16,12 +16,12 @@ import static java.util.Arrays.stream;
 public class WebdriverWrapper {
 
     @NonNull
-    private final WebCrawlerConfiguration config;
+    private final WebCrawlerConfigurationProperties config;
     private final WebDriver webDriver;
 
     private boolean cookieConsented = false;
 
-    public WebdriverWrapper(@NonNull WebCrawlerConfiguration config, @NonNull WebDriver webDriver) {
+    public WebdriverWrapper(@NonNull WebCrawlerConfigurationProperties config, @NonNull WebDriver webDriver) {
         this.config = config;
         this.webDriver = webDriver;
     }

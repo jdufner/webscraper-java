@@ -15,7 +15,7 @@ import static org.mockito.Mockito.*;
 class WebConfigurationTest {
 
     @Mock
-    private WebdriverConfiguration webdriverConfiguration;
+    private WebdriverConfigurationProperties webdriverConfigurationProperties;
 
     @InjectMocks
     private WebConfiguration webConfiguration;
@@ -25,13 +25,13 @@ class WebConfigurationTest {
         WebDriver webDriver = null;
         try {
             // arrange
-            when(webdriverConfiguration.options()).thenReturn(Arrays.asList("--disable-search-engine-choice-screen", "--disable-notifications", "--disable-infobars", "--disable-extensions"));
+            when(webdriverConfigurationProperties.options()).thenReturn(Arrays.asList("--disable-search-engine-choice-screen", "--disable-notifications", "--disable-infobars", "--disable-extensions"));
 
             // act
             webDriver = webConfiguration.getChromeDriver();
 
             // assert
-            verify(webdriverConfiguration, times(1)).options();
+            verify(webdriverConfigurationProperties, times(1)).options();
         } finally {
             if (webDriver != null) {
                 webDriver.quit();
