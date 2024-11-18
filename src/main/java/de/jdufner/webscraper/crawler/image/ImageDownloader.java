@@ -38,7 +38,7 @@ public class ImageDownloader {
     }
 
     void downloadAll() {
-        for(int i = 0; i < imageDownloaderConfiguration.numberPages(); i++) {
+        for(int i = 0; i < imageDownloaderConfiguration.numberImages(); i++) {
             downloadNextImage();
         }
     }

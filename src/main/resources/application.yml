@@ -34,4 +34,4 @@ logging:
         webscraper:
           crawler:
             web:
-              WebFetcher: DEBUG
+              WebFetcher: INFO

@@ -10,14 +10,19 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Arrays.stream;
+
 @Service
 public class WebdriverWrapper {
 
+    @NonNull
+    private final WebCrawlerConfiguration config;
     private final WebDriver webDriver;
 
     private boolean cookieConsented = false;
 
-    public WebdriverWrapper(@NonNull WebDriver webDriver) {
+    public WebdriverWrapper(@NonNull WebCrawlerConfiguration config, @NonNull WebDriver webDriver) {
+        this.config = config;
         this.webDriver = webDriver;
     }
 
@@ -30,6 +35,7 @@ public class WebdriverWrapper {
     private void waitUntilCookiesConsentedAndPageFullyLoaded() {
         sleep(1000);
         consentCookies();
+        executeJavascript();
         checkIfPageIsFullyLoaded();
     }
 
@@ -102,6 +108,13 @@ public class WebdriverWrapper {
     private void clickButtonWithTitle(@NonNull String title) {
         List<WebElement> buttons = webDriver.findElements(By.cssSelector("button[title='" + title + "']"));
         buttons.stream().filter(WebElement::isDisplayed).forEach(WebElement::click);
+    }
+
+    private void executeJavascript() {
+        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
+        if (config.javascript() != null) {
+            stream(config.javascript()).forEach(javascriptExecutor::executeScript);
+        }
     }
 
 }

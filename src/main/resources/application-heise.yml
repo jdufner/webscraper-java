@@ -9,6 +9,8 @@ webscraper:
     web:
       start-url: https://www.heise.de
       number-pages: 30
+      javascript:
+        - document.querySelectorAll('a-sticky-footer button[data-hide-trigger]').forEach((element) => element.click())
     sites:
       whitelist:
         - https://www.heise.de

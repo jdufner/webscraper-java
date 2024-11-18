@@ -37,7 +37,7 @@ class ImageDownloaderTest {
     @Test
     void given_configuration_when_download_all_expect_url_multiple_times() {
         // arrange
-        when(configuration.numberPages()).thenReturn(2);
+        when(configuration.numberImages()).thenReturn(2);
         String url = "https://test.com/image.jpg";
         URI uri = URI.create(url);
         Image image = new Image(1, uri);
