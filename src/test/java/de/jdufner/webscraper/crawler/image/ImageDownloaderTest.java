@@ -1,7 +1,7 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.HsqldbRepository;
+import de.jdufner.webscraper.crawler.data.CrawlerRepository;
 import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +26,7 @@ class ImageDownloaderTest {
     private SiteConfigurationProperties siteConfigurationProperties;
 
     @Mock
-    private HsqldbRepository repository;
+    private CrawlerRepository crawlerRepository;
 
     @Mock
     private ImageGetterAhc imageGetter;
@@ -41,7 +41,7 @@ class ImageDownloaderTest {
         String url = "https://localhost/image.jpg";
         URI uri = URI.create(url);
         Image image = new Image(1, uri);
-        when(repository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
+        when(crawlerRepository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
         when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
 
         // act

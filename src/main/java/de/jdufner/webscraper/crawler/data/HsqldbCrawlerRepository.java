@@ -7,7 +7,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Repository;
 
 import java.io.File;
 import java.net.URI;
@@ -17,12 +17,12 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 
-@Service
-public class HsqldbRepository implements Repository {
+@Repository
+public class HsqldbCrawlerRepository implements CrawlerRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public HsqldbRepository(@NonNull JdbcTemplate jdbcTemplate) {
+    public HsqldbCrawlerRepository(@NonNull JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 

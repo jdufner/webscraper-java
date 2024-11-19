@@ -1,8 +1,7 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.HsqldbRepository;
-import de.jdufner.webscraper.crawler.data.Repository;
+import de.jdufner.webscraper.crawler.data.CrawlerRepository;
 import de.jdufner.webscraper.crawler.data.Image;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -23,17 +22,17 @@ public class ImageDownloader {
     @NonNull
     private final SiteConfigurationProperties siteConfigurationProperties;
     @NonNull
-    private final Repository repository;
+    private final CrawlerRepository crawlerRepository;
     @NonNull
     private final ImageGetter imageGetter;
 
     public ImageDownloader(@NonNull ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties,
                            @NonNull SiteConfigurationProperties siteConfigurationProperties,
-                           @NonNull HsqldbRepository repository,
+                           @NonNull CrawlerRepository crawlerRepository,
                            @NonNull ImageGetterAhc imageGetter) {
         this.imageDownloaderConfigurationProperties = imageDownloaderConfigurationProperties;
         this.siteConfigurationProperties = siteConfigurationProperties;
-        this.repository = repository;
+        this.crawlerRepository = crawlerRepository;
         this.imageGetter = imageGetter;
     }
 
@@ -44,13 +43,15 @@ public class ImageDownloader {
     }
 
     private void downloadNextImage() {
-        Optional<Image> image = repository.getNextImageIfAvailable();
-        if (image.isPresent()) {
-            if (siteConfigurationProperties.isEligibleAndNotBlocked(image.get().uri())) {
-                File file = download(image.get().uri());
-                repository.setImageDownloadedAndFilename(image.get(), file);
+        Optional<Image> optionalImage = crawlerRepository.getNextImageIfAvailable();
+        if (optionalImage.isPresent()) {
+            Image image = optionalImage.get();
+            if (siteConfigurationProperties.isEligibleAndNotBlocked(optionalImage.get().uri())) {
+                // TODO why to store the file locally instead of using S3 protocol (MinIO)
+                File file = download(image.uri());
+                crawlerRepository.setImageDownloadedAndFilename(image, file);
             } else {
-                repository.setImageSkip(image.get());
+                crawlerRepository.setImageSkip(image);
             }
         }
     }

@@ -1,9 +1,5 @@
 package de.jdufner.webscraper.crawler.data;
 
-import de.jdufner.webscraper.crawler.data.HsqldbRepository;
-import de.jdufner.webscraper.crawler.data.HtmlPage;
-import de.jdufner.webscraper.crawler.data.Image;
-import de.jdufner.webscraper.crawler.data.Link;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,10 +16,10 @@ import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-class HsqldbRepositoryIT {
+class HsqldbCrawlerRepositoryIT {
 
     @Autowired
-    private HsqldbRepository hsqldbRepository;
+    private HsqldbCrawlerRepository hsqldbCrawlerRepository;
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -37,7 +33,7 @@ class HsqldbRepositoryIT {
                 asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
 
         // act
-        hsqldbRepository.save(htmlPage);
+        hsqldbCrawlerRepository.save(htmlPage);
 
         // assert
 
@@ -50,10 +46,10 @@ class HsqldbRepositoryIT {
                 emptyList(), emptyList(), emptyList(), emptyList());
 
         // act
-        hsqldbRepository.save(htmlPage);
+        int id = hsqldbCrawlerRepository.save(htmlPage);
 
         // assert
-
+        assertThat(id).isGreaterThanOrEqualTo(0);
     }
 
     @Test
@@ -62,7 +58,7 @@ class HsqldbRepositoryIT {
         jdbcTemplate.update("insert into IMAGES (URL) values (?)", "https://www.google.com/image.jpg");
 
         // act
-        Optional<Image> image = hsqldbRepository.getNextImageIfAvailable();
+        Optional<Image> image = hsqldbCrawlerRepository.getNextImageIfAvailable();
 
         // assert
         assertThat(image.isPresent()).isTrue();
@@ -72,10 +68,10 @@ class HsqldbRepositoryIT {
     @Test
     public void given_no_images_in_database_when_get_no_images_available_expect_empty() {
         // arrange
-        jdbcTemplate.update("delete from IMAGES");
+        jdbcTemplate.update("delete from IMAGES where id >= 0");
 
         // act
-        Optional<Image> image = hsqldbRepository.getNextImageIfAvailable();
+        Optional<Image> image = hsqldbCrawlerRepository.getNextImageIfAvailable();
 
         // assert
         assertThat(image.isEmpty()).isTrue();
@@ -89,7 +85,7 @@ class HsqldbRepositoryIT {
         File file = new File("image.jpg");
 
         // act
-        hsqldbRepository.setImageDownloadedAndFilename(image, file);
+        hsqldbCrawlerRepository.setImageDownloadedAndFilename(image, file);
 
         // assert
         Object[] data = Objects.requireNonNull(jdbcTemplate.queryForObject(
@@ -107,7 +103,7 @@ class HsqldbRepositoryIT {
         jdbcTemplate.update("insert into LINKS (URL) values (?)", "https://www.google.com/");
 
         // act
-        Optional<Link> link = hsqldbRepository.getNextLinkIfAvailable();
+        Optional<Link> link = hsqldbCrawlerRepository.getNextLinkIfAvailable();
 
         // assert
         assertThat(link.isPresent()).isTrue();
@@ -117,10 +113,10 @@ class HsqldbRepositoryIT {
     @Test
     public void given_no_link_in_database_when_get_next_link_expect_empty() {
         // arrange
-        jdbcTemplate.update("delete from LINKS");
+        jdbcTemplate.update("delete from LINKS where id >= 0");
 
         // act
-        Optional<Link> link = hsqldbRepository.getNextLinkIfAvailable();
+        Optional<Link> link = hsqldbCrawlerRepository.getNextLinkIfAvailable();
 
         // assert
         assertThat(link.isEmpty()).isTrue();
@@ -133,7 +129,7 @@ class HsqldbRepositoryIT {
         jdbcTemplate.update("insert into LINKS (ID, URL) values (?, ?)", link.id(), link.uri().toString());
 
         // act
-        hsqldbRepository.setLinkDownloaded(link);
+        hsqldbCrawlerRepository.setLinkDownloaded(link);
 
         // assert
         Boolean downloaded = jdbcTemplate.queryForObject(
@@ -147,12 +143,12 @@ class HsqldbRepositoryIT {
     @Test
     public void given_image_when_image_exists_expect_skip_updated() {
         // arrange
-        jdbcTemplate.update("delete from IMAGES");
+        jdbcTemplate.update("delete from IMAGES where id >= 0");
         Image image = new Image(-2, URI.create("https://localhost/"));
         jdbcTemplate.update("insert into IMAGES (ID, URL) values (?, ?)", image.id(), image.uri().toString());
 
         // act
-        hsqldbRepository.setImageSkip(image);
+        hsqldbCrawlerRepository.setImageSkip(image);
 
         // assert
         Boolean skipped = jdbcTemplate.queryForObject(
@@ -166,12 +162,12 @@ class HsqldbRepositoryIT {
     @Test
     public void given_link_when_link_exists_expect_skip_updated() {
         // arrange
-        jdbcTemplate.update("delete from LINKS");
+        jdbcTemplate.update("delete from LINKS where id >= 0");
         Link link = new Link(-2, URI.create("https://localhost/"));
         jdbcTemplate.update("insert into LINKS (ID, URL) values (?, ?)", link.id(), link.uri().toString());
 
         // act
-        hsqldbRepository.setLinkSkip(link);
+        hsqldbCrawlerRepository.setLinkSkip(link);
 
         // assert
         Boolean skipped = jdbcTemplate.queryForObject(

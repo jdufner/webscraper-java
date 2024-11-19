@@ -1,10 +1,9 @@
 package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.HsqldbRepository;
+import de.jdufner.webscraper.crawler.data.CrawlerRepository;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Link;
-import de.jdufner.webscraper.crawler.data.Repository;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,16 +28,16 @@ public class WebCrawler {
     @NonNull
     private final WebFetcher webFetcher;
     @NonNull
-    private final Repository repository;
+    private final CrawlerRepository crawlerRepository;
 
     public WebCrawler(@NonNull WebCrawlerConfigurationProperties webCrawlerConfigurationProperties,
                       @NonNull SiteConfigurationProperties siteConfigurationProperties,
                       @NonNull WebFetcher webFetcher,
-                      @NonNull HsqldbRepository repository) {
+                      @NonNull CrawlerRepository crawlerRepository) {
         this.webCrawlerConfigurationProperties = webCrawlerConfigurationProperties;
         this.siteConfigurationProperties = siteConfigurationProperties;
         this.webFetcher = webFetcher;
-        this.repository = repository;
+        this.crawlerRepository = crawlerRepository;
     }
 
     public void crawl() {
@@ -50,8 +49,8 @@ public class WebCrawler {
     void downloadInitialUrl() {
         URI uri = URI.create(webCrawlerConfigurationProperties.startUrl());
         HtmlPage htmlPage = webFetcher.get(uri.toString());
-        int documentId = repository.save(htmlPage);
-        repository.setLinkDownloaded(new Link(documentId, uri));
+        int documentId = crawlerRepository.save(htmlPage);
+        crawlerRepository.setLinkDownloaded(new Link(documentId, uri));
     }
 
     void downloadLinks() {
@@ -68,7 +67,7 @@ public class WebCrawler {
     }
 
     @NonNull LinkStatus downloadEligibleNextLink() {
-        Optional<Link> optionalLink = repository.getNextLinkIfAvailable();
+        Optional<Link> optionalLink = crawlerRepository.getNextLinkIfAvailable();
         if (optionalLink.isPresent()) {
             Link link = optionalLink.get();
             if (siteConfigurationProperties.isEligibleAndNotBlocked(link.uri())) {
@@ -82,14 +81,14 @@ public class WebCrawler {
 
     @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
         HtmlPage htmlPage = webFetcher.get(link.uri().toString());
-        repository.save(htmlPage);
-        repository.setLinkDownloaded(link);
+        crawlerRepository.save(htmlPage);
+        crawlerRepository.setLinkDownloaded(link);
         return LinkStatus.DOWNLOADED;
     }
 
     @NonNull LinkStatus skip(@NonNull Link link) {
         logger.info("Link skipped {}", link.uri());
-        repository.setLinkSkip(link);
+        crawlerRepository.setLinkSkip(link);
         return LinkStatus.SKIPPED;
     }
 
