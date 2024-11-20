@@ -1,6 +1,6 @@
 node {
 
-  // properties([disableConcurrentBuilds(), pipelineTriggers([cron('H H/2 * * *')])])
+  //properties([disableConcurrentBuilds(), pipelineTriggers([cron('H H/2 * * *')])])
 
   stage('Configure') {
     env.JAVA_HOME="${tool 'OpenJDK21'}"
@@ -20,21 +20,21 @@ node {
 
   stage('Result') {
     junit '**/target/surefire-reports/TEST*.xml, **/target/failsafe-reports/TEST*.xml'
-    jacoco classPattern: '**/target/classes', execPattern: '**/target/coverage-reports/jacoco**.exec', sourcePattern: '**/src/main/java'
+    //jacoco classPattern: '**/target/classes', execPattern: '**/target/coverage-reports/jacoco**.exec', sourcePattern: '**/src/main/java'
 
-    recordIssues tools: [checkStyle(pattern: '**/target/checkstyle-result.xml'),
-                         spotBugs(pattern: '**/target/spotbugsXml.xml'),
-                         pmdParser(pattern: '**/target/pmd.xml'),
-                         cpd(pattern: '**/target/cpd.xml'),
-                         taskScanner(highTags:'FIXME', normalTags:'TODO', includePattern: '**/*.java', excludePattern: 'target/**/*')]
+    //recordIssues tools: [checkStyle(pattern: '**/target/checkstyle-result.xml'),
+    //                     spotBugs(pattern: '**/target/spotbugsXml.xml'),
+    //                     pmdParser(pattern: '**/target/pmd.xml'),
+    //                     cpd(pattern: '**/target/cpd.xml'),
+    //                     taskScanner(highTags:'FIXME', normalTags:'TODO', includePattern: '**/*.java', excludePattern: 'target/**/*')]
 
-    dependencyCheckPublisher canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/dependency-check-report.xml', unHealthy: ''
+    //dependencyCheckPublisher canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/dependency-check-report.xml', unHealthy: ''
 
     //publishHTML([allowMissing: false, alwaysLinkToLastBuild: false, keepAll: false, reportDir: 'target/generated-docs/', reportFiles: 'arc42-template.html', reportName: 'arc42-Template', reportTitles: ''])
   }
 
-  stage('Archive') {
-    archiveArtifacts 'target/tutorials*.jar, target/tutorials*project.zip'
-  }
+  //stage('Archive') {
+  //  archiveArtifacts 'target/tutorials*.jar, target/tutorials*project.zip'
+  //}
 
 }
