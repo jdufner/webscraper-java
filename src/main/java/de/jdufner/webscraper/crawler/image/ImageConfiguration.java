@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class ImageConfiguration {
 
     @Bean
-    public @NonNull AsyncHttpClient getAsyncHttpClient() {
+    public @NonNull AsyncHttpClient asyncHttpClient() {
         return Dsl.asyncHttpClient();
     }
 

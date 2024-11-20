@@ -17,7 +17,7 @@ public class WebConfiguration {
     }
 
     @Bean
-    public @NonNull WebDriver getChromeDriver() {
+    public @NonNull WebDriver chromeDriver() {
         ChromeOptions chromeOptions = new ChromeOptions();
         webdriverConfigurationProperties.options().forEach(chromeOptions::addArguments);
         return new ChromeDriver(chromeOptions);

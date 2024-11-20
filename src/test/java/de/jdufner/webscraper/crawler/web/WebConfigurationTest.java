@@ -28,7 +28,7 @@ class WebConfigurationTest {
             when(webdriverConfigurationProperties.options()).thenReturn(Arrays.asList("--disable-search-engine-choice-screen", "--disable-notifications", "--disable-infobars", "--disable-extensions"));
 
             // act
-            webDriver = webConfiguration.getChromeDriver();
+            webDriver = webConfiguration.chromeDriver();
 
             // assert
             verify(webdriverConfigurationProperties, times(1)).options();

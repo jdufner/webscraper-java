@@ -19,7 +19,7 @@ class ImageConfigurationTest {
         // arrange
 
         // act
-        AsyncHttpClient asc = imageConfiguration.getAsyncHttpClient();
+        AsyncHttpClient asc = imageConfiguration.asyncHttpClient();
 
         // assert
         assertThat(asc).isInstanceOf(AsyncHttpClient.class);
