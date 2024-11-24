@@ -11,7 +11,6 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest
 @ConfigurationPropertiesScan
 @DirtiesContext
-// @ActiveProfiles(profiles = "remoteWebDriver,heise")
 class WebCrawlerIT {
 
     private static final Logger logger = LoggerFactory.getLogger(WebCrawlerIT.class);
