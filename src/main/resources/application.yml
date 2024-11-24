@@ -13,7 +13,8 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
   profiles:
-    active: heise,remoteWebDriver
+    active: @spring.profiles.active@
+  #active: heise,remoteWebDriver
 webdriver:
   chrome:
     options:

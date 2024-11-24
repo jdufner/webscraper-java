@@ -155,10 +155,22 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<!--configuration>
+					<profiles>
+						<profile>heise</profile>
+						<profile>localWebDriver</profile>
+					</profiles>
+				</configuration-->
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -213,5 +225,23 @@
 			</plugin>
 		</plugins>
 	</build>
+
+	<profiles>
+		<profile>
+			<id>Surface-Pro-7</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<properties>
+				<spring.profiles.active>heise,localWebDriver</spring.profiles.active>
+			</properties>
+		</profile>
+		<profile>
+			<id>Ryzen-7</id>
+			<properties>
+				<spring.profiles.active>heise,remoteWebDriver</spring.profiles.active>
+			</properties>
+		</profile>
+	</profiles>
 
 </project>
