@@ -147,11 +147,6 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<!--dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-test</artifactId>
-			<scope>test</scope>
-		</dependency-->
 	</dependencies>
 
 	<build>
@@ -238,6 +233,12 @@
 		</profile>
 		<profile>
 			<id>Ryzen-7</id>
+			<properties>
+				<spring.profiles.active>heise,localWebDriver</spring.profiles.active>
+			</properties>
+		</profile>
+		<profile>
+			<id>Jenkins</id>
 			<properties>
 				<spring.profiles.active>heise,remoteWebDriver</spring.profiles.active>
 			</properties>
