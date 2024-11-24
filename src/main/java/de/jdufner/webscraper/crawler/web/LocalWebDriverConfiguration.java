@@ -6,22 +6,23 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 @Configuration
-public class WebConfiguration {
+@Profile("localWebDriver")
+public class LocalWebDriverConfiguration {
 
     private final WebdriverConfigurationProperties webdriverConfigurationProperties;
 
-    public WebConfiguration(@NonNull WebdriverConfigurationProperties webdriverConfigurationProperties) {
+    public LocalWebDriverConfiguration(@NonNull WebdriverConfigurationProperties webdriverConfigurationProperties) {
         this.webdriverConfigurationProperties = webdriverConfigurationProperties;
     }
 
     @Bean
-    public @NonNull WebDriver chromeDriver() {
+    public @NonNull WebDriver webDriver() {
         ChromeOptions chromeOptions = new ChromeOptions();
         webdriverConfigurationProperties.options().forEach(chromeOptions::addArguments);
         return new ChromeDriver(chromeOptions);
     }
-
 
 }

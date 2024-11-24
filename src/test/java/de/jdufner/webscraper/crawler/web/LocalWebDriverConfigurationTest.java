@@ -12,13 +12,13 @@ import java.util.Arrays;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class WebConfigurationTest {
+class LocalWebDriverConfigurationTest {
 
     @Mock
     private WebdriverConfigurationProperties webdriverConfigurationProperties;
 
     @InjectMocks
-    private WebConfiguration webConfiguration;
+    private LocalWebDriverConfiguration localWebDriverConfiguration;
 
     @Test
     void when_get_chrome_driver_given_selenium_configuration_expect_arguments_added() {
@@ -28,7 +28,7 @@ class WebConfigurationTest {
             when(webdriverConfigurationProperties.options()).thenReturn(Arrays.asList("--disable-search-engine-choice-screen", "--disable-notifications", "--disable-infobars", "--disable-extensions"));
 
             // act
-            webDriver = webConfiguration.chromeDriver();
+            webDriver = localWebDriverConfiguration.webDriver();
 
             // assert
             verify(webdriverConfigurationProperties, times(1)).options();
