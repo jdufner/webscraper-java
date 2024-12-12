@@ -316,7 +316,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractLinks("https://localhost", document);
+        List<URI> urls = webFetcher.extractLinks(URI.create("https://localhost"), document);
 
         // assert
         assertThat(urls).containsExactly(URI.create("https://localhost/test.html"));
@@ -334,7 +334,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractLinks("https://localhost", document);
+        List<URI> urls = webFetcher.extractLinks(URI.create("https://localhost"), document);
 
         // assert
         assertThat(urls).containsExactly(URI.create("https://www.google.com/"));
@@ -353,7 +353,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractLinks("https://localhost", document);
+        List<URI> urls = webFetcher.extractLinks(URI.create("https://localhost"), document);
 
         // assert
         assertThat(urls).containsExactly(URI.create("https://www.google.com/"),URI.create("https://www.heise.de/"));
@@ -370,7 +370,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractLinks("https://localhost", document);
+        List<URI> urls = webFetcher.extractLinks(URI.create("https://localhost"), document);
 
         // assert
         assertThat(urls).isEmpty();
@@ -388,7 +388,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractImages("https://localhost", document);
+        List<URI> urls = webFetcher.extractImages(URI.create("https://localhost"), document);
 
         // assert
         assertThat(urls).containsExactly(URI.create("https://localhost/test.jpg"));
@@ -406,7 +406,7 @@ class WebFetcherTest {
                 </html>""");
 
         // act
-        List<URI> urls = webFetcher.extractImages("https://localhost", document);
+        List<URI> urls = webFetcher.extractImages(URI.create("https://localhost"), document);
 
         // assert
         assertThat(urls).containsExactly(URI.create("https://www.google.com/test.jpg"));
