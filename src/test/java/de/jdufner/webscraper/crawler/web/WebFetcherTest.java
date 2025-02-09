@@ -451,7 +451,7 @@ class WebFetcherTest {
 
         // assert
         assertThat(uri).isPresent();
-        assertThat(uri.get().toString()).isEqualTo("https://localhost/path/link");
+        assertThat(uri.get().toString()).isEqualTo("https://localhost/link");
     }
 
     @Test
@@ -465,7 +465,7 @@ class WebFetcherTest {
 
         // assert
         assertThat(uri).isPresent();
-        assertThat(uri.get().toString()).isEqualTo("https://localhost/path/link");
+        assertThat(uri.get().toString()).isEqualTo("https://localhost/link");
     }
 
     @Test

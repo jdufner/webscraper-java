@@ -136,12 +136,8 @@ public class WebFetcher {
         try {
             URI uri = URI.create(url);
             if (!uri.isAbsolute()) {
-                if (uri.getPath().startsWith("/")) {
-                    URI baseUri = URI.create(baseUrl);
-                    uri = baseUri.resolve(uri);
-                } else {
-                    uri = URI.create(baseUrl + (url.startsWith("./") ? url.substring(1) : "/" + url));
-                }
+                URI baseUri = URI.create(baseUrl);
+                uri = baseUri.resolve(uri);
             }
             logger.debug("built url = {}", uri);
             return Optional.of(uri);
