@@ -22,6 +22,24 @@
 
 ## Developer information
 
+### Maven Profiles
+
+| Name        | Purpose     | Spring Profiles        |
+|-------------|-------------|------------------------|
+| local       | Local Test  | heise, localWebDriver  |
+| buildserver | Remote Test | heise, remoteWebDriver |
+
+### Spring Profiles
+
+| Name            | Purpose                                                     |
+|-----------------|-------------------------------------------------------------|
+| apod            | Fetches HTML pages from www.apod.org                        |
+| heise           | Fetches HTML pages from www.heise.de                        |
+| localWebDriver  | Uses a local Selenium Web Driver with local Chrome browser. |
+| remoteWebDriver | Uses a remote Selenium Web Driver as Docker container.      |
+
+
+
 ### Todo
 
 * Set up build pipeline in Jenkins (Multibranch-Pipeline?)

@@ -223,7 +223,7 @@
 
 	<profiles>
 		<profile>
-			<id>Surface-Pro-7</id>
+			<id>local</id>
 			<activation>
 				<activeByDefault>true</activeByDefault>
 			</activation>
@@ -232,13 +232,7 @@
 			</properties>
 		</profile>
 		<profile>
-			<id>Ryzen-7</id>
-			<properties>
-				<spring.profiles.active>heise,localWebDriver</spring.profiles.active>
-			</properties>
-		</profile>
-		<profile>
-			<id>Jenkins</id>
+			<id>buildserver</id>
 			<properties>
 				<spring.profiles.active>heise,remoteWebDriver</spring.profiles.active>
 			</properties>
