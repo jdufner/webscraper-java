@@ -7,6 +7,8 @@ import de.jdufner.webscraper.crawler.data.Link;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -38,6 +40,13 @@ public class WebCrawler {
         this.siteConfigurationProperties = siteConfigurationProperties;
         this.webFetcher = webFetcher;
         this.crawlerRepository = crawlerRepository;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void doStartCrawlingAutomatically() {
+        if (webCrawlerConfigurationProperties.startAutomatically()) {
+            crawl();
+        }
     }
 
     public void crawl() {

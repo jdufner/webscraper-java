@@ -7,8 +7,10 @@ webscraper:
     image:
       number-images: 100
     web:
+      start-automatically: true
       start-url: https://www.heise.de
       number-pages: 30
+      consent-cookies: true
       javascript:
         - document.querySelectorAll('a-sticky-footer button[data-hide-trigger]').forEach((element) => element.click())
     sites:

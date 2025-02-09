@@ -3,10 +3,15 @@ spring:
     activate:
       on-profile: apod
 webscraper:
-  start-url: https://apod.nasa.gov/apod/astropix.html
-  number-pages: 200
-  number-images: 100
-  white-list:
-    - https://www.heise.de
-  black-list:
-    - https://aktionen.heise.de/
+  crawler:
+    image:
+      number-images: 100
+    web:
+      start-automatically: true
+      start-url: https://apod.nasa.gov/apod/astropix.html
+      number-pages: 200
+      consent-cookies: false
+    sites:
+      white-list:
+        - https://apod.nasa.gov
+      black-list:

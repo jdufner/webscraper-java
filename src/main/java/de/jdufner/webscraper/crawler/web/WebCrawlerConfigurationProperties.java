@@ -5,5 +5,5 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @ConfigurationProperties(prefix = "webscraper.crawler.web")
-public record WebCrawlerConfigurationProperties(@NonNull String startUrl, int numberPages, @Nullable String[] javascript) {
+public record WebCrawlerConfigurationProperties(boolean startAutomatically, @NonNull String startUrl, int numberPages, boolean consentCookies, @Nullable String[] javascript) {
 }

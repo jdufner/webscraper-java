@@ -96,7 +96,7 @@ public class WebdriverWrapper {
     }
 
     private void consentCookies() {
-        if (!cookieConsented) {
+        if (config.consentCookies() && !cookieConsented) {
             webDriver.switchTo().frame(webDriver.switchTo().activeElement());
             clickButtonWithTitle("Zustimmen");
             clickButtonWithTitle("Agree");
