@@ -29,6 +29,8 @@ class WebdriverWrapperTest {
     @Test
     void given_wrapper_when_get_html_url_expect_url_passed_through() {
         // arrange
+        when(config.consentCookies()).thenReturn(true);
+
         WebDriver.TargetLocator tl = mock(WebDriver.TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(tl);
         when(tl.activeElement()).thenReturn(mock(WebElement.class));
@@ -52,6 +54,8 @@ class WebdriverWrapperTest {
     @Test
     void given_wrapper_when_not_yet_scrolled_to_end_of_page_expect_scroll_down() {
         // arrange
+        when(config.consentCookies()).thenReturn(true);
+
         WebDriver.TargetLocator tl = mock(WebDriver.TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(tl);
         when(tl.activeElement()).thenReturn(mock(WebElement.class));
@@ -76,6 +80,8 @@ class WebdriverWrapperTest {
     @Test
     void given_wrapper_when_get_html_page_content_expect_tag_present() {
         // arrange
+        when(config.consentCookies()).thenReturn(true);
+
         WebDriver.TargetLocator tl = mock(WebDriver.TargetLocator.class);
         when(webDriver.switchTo()).thenReturn(tl);
         when(tl.activeElement()).thenReturn(mock(WebElement.class));
