@@ -85,6 +85,8 @@ public class WebdriverWrapper {
             webDriver.switchTo().frame(webDriver.switchTo().activeElement());
             clickButtonWithTitle("Zustimmen");
             clickButtonWithTitle("Agree");
+            // Alternative approach
+            // executeScript("document.querySelectorAll('button[title=\"Zustimmen\"]').forEach(button => {button.click();})");
             webDriver.switchTo().defaultContent();
             cookieConsented = true;
         }
