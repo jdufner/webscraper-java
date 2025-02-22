@@ -35,7 +35,7 @@ public class WebdriverWrapper {
     private void waitUntilCookiesConsentedAndPageFullyLoaded() {
         sleep(1000);
         consentCookies();
-        executeJavascript();
+        executeScriptFromConfig();
         checkIfPageIsFullyLoaded();
     }
 
@@ -53,46 +53,31 @@ public class WebdriverWrapper {
     }
 
     private void scrollDownPageByPage() {
-        long innerHeight = getInnerHeight();
-        long scrollHeight = getScrollHeight();
+        long innerHeight = executeScriptAndReturnLong("return window.innerHeight");
+        long scrollHeight = executeScriptAndReturnLong("return document.body.scrollHeight");
         int index = 1;
-        while (getPixelsBelowWindow() >= 0.9 * innerHeight && index <= 100) {
-            scrollVerticallyBy(innerHeight);
+        while (executeScriptAndReturnLong("return document.body.scrollHeight - window.scrollY - window.innerHeight") >= 0.9 * innerHeight && index <= 100) {
+            executeScript("window.scrollBy(0, " + innerHeight + ")");
             index += 1;
             sleep(500);
-            long newScrollHeight = getScrollHeight();
+            long newScrollHeight = executeScriptAndReturnLong("return document.body.scrollHeight");
             if (newScrollHeight > scrollHeight) {
                 index = 1;
                 scrollHeight = newScrollHeight;
             }
 
         }
-        scrollToEndOfPage();
+        executeScript("window.scrollTo(0, document.body.scrollHeight)");
     }
 
-    private long getPixelsBelowWindow() {
+    private long executeScriptAndReturnLong(@NonNull String script) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return ((Number) Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight"))).longValue();
+        return ((Number) Objects.requireNonNull(javascriptExecutor.executeScript(script))).longValue();
     }
 
-    private void scrollVerticallyBy(long verticalPixels) {
+    private void executeScript(@NonNull String script) {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        javascriptExecutor.executeScript("window.scrollBy(0, " + verticalPixels + ")");
-    }
-
-    private void scrollToEndOfPage() {
-        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        javascriptExecutor.executeScript("window.scrollTo(0, document.body.scrollHeight)");
-    }
-
-    private long getScrollHeight() {
-        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return (Long) Objects.requireNonNull(javascriptExecutor.executeScript("return document.body.scrollHeight"));
-    }
-
-    private long getInnerHeight() {
-        JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return (Long) Objects.requireNonNull(javascriptExecutor.executeScript("return window.innerHeight"));
+        javascriptExecutor.executeScript(script);
     }
 
     private void consentCookies() {
@@ -110,7 +95,7 @@ public class WebdriverWrapper {
         buttons.stream().filter(WebElement::isDisplayed).forEach(WebElement::click);
     }
 
-    private void executeJavascript() {
+    private void executeScriptFromConfig() {
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         if (config.javascript() != null) {
             stream(config.javascript()).forEach(javascriptExecutor::executeScript);
