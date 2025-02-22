@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
-@SpringBootTest
+@SpringBootTest(properties = { "webscraper.crawler.web.number-pages=1" })
 @ConfigurationPropertiesScan
 @DirtiesContext
 class WebCrawlerIT {
