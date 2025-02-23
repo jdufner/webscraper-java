@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/webscraper
+    username: webscraper
+    password: webscraper
+  flyway:
+    enabled: true
+    locations: db/migration/postgres
+    validate-on-migrate: true
+    baseline-on-migrate: true
+    baseline-version: 1

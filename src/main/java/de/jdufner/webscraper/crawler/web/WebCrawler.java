@@ -21,7 +21,7 @@ public class WebCrawler {
         DOWNLOADED, SKIPPED, UNAVAILABLE
     }
 
-    private static final Logger logger = LoggerFactory.getLogger(WebCrawler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebCrawler.class);
 
     @NonNull
     private final WebCrawlerConfigurationProperties webCrawlerConfigurationProperties;
@@ -50,7 +50,7 @@ public class WebCrawler {
     }
 
     public void crawl() {
-        logger.info("startUrl = {}, numberPages = {}", webCrawlerConfigurationProperties.startUrl(), webCrawlerConfigurationProperties.numberPages());
+        LOGGER.info("startUrl = {}, numberPages = {}", webCrawlerConfigurationProperties.startUrl(), webCrawlerConfigurationProperties.numberPages());
         downloadInitialUrl();
         downloadLinks();
     }
@@ -96,7 +96,7 @@ public class WebCrawler {
     }
 
     @NonNull LinkStatus skip(@NonNull Link link) {
-        logger.info("Link skipped {}", link.uri());
+        LOGGER.info("Link skipped {}", link.uri());
         crawlerRepository.setLinkSkip(link);
         return LinkStatus.SKIPPED;
     }

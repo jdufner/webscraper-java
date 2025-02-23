@@ -1,0 +1,19 @@
+drop table if exists DOCUMENTS_TO_AUTHORS cascade;
+drop table if exists AUTHORS cascade;
+drop table if exists DOCUMENTS_TO_CATEGORIES cascade;
+drop table if exists CATEGORIES cascade;
+drop table if exists DOCUMENTS_TO_IMAGES cascade;
+drop table if exists IMAGES cascade;
+drop table if exists DOCUMENTS_TO_LINKS cascade;
+drop table if exists LINKS cascade;
+drop table if exists DOCUMENTS cascade;
+
+drop sequence if exists documents_to_authors_id_seq cascade;
+drop sequence if exists authors_id_seq cascade;
+drop sequence if exists documents_to_categories_id_seq cascade;
+drop sequence if exists categories_id_seq cascade;
+drop sequence if exists documents_to_images_id_seq cascade;
+drop sequence if exists images_id_seq cascade;
+drop sequence if exists documents_to_links_id_seq cascade;
+drop sequence if exists links_id_seq cascade;
+drop sequence if exists documents_id_seq cascade;

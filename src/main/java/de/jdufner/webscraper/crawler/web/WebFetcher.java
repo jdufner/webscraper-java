@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Service
 public class WebFetcher {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebFetcher.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebFetcher.class);
     static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
 
     private final WebdriverWrapper webdriverWrapper;
@@ -33,7 +33,7 @@ public class WebFetcher {
     }
 
     public @NonNull HtmlPage get(@NonNull String url) {
-        logger.info("get url = {}", url);
+        LOGGER.info("get url = {}", url);
         URI uri = URI.create(url);
         String html = webdriverWrapper.getHtml(uri.toString());
         Date downloadedAt = new Date();
@@ -45,7 +45,7 @@ public class WebFetcher {
         List<String> categories = extractCategories(document);
         List<URI> links = extractLinks(uri, document);
         List<URI> images = extractImages(uri, document);
-        logger.info("title = {}, createdAt = {}, authors = {}, categories = {}, links = {}, images = {}",
+        LOGGER.info("title = {}, createdAt = {}, authors = {}, categories = {}, links = {}, images = {}",
                 title, createdAt, authors, categories, links, images);
         return new HtmlPage(uri, html, downloadedAt, title.orElse(null), createdAt.orElse(null), authors, categories, links, images);
     }
@@ -126,20 +126,20 @@ public class WebFetcher {
             URI newUri = new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), null, null);
             return Optional.of(newUri);
         } catch (URISyntaxException e) {
-            logger.warn("URISyntaxException = {}", e.toString());
+            LOGGER.warn("URISyntaxException = {}", e.toString());
             return Optional.empty();
         }
     }
 
     static @NonNull Optional<URI> buildUrl(@NonNull String baseUrl, @NonNull String url) {
-        logger.debug("build url from baseUrl = {}, url = {}", baseUrl, url);
+        LOGGER.debug("build url from baseUrl = {}, url = {}", baseUrl, url);
         try {
             URI uri = URI.create(url);
             if (!uri.isAbsolute()) {
                 URI baseUri = URI.create(baseUrl);
                 uri = baseUri.resolve(uri);
             }
-            logger.debug("built url = {}", uri);
+            LOGGER.debug("built url = {}", uri);
             return Optional.of(uri);
         } catch (IllegalArgumentException e) {
             return Optional.empty();

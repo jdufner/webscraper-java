@@ -9,16 +9,15 @@ import org.springframework.stereotype.Repository;
 import java.util.Objects;
 
 @Repository
-@Profile("hsqldb")
-public class HsqldbCrawlerRepository extends AbstractCrawlerRepository implements CrawlerRepository {
+@Profile("postgres")
+public class PostgresCrawlerRepository extends AbstractCrawlerRepository implements CrawlerRepository {
 
-    public HsqldbCrawlerRepository(@NonNull JdbcTemplate jdbcTemplate) {
+    public PostgresCrawlerRepository(@NonNull JdbcTemplate jdbcTemplate) {
         super(jdbcTemplate);
     }
 
-    @Override
     protected @NonNull Number getIdFromKeyholder(@NonNull KeyHolder keyHolder) {
-        return Objects.requireNonNull(keyHolder.getKey());
+        return Objects.requireNonNull((Number) Objects.requireNonNull(keyHolder.getKeys()).get("id"));
     }
 
 }
