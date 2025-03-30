@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.junit.jupiter.EnabledIf;
 
 import java.io.File;
 import java.net.URI;
@@ -19,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @Profile("hsqldb")
 //@DisabledIf("postgres")
-//@EnabledIf("hsqldb")
+@EnabledIf("hsqldb")
 class HsqldbCrawlerRepositoryIT {
 
     @Autowired
