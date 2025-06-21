@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.3.5</version>
+		<version>3.5.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>de.jdufner</groupId>
@@ -48,7 +48,7 @@
 	<properties>
 		<assertj.version>3.26.3</assertj.version>
 		<flyway.version>11.3.3</flyway.version>
-		<httpasyncclient.version>2.2.0</httpasyncclient.version>
+		<httpasyncclient.version>3.0.2</httpasyncclient.version>
 		<hsqldb.version>2.7.4</hsqldb.version>
 		<java.version>21</java.version>
 		<jsoup.version>1.18.1</jsoup.version>
