@@ -1,0 +1,18 @@
+@startuml
+
+box "Webscraper"
+  participant Crawler
+  participant Database
+  participant Files
+end box
+participant Website
+
+
+Crawler -> Website ++: Get start URL
+activate Crawler
+Crawler <- Website --: Return HTML page
+Crawler -> Crawler: Analyze HTML page
+Crawler -> Database ++: Save HTML page and links
+Crawler <- Database --
+
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+
+participant Webscraper
+participant Website
+
+
+Webscraper -> Website ++: Get start URL
+activate Webscraper
+Webscraper <- Website --: Return HTML page
+Webscraper -> Webscraper: Analyze HTML page
+Webscraper -> Webscraper: Save HTML page and links
+
+@enduml

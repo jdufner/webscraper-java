@@ -17,6 +17,17 @@ These include
 ****
 endif::arc42help[]
 
+Today, the internet provides tons of new information per day.
+To keep pace, I want to get summaries of new articles.
+I also want to have references to other websites either news pages or social media.
+
+The internet provides to of pictures from nature, astronomy, animals, and so on.
+I like to have a collection of high quality wallpapers.
+
+I'm interested in Java, Spring and AI.
+So, I was looking for an interesting use case.
+This project helps me to keep up with existing technology.
+
 === Requirements Overview
 
 ifdef::arc42help[]
@@ -39,6 +50,11 @@ Keep these excerpts as short as possible. Balance readability of this document w
 See https://docs.arc42.org/section-1/[Introduction and Goals] in the arc42 documentation.
 ****
 endif::arc42help[]
+
+The Webscraper fetches web pages from the Internet and perform following actions:
+
+1. Provides summaries using a local LLM and searches for references at other web sites.
+2. Downloads pictures, then presents two to the user to choose the preferred one.
 
 === Quality Goals
 
@@ -64,6 +80,29 @@ A table with quality goals and concrete scenarios, ordered by priorities
 ****
 endif::arc42help[]
 
+[options="header",cols="1,2,2"]
+|===
+|Priority | Quality goal | Scenario
+| 1
+| Adaptability - The software should run on different devices (desktop, laptop etc) and with different setups (databases, w or w/o LLM etc).
+| Webscraper should run on my AMD Ryzen 7, 64 GB RAM, 2 TB SSD w/ Win 11 and on my Raspberry PI 3, 1 GB RAM with Raspbian 11.
+| 2
+| Recoverability - The state of the software must be persisted so that it can be started, stopped or restarted everytime.
+| Webscraper must be started when the computer has been turned on and must be stopped when the computer has been turned off.
+| 3
+| Modifiability - The software must be easily modifiable in order to implement new use cases.
+| The implementation of a new use case must be done in 10 hours.
+| 4
+| Testability - The software must be tested according to the test pyramid.
+| All classes and business logic must be unit tested.
+Integrations with websites, databases, and files must be integration tested.
+Interactions should be tests with end-to-end tests.
+| 5
+| Modularity - The domains of the structured in a modular way so that they have clear interfaces the directed dependencies.
+| Webscraper must be modularized and ideally communicates via events.
+|===
+
+
 === Stakeholders
 
 ifdef::arc42help[]
@@ -88,9 +127,8 @@ Table with role names, person names, and their expectations with respect to the 
 ****
 endif::arc42help[]
 
-[options="header",cols="1,2,2"]
+[options="header",cols="2,1,2"]
 |===
-|Role/Name|Contact|Expectations
-| _<Role-1>_ | _<Contact-1>_ | _<Expectation-1>_
-| _<Role-2>_ | _<Contact-2>_ | _<Expectation-2>_
+|Role / Name | Contact | Expectations
+| Founder, Developer, User: Jürgen | | I'm doing everything :)
 |===
