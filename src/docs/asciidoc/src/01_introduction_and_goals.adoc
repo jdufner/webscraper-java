@@ -102,7 +102,6 @@ Interactions should be tests with end-to-end tests.
 | Webscraper must be modularized and ideally communicates via events.
 |===
 
-
 === Stakeholders
 
 ifdef::arc42help[]
