@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface CrawlerRepository {
 
-    int save(@NonNull HtmlPage htmlPage);
+    int saveDocument(@NonNull HtmlPage htmlPage);
 
     @NonNull Optional<Image> getNextImageIfAvailable();
 
@@ -23,4 +23,5 @@ public interface CrawlerRepository {
 
     void setLinkSkip(Link link);
 
+    int saveDocumentOutbox(@NonNull DocumentOutbox documentOutbox);
 }

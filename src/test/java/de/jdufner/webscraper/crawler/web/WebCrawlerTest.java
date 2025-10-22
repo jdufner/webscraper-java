@@ -41,13 +41,13 @@ class WebCrawlerTest {
     @Test
     public void given_webcrawler_when_crawl_expect_html_page() {
         // arrange
-        String url = "https://www.start.com";
+        String url = "https://localhost";
         when(webCrawlerConfigurationProperties.startUrl()).thenReturn(url);
         when(webCrawlerConfigurationProperties.numberPages()).thenReturn(3);
-        HtmlPage htmlPageStart = new HtmlPage(URI.create(url), "", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
+        HtmlPage htmlPageStart = new HtmlPage(URI.create(url), "", new Date(), null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(url)).thenReturn(htmlPageStart);
-        Link link = new Link(1, URI.create("https://www.continue.com"));
-        HtmlPage htmlPageContinue = new HtmlPage(link.uri(), "", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
+        Link link = new Link(1, URI.create("https://localhost/next"));
+        HtmlPage htmlPageContinue = new HtmlPage(link.uri(), "", new Date(), null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(link.uri().toString())).thenReturn(htmlPageContinue);
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
         when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
@@ -60,7 +60,7 @@ class WebCrawlerTest {
         verify(crawlerRepository, times(3)).getNextLinkIfAvailable();
         verify(webFetcher, times(3)).get(link.uri().toString());
         ArgumentCaptor<HtmlPage> savedHtmlPages = ArgumentCaptor.forClass(HtmlPage.class);
-        verify(crawlerRepository, times(4)).save(savedHtmlPages.capture());
+        verify(crawlerRepository, times(4)).saveDocument(savedHtmlPages.capture());
         assertThat(savedHtmlPages.getAllValues()).containsExactly(htmlPageStart, htmlPageContinue, htmlPageContinue, htmlPageContinue);
         verify(crawlerRepository, times(3)).setLinkDownloaded(link);
     }
@@ -70,9 +70,9 @@ class WebCrawlerTest {
         // arrange
         URI uri = URI.create("https://localhost");
         when(webCrawlerConfigurationProperties.startUrl()).thenReturn(uri.toString());
-        HtmlPage htmlPage = new HtmlPage(uri, "<html></html>", new Date(), "", null, emptyList(), emptyList(), emptyList(), emptyList());
+        HtmlPage htmlPage = new HtmlPage(uri, "<html></html>", new Date(), null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(uri.toString())).thenReturn(htmlPage);
-        when(crawlerRepository.save(htmlPage)).thenReturn(1);
+        when(crawlerRepository.saveDocument(htmlPage)).thenReturn(1);
 
         // act
         webCrawler.downloadInitialUrl();
@@ -92,7 +92,7 @@ class WebCrawlerTest {
 
         // assert
         verify(crawlerRepository).getNextLinkIfAvailable();
-        verify(crawlerRepository, times(0)).save(any(HtmlPage.class));
+        verify(crawlerRepository, times(0)).saveDocument(any(HtmlPage.class));
     }
 
     @Test
@@ -102,7 +102,7 @@ class WebCrawlerTest {
         Link link = new Link(-1, URI.create("http://localhost"));
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
         when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
-        HtmlPage htmlPage = new HtmlPage(link.uri(), "<html></html>", new Date(), "test", null, emptyList(), emptyList(), emptyList(), emptyList());
+        HtmlPage htmlPage = new HtmlPage(link.uri(), "<html></html>", new Date(), null, emptyList(), emptyList(), emptyList(), emptyList());
         when(webFetcher.get(link.uri().toString())).thenReturn(htmlPage);
 
         // act
@@ -110,7 +110,7 @@ class WebCrawlerTest {
 
         // assert
         verify(crawlerRepository).getNextLinkIfAvailable();
-        verify(crawlerRepository).save(any(HtmlPage.class));
+        verify(crawlerRepository).saveDocument(any(HtmlPage.class));
     }
 
     @Test
@@ -162,7 +162,7 @@ class WebCrawlerTest {
         WebCrawler.LinkStatus linkStatus = webCrawler.downloadAndSave(link);
 
         // assert
-        verify(crawlerRepository).save(any());
+        verify(crawlerRepository).saveDocument(any());
         verify(crawlerRepository).setLinkDownloaded(link);
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.DOWNLOADED);
     }

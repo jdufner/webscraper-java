@@ -1,9 +1,7 @@
 package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.CrawlerRepository;
-import de.jdufner.webscraper.crawler.data.HtmlPage;
-import de.jdufner.webscraper.crawler.data.Link;
+import de.jdufner.webscraper.crawler.data.*;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +56,9 @@ public class WebCrawler {
     void downloadInitialUrl() {
         URI uri = URI.create(webCrawlerConfigurationProperties.startUrl());
         HtmlPage htmlPage = webFetcher.get(uri.toString());
-        int documentId = crawlerRepository.save(htmlPage);
+        int documentId = crawlerRepository.saveDocument(htmlPage);
+        DocumentOutbox documentOutbox = new DocumentOutbox(documentId, DocumentProcessState.DOWNLOADED);
+        int documentOutboxId = crawlerRepository.saveDocumentOutbox(documentOutbox);
         crawlerRepository.setLinkDownloaded(new Link(documentId, uri));
     }
 
@@ -90,7 +90,7 @@ public class WebCrawler {
 
     @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
         HtmlPage htmlPage = webFetcher.get(link.uri().toString());
-        crawlerRepository.save(htmlPage);
+        crawlerRepository.saveDocument(htmlPage);
         crawlerRepository.setLinkDownloaded(link);
         return LinkStatus.DOWNLOADED;
     }

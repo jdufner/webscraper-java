@@ -26,8 +26,8 @@ public abstract class AbstractCrawlerRepository {
 
     protected abstract @NonNull Number getIdFromKeyholder(@NonNull KeyHolder keyHolder);
 
-    public int save(@NonNull HtmlPage htmlPage) {
-        Number documentId = saveDocument(htmlPage);
+    public int saveDocument(@NonNull HtmlPage htmlPage) {
+        Number documentId = saveDocumentInternal(htmlPage);
         saveAuthors(htmlPage, documentId);
         saveCategories(htmlPage, documentId);
         saveLinks(htmlPage, documentId);
@@ -35,7 +35,7 @@ public abstract class AbstractCrawlerRepository {
         return documentId.intValue();
     }
 
-    protected @NonNull Number saveDocument(@NonNull HtmlPage htmlPage) {
+    protected @NonNull Number saveDocumentInternal(@NonNull HtmlPage htmlPage) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator psc = con -> {
             PreparedStatement ps = con.prepareStatement("INSERT INTO documents (URL, CONTENT, DOWNLOADED_AT, CREATED_AT) VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
@@ -190,6 +190,18 @@ public abstract class AbstractCrawlerRepository {
             return null;
         }
         return new Timestamp(date.getTime());
+    }
+
+    public int saveDocumentOutbox(@NonNull DocumentOutbox documentOutbox) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        PreparedStatementCreator psc = con -> {
+            PreparedStatement ps = con.prepareStatement("INSERT INTO documents_outbox (document_id, document_process_state) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, documentOutbox.documentId());
+            ps.setString(2, documentOutbox.processState().toString());
+            return ps;
+        };
+        jdbcTemplate.update(psc, keyHolder);
+        return getIdFromKeyholder(keyHolder).intValue();
     }
 
 }

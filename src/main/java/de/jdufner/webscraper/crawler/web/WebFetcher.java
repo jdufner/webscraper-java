@@ -46,7 +46,7 @@ public class WebFetcher {
         List<URI> images = extractImages(uri, document);
         LOGGER.info("title = {}, createdAt = {}, authors = {}, categories = {}, links = {}, images = {}",
                 title, createdAt, authors, categories, links, images);
-        return new HtmlPage(uri, html, downloadedAt, title.orElse(null), createdAt.orElse(null), authors, categories, links, images);
+        return new HtmlPage(uri, html, downloadedAt, createdAt.orElse(null), authors, categories, links, images);
     }
 
     @NonNull

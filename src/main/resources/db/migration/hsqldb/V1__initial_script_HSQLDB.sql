@@ -3,7 +3,15 @@ create table if not exists DOCUMENTS (
     url varchar(1000) not null,
     content varchar(10000000) not null,
     downloaded_at timestamp not null,
+    title varchar(1000),
     created_at timestamp
+);
+
+create table if not exists DOCUMENTS_OUTBOX (
+    id integer identity primary key,
+    document_id integer not null,
+    document_process_state varchar(20) not null,
+    constraint fk_do_document_id foreign key (document_id) references DOCUMENTS(id)
 );
 
 create table if not exists AUTHORS (

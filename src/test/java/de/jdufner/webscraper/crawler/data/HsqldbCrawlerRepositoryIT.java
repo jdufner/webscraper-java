@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,13 +30,13 @@ class HsqldbCrawlerRepositoryIT {
     @Test
     public void when_html_page_fully_populated_expect_everything_saved() {
         // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), "title", null,
+        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null,
                 asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                 asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
                 asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
 
         // act
-        hsqldbCrawlerRepository.save(htmlPage);
+        hsqldbCrawlerRepository.saveDocument(htmlPage);
 
         // assert
     }
@@ -43,11 +44,11 @@ class HsqldbCrawlerRepositoryIT {
     @Test
     public void when_html_page_almost_empty_expect_saved() {
         // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), "title", null,
+        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null,
                 emptyList(), emptyList(), emptyList(), emptyList());
 
         // act
-        int id = hsqldbCrawlerRepository.save(htmlPage);
+        int id = hsqldbCrawlerRepository.saveDocument(htmlPage);
 
         // assert
         assertThat(id).isGreaterThanOrEqualTo(0);
@@ -177,6 +178,27 @@ class HsqldbCrawlerRepositoryIT {
                 link.id()
         );
         assertThat(skipped).isTrue();
+    }
+
+    @Test
+    public void given_document_when_document_downloaded_expect_new_outbox_document() {
+        // arrange
+        jdbcTemplate.update("delete from DOCUMENTS where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS_OUTBOX where id >= 0");
+        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null,
+                emptyList(), emptyList(), emptyList(), emptyList());
+        jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT) values (?, ?, ?, ?)", 1, htmlPage.uri().toString(), htmlPage.html(), new Timestamp(htmlPage.downloadedAt().getTime()));
+        DocumentOutbox documentOutbox = new DocumentOutbox(1, DocumentProcessState.DOWNLOADED);
+
+        // act
+        hsqldbCrawlerRepository.saveDocumentOutbox(documentOutbox);
+
+        // assert
+        Number documentOutboxId = jdbcTemplate.queryForObject("select ID from DOCUMENTS_OUTBOX where document_id = ?",
+                (rs, rowNum) -> rs.getInt("ID"),
+                1
+        );
+        assertThat(documentOutboxId).isNotNull();
     }
 
 }
