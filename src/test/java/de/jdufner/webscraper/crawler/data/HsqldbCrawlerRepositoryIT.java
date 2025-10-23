@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.net.URI;
-import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -181,24 +180,28 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_document_when_document_downloaded_expect_new_outbox_document() {
+    public void given_downloaded_document_when_save_document_then_id() {
         // arrange
-        jdbcTemplate.update("delete from DOCUMENTS where id >= 0");
-        jdbcTemplate.update("delete from DOCUMENTS_OUTBOX where id >= 0");
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null,
-                emptyList(), emptyList(), emptyList(), emptyList());
-        jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT) values (?, ?, ?, ?)", 1, htmlPage.uri().toString(), htmlPage.html(), new Timestamp(htmlPage.downloadedAt().getTime()));
-        DocumentOutbox documentOutbox = new DocumentOutbox(1, DocumentProcessState.DOWNLOADED);
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null, URI.create("https://localhost/"), "<html></html>", new Date());
 
         // act
-        hsqldbCrawlerRepository.saveDocumentOutbox(documentOutbox);
+        int i = hsqldbCrawlerRepository.saveDownloadedDocument(downloadedDocument);
 
         // assert
-        Number documentOutboxId = jdbcTemplate.queryForObject("select ID from DOCUMENTS_OUTBOX where document_id = ?",
-                (rs, rowNum) -> rs.getInt("ID"),
-                1
-        );
-        assertThat(documentOutboxId).isNotNull();
+        assertThat(i).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
+    public void given_saved_downloaded_document_when_load_document_then_downloaded_document_with_id() {
+        // arrange
+        jdbcTemplate.update("delete from DOCUMENTS");
+        jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?)", 1, "https://localhost/", "<html></html>", new Date(), DocumentProcessState.DOWNLOADED.toString());
+
+        // act
+        Optional<DownloadedDocument> downloadedDocument = hsqldbCrawlerRepository.getDownloadedDocument();
+
+        // assert
+        assertThat(downloadedDocument.isPresent()).isTrue();
     }
 
 }

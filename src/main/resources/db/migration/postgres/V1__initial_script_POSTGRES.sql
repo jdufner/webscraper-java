@@ -3,7 +3,9 @@ create table if not exists DOCUMENTS (
     url varchar(1000) not null,
     content varchar(10000000) not null,
     downloaded_at timestamp not null,
-    created_at timestamp
+    title varchar(1000),
+    created_at timestamp,
+    process_state varchar(20) not null
 );
 
 create table if not exists AUTHORS (

@@ -55,11 +55,12 @@ public class WebCrawler {
 
     void downloadInitialUrl() {
         URI uri = URI.create(webCrawlerConfigurationProperties.startUrl());
-        HtmlPage htmlPage = webFetcher.get(uri.toString());
-        int documentId = crawlerRepository.saveDocument(htmlPage);
-        DocumentOutbox documentOutbox = new DocumentOutbox(documentId, DocumentProcessState.DOWNLOADED);
-        int documentOutboxId = crawlerRepository.saveDocumentOutbox(documentOutbox);
-        crawlerRepository.setLinkDownloaded(new Link(documentId, uri));
+        DownloadedDocument downloadedDocument = webFetcher.downloadedDocument(uri);
+        int downloadedDocumentId = crawlerRepository.saveDownloadedDocument(downloadedDocument);
+        crawlerRepository.setLinkDownloaded(new Link(downloadedDocumentId, uri));
+//        HtmlPage htmlPage = webFetcher.get(uri.toString());
+//        int documentId = crawlerRepository.saveDocument(htmlPage);
+//        crawlerRepository.setLinkDownloaded(new Link(documentId, uri));
     }
 
     void downloadLinks() {

@@ -23,5 +23,7 @@ public interface CrawlerRepository {
 
     void setLinkSkip(Link link);
 
-    int saveDocumentOutbox(@NonNull DocumentOutbox documentOutbox);
+    int saveDownloadedDocument(@NonNull DownloadedDocument downloadedDocument);
+
+    @NonNull Optional<DownloadedDocument> getDownloadedDocument();
 }

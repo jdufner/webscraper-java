@@ -1,0 +1,103 @@
+@startuml
+skinparam linetype ortho
+
+' Tabellendefinitionen
+entity DOCUMENTS {
+  # id : integer
+  --
+  * url : varchar(1000)
+  * content : varchar(10000000)
+  * downloaded_at : timestamp
+  title : varchar(1000)
+  created_at : timestamp
+}
+
+entity DOCUMENTS_OUTBOX {
+  # id : integer
+  --
+  * document_id : integer
+  * document_process_state : varchar(20)
+}
+
+entity AUTHORS {
+  # id : integer
+  --
+  * name : varchar(100)
+}
+
+entity DOCUMENTS_TO_AUTHORS {
+  # id : integer
+  --
+  * document_id : integer
+  * author_id : integer
+}
+
+entity CATEGORIES {
+  # id : integer
+  --
+  * name : varchar(100)
+}
+
+entity DOCUMENTS_TO_CATEGORIES {
+  # id : integer
+  --
+  * document_id : integer
+  * category_id : integer
+}
+
+entity LINKS {
+  # id : integer
+  --
+  * url : varchar(1000)
+  skip : boolean
+  downloaded : boolean
+}
+
+entity DOCUMENTS_TO_LINKS {
+  # id : integer
+  --
+  * document_id : integer
+  * link_id : integer
+}
+
+entity IMAGES {
+  # id : integer
+  --
+  * url : varchar(1000)
+  filename : varchar(1000)
+  size : integer
+  width : integer
+  height : integer
+  skip : boolean
+  downloaded : boolean
+}
+
+entity DOCUMENTS_TO_IMAGES {
+  # id : integer
+  --
+  * document_id : integer
+  * image_id : integer
+}
+
+' Beziehungen (angenommen: NOT NULL FK = zwingend/Mandatory '||--')
+
+' DOCUMENTS_OUTBOX (1:1/1:n, zwingend)
+DOCUMENTS ||--o{ DOCUMENTS_OUTBOX : fk_document_id
+
+' DOCUMENTS <-> AUTHORS (n:m über DOCUMENTS_TO_AUTHORS)
+DOCUMENTS }|--|| DOCUMENTS_TO_AUTHORS : document_id
+DOCUMENTS_TO_AUTHORS ||--|{ AUTHORS: author_id
+
+' DOCUMENTS <-> CATEGORIES (n:m über DOCUMENTS_TO_CATEGORIES)
+DOCUMENTS }|--|| DOCUMENTS_TO_CATEGORIES : document_id
+DOCUMENTS_TO_CATEGORIES ||--|{ CATEGORIES: category_id
+
+' DOCUMENTS <-> LINKS (n:m über DOCUMENTS_TO_LINKS)
+DOCUMENTS }|--|| DOCUMENTS_TO_LINKS : document_id
+DOCUMENTS_TO_LINKS ||--|{ LINKS: link_id
+
+' DOCUMENTS <-> IMAGES (n:m über DOCUMENTS_TO_IMAGES)
+DOCUMENTS }|--|| DOCUMENTS_TO_IMAGES : document_id
+DOCUMENTS_TO_IMAGES ||--|{ IMAGES: image_id
+
+@enduml

@@ -19,7 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Profile("postgres")
-//@EnabledIf(value = "#{environment.getActiveProfiles()[0] == 'postgres'}")
 class PostgresCrawlerRepositoryIT {
 
     @Autowired
@@ -92,7 +91,7 @@ class PostgresCrawlerRepositoryIT {
         Image image = new Image(-1, URI.create("http://localhost/" + filename));
         jdbcTemplate.update("insert into IMAGES (URL) values (?)", image.uri().toString());
         Integer id = jdbcTemplate.queryForObject("select ID from IMAGES where URL = ?", new Object[]{image.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
-        image = new Image(id, image.uri());
+        image = new Image(Optional.ofNullable(id).orElse(0), image.uri());
         File file = new File(filename);
 
         // act
@@ -141,7 +140,7 @@ class PostgresCrawlerRepositoryIT {
         Link link = new Link(-1, URI.create("https://localhost/"));
         jdbcTemplate.update("insert into LINKS (URL) values (?)", link.uri().toString());
         Integer id = jdbcTemplate.queryForObject("select ID from LINKS where URL = ?", new Object[]{link.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
-        link = new Link(id, link.uri());
+        link = new Link(Optional.ofNullable(id).orElse(0), link.uri());
 
         // act
         postgresCrawlerRepository.setLinkDownloaded(link);
@@ -163,7 +162,7 @@ class PostgresCrawlerRepositoryIT {
         Image image = new Image(-1, URI.create("https://localhost/image_p9W5QuCf2kgagJc5ViKu.jpg"));
         jdbcTemplate.update("insert into IMAGES (URL) values (?)", image.uri().toString());
         Integer id = jdbcTemplate.queryForObject("select ID from IMAGES where URL = ?", new Object[]{image.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
-        image = new Image(id, image.uri());
+        image = new Image(Optional.ofNullable(id).orElse(0), image.uri());
 
         // act
         postgresCrawlerRepository.setImageSkip(image);
@@ -185,7 +184,7 @@ class PostgresCrawlerRepositoryIT {
         Link link = new Link(-2, URI.create("https://localhost/"));
         jdbcTemplate.update("insert into LINKS (URL) values (?)", link.uri().toString());
         Integer id = jdbcTemplate.queryForObject("select ID from LINKS where URL = ?", new Object[]{link.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
-        link = new Link(id, link.uri());
+        link = new Link(Optional.ofNullable(id).orElse(0), link.uri());
 
         // act
         postgresCrawlerRepository.setLinkSkip(link);

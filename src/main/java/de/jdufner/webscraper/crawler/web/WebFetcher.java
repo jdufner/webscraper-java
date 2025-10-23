@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler.web;
 
+import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -47,6 +48,13 @@ public class WebFetcher {
         LOGGER.info("title = {}, createdAt = {}, authors = {}, categories = {}, links = {}, images = {}",
                 title, createdAt, authors, categories, links, images);
         return new HtmlPage(uri, html, downloadedAt, createdAt.orElse(null), authors, categories, links, images);
+    }
+
+    public @NonNull DownloadedDocument downloadedDocument(@NonNull URI uri) {
+        LOGGER.info("get url = {}", uri);
+        String html = webdriverWrapper.getHtml(uri.toString());
+        Date downloadedAt = new Date();
+        return new DownloadedDocument(null, uri, html, downloadedAt);
     }
 
     @NonNull

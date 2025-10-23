@@ -26,6 +26,20 @@ public abstract class AbstractCrawlerRepository {
 
     protected abstract @NonNull Number getIdFromKeyholder(@NonNull KeyHolder keyHolder);
 
+    public int saveDownloadedDocument(@NonNull DownloadedDocument downloadedDocument) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        PreparedStatementCreator psc = con -> {
+            PreparedStatement ps = con.prepareStatement("INSERT INTO documents (url, content, downloaded_at, process_state) VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setString(1, downloadedDocument.uri().toString());
+            ps.setString(2, downloadedDocument.content());
+            ps.setTimestamp(3, convert(downloadedDocument.downloadedAt()));
+            ps.setString(4, DocumentProcessState.DOWNLOADED.toString());
+            return ps;
+        };
+        jdbcTemplate.update(psc, keyHolder);
+        return getIdFromKeyholder(keyHolder).intValue();
+    }
+
     public int saveDocument(@NonNull HtmlPage htmlPage) {
         Number documentId = saveDocumentInternal(htmlPage);
         saveAuthors(htmlPage, documentId);
@@ -38,11 +52,12 @@ public abstract class AbstractCrawlerRepository {
     protected @NonNull Number saveDocumentInternal(@NonNull HtmlPage htmlPage) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO documents (URL, CONTENT, DOWNLOADED_AT, CREATED_AT) VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement("INSERT INTO DOCUMENTS (URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE, CREATED_AT) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, htmlPage.uri().toString());
             ps.setString(2, htmlPage.html());
             ps.setTimestamp(3, convert(htmlPage.downloadedAt()));
-            ps.setTimestamp(4, convert(htmlPage.createdAt()));
+            ps.setString(4, DocumentProcessState.DOWNLOADED.toString());
+            ps.setTimestamp(5, convert(htmlPage.createdAt()));
             return ps;
         };
         jdbcTemplate.update(psc, keyHolder);
@@ -192,16 +207,17 @@ public abstract class AbstractCrawlerRepository {
         return new Timestamp(date.getTime());
     }
 
-    public int saveDocumentOutbox(@NonNull DocumentOutbox documentOutbox) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO documents_outbox (document_id, document_process_state) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, documentOutbox.documentId());
-            ps.setString(2, documentOutbox.processState().toString());
-            return ps;
-        };
-        jdbcTemplate.update(psc, keyHolder);
-        return getIdFromKeyholder(keyHolder).intValue();
+    public @NonNull Optional<DownloadedDocument> getDownloadedDocument() {
+        return Objects.requireNonNull(
+                jdbcTemplate.query(
+                        "select ID, URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED' and ID = (select min(ID) from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED') limit 1",
+                        rs -> {
+                            if (rs.next()) {
+                                return Optional.of(new DownloadedDocument(rs.getInt("ID"), URI.create(rs.getString("URL")), rs.getString("CONTENT"),  rs.getTimestamp("DOWNLOADED_AT")));
+                            }
+                            return Optional.empty();
+                        })
+        );
     }
 
 }
