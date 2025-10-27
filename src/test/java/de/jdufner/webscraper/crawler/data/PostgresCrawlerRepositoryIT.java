@@ -30,7 +30,7 @@ class PostgresCrawlerRepositoryIT {
     @Test
     public void when_html_page_fully_populated_expect_everything_saved() {
         // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null,
+        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null, null,
                 asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                 asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
                 asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
@@ -44,7 +44,7 @@ class PostgresCrawlerRepositoryIT {
     @Test
     public void when_html_page_almost_empty_expect_saved() {
         // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null,
+        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null, null,
                 emptyList(), emptyList(), emptyList(), emptyList());
 
         // act

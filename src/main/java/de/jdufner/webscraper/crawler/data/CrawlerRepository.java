@@ -4,6 +4,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.io.File;
+import java.net.URI;
 import java.util.Optional;
 
 @Repository
@@ -24,6 +25,8 @@ public interface CrawlerRepository {
     void setLinkSkip(Link link);
 
     int saveDownloadedDocument(@NonNull DownloadedDocument downloadedDocument);
+
+    @NonNull Optional<Number> saveUriAsLink(@NonNull URI uri);
 
     @NonNull Optional<DownloadedDocument> getDownloadedDocument();
 }

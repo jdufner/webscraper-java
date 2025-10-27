@@ -2,6 +2,8 @@ package de.jdufner.webscraper.crawler.data;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
@@ -17,6 +19,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 public abstract class AbstractCrawlerRepository {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCrawlerRepository.class);
 
     protected final JdbcTemplate jdbcTemplate;
 
@@ -52,12 +56,13 @@ public abstract class AbstractCrawlerRepository {
     protected @NonNull Number saveDocumentInternal(@NonNull HtmlPage htmlPage) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO DOCUMENTS (URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE, CREATED_AT) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement("INSERT INTO DOCUMENTS (URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE, TITLE, CREATED_AT) VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, htmlPage.uri().toString());
             ps.setString(2, htmlPage.html());
             ps.setTimestamp(3, convert(htmlPage.downloadedAt()));
             ps.setString(4, DocumentProcessState.DOWNLOADED.toString());
-            ps.setTimestamp(5, convert(htmlPage.createdAt()));
+            ps.setString(5, htmlPage.title());
+            ps.setTimestamp(6, convert(htmlPage.createdAt()));
             return ps;
         };
         jdbcTemplate.update(psc, keyHolder);
@@ -113,25 +118,9 @@ public abstract class AbstractCrawlerRepository {
     }
 
     protected void saveLinks(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
-        ResultSetExtractor<Optional<Number>> rse = rs -> {
-            if (rs.next()) {
-                return Optional.of(rs.getLong("ID"));
-            }
-            return Optional.empty();
-        };
-        htmlPage.links().forEach(link -> {
-            Optional<Number> linkId = Objects.requireNonNull(jdbcTemplate.query("SELECT ID FROM links WHERE URL = ?", rse, link.toString()));
-            if (linkId.isEmpty()) {
-                KeyHolder keyHolder = new GeneratedKeyHolder();
-                PreparedStatementCreator psc = con -> {
-                    PreparedStatement ps = con.prepareStatement("INSERT INTO links (URL) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
-                    ps.setString(1, link.toString());
-                    return ps;
-                };
-                jdbcTemplate.update(psc, keyHolder);
-                linkId = Optional.of(getIdFromKeyholder(keyHolder));
-            }
-            jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_LINKS (DOCUMENT_ID, LINK_ID) values (?, ?)", documentId, linkId.get());
+        htmlPage.links().forEach(uri -> {
+            Optional<Number> linkId = saveUriAsLink(uri);
+            linkId.ifPresent(number -> jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_LINKS (DOCUMENT_ID, LINK_ID) values (?, ?)", documentId, number));
         });
     }
 
@@ -218,6 +207,28 @@ public abstract class AbstractCrawlerRepository {
                             return Optional.empty();
                         })
         );
+    }
+
+    public @NonNull Optional<Number> saveUriAsLink(@NonNull URI uri) {
+        ResultSetExtractor<Optional<Number>> rse = rs -> {
+            if (rs.next()) {
+                return Optional.of(rs.getLong("ID"));
+            }
+            return Optional.empty();
+        };
+        Optional<Number> linkId = Objects.requireNonNull(jdbcTemplate.query("SELECT ID FROM LINKS WHERE URL = ?", rse, uri.toString()));
+        if (linkId.isEmpty()) {
+            KeyHolder keyHolder = new GeneratedKeyHolder();
+            PreparedStatementCreator psc = con -> {
+                PreparedStatement ps = con.prepareStatement("INSERT INTO LINKS (URL) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                ps.setString(1, uri.toString());
+                return ps;
+            };
+            jdbcTemplate.update(psc, keyHolder);
+            linkId = Optional.of(getIdFromKeyholder(keyHolder));
+        }
+        LOGGER.debug("LINKS (ID = {}, URI = {})", linkId.get(), uri.toString());
+        return linkId;
     }
 
 }

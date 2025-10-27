@@ -2,20 +2,20 @@ package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.CrawlerRepository;
+import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import de.jdufner.webscraper.crawler.data.HtmlPage;
 import de.jdufner.webscraper.crawler.data.Link;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.net.URI;
 import java.util.Date;
 import java.util.Optional;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -39,45 +39,55 @@ class WebCrawlerTest {
     private WebCrawler webCrawler;
 
     @Test
-    public void given_webcrawler_when_crawl_expect_html_page() {
-        // arrange
-        String url = "https://localhost";
-        when(webCrawlerConfigurationProperties.startUrl()).thenReturn(url);
-        when(webCrawlerConfigurationProperties.numberPages()).thenReturn(3);
-        HtmlPage htmlPageStart = new HtmlPage(URI.create(url), "", new Date(), null, emptyList(), emptyList(), emptyList(), emptyList());
-        when(webFetcher.get(url)).thenReturn(htmlPageStart);
-        Link link = new Link(1, URI.create("https://localhost/next"));
-        HtmlPage htmlPageContinue = new HtmlPage(link.uri(), "", new Date(), null, emptyList(), emptyList(), emptyList(), emptyList());
-        when(webFetcher.get(link.uri().toString())).thenReturn(htmlPageContinue);
-        when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
-        when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
-
-        // act
-        webCrawler.crawl();
-
-        // assert
-        verify(webFetcher, times(1)).get(url);
-        verify(crawlerRepository, times(3)).getNextLinkIfAvailable();
-        verify(webFetcher, times(3)).get(link.uri().toString());
-        ArgumentCaptor<HtmlPage> savedHtmlPages = ArgumentCaptor.forClass(HtmlPage.class);
-        verify(crawlerRepository, times(4)).saveDocument(savedHtmlPages.capture());
-        assertThat(savedHtmlPages.getAllValues()).containsExactly(htmlPageStart, htmlPageContinue, htmlPageContinue, htmlPageContinue);
-        verify(crawlerRepository, times(3)).setLinkDownloaded(link);
-    }
-
-    @Test
-    public void given_webcrawler_when_initial_url_expect_downloaded() {
+    public void given_webcrawler_when_download_and_not_initialized_expect_download_initial_url() {
         // arrange
         URI uri = URI.create("https://localhost");
         when(webCrawlerConfigurationProperties.startUrl()).thenReturn(uri.toString());
-        HtmlPage htmlPage = new HtmlPage(uri, "<html></html>", new Date(), null, emptyList(), emptyList(), emptyList(), emptyList());
-        when(webFetcher.get(uri.toString())).thenReturn(htmlPage);
-        when(crawlerRepository.saveDocument(htmlPage)).thenReturn(1);
+        when(webCrawlerConfigurationProperties.numberPages()).thenReturn(1);
+
+        // act
+        webCrawler.download();
+
+        // assert
+        assertThat((Boolean) ReflectionTestUtils.getField(webCrawler, "initialized")).isTrue();
+        verify(crawlerRepository).saveUriAsLink(uri);
+    }
+
+    @Test void given_webcrawler_when_download_and_initialized_expect_download_link() {
+        // arrange
+        URI uri = URI.create("https://localhost");
+        when(webCrawlerConfigurationProperties.numberPages()).thenReturn(1);
+        ReflectionTestUtils.setField(webCrawler, "initialized", true);
+        Link link = new Link(1, uri);
+        when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
+        when(siteConfigurationProperties.isEligibleAndNotBlocked(uri)).thenReturn(true);
+
+        // act
+        webCrawler.download();
+
+        // assert
+        assertThat((Integer) ReflectionTestUtils.getField(webCrawler, "numberDownloadedLinks")).isEqualTo(1);
+        verify(crawlerRepository).getNextLinkIfAvailable();
+    }
+
+    @Test
+    public void given_webcrawler_when_download_initial_url_expect_downloaded_and_saved() {
+        // arrange
+        URI uri = URI.create("https://localhost");
+        when(webCrawlerConfigurationProperties.startUrl()).thenReturn(uri.toString());
+        when(crawlerRepository.saveUriAsLink(uri)).thenReturn(Optional.of(1));
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null, uri, "<html></hml>", new Date());
+        when(webFetcher.downloadDocument(uri)).thenReturn(downloadedDocument);
+        when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
+        doNothing().when(crawlerRepository).setLinkDownloaded(any(Link.class));
 
         // act
         webCrawler.downloadInitialUrl();
 
         // assert
+        verify(crawlerRepository).saveUriAsLink(uri);
+        verify(webFetcher).downloadDocument(uri);
+        verify(crawlerRepository).saveDownloadedDocument(downloadedDocument);
         verify(crawlerRepository).setLinkDownloaded(new Link(1, uri));
     }
 
@@ -88,7 +98,7 @@ class WebCrawlerTest {
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.empty());
 
         // act
-        webCrawler.downloadLinks();
+        webCrawler.downloadLink();
 
         // assert
         verify(crawlerRepository).getNextLinkIfAvailable();
@@ -96,21 +106,25 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_links_available_expect_html_page_saved() {
+    public void given_webcrawler_when_links_available_expect_downloaded_and_saved() {
         // arrange
         when(webCrawlerConfigurationProperties.numberPages()).thenReturn(1);
-        Link link = new Link(-1, URI.create("http://localhost"));
+        Link link = new Link(1, URI.create("http://localhost"));
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
         when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
-        HtmlPage htmlPage = new HtmlPage(link.uri(), "<html></html>", new Date(), null, emptyList(), emptyList(), emptyList(), emptyList());
-        when(webFetcher.get(link.uri().toString())).thenReturn(htmlPage);
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></hml>", new Date());
+        when(webFetcher.downloadDocument(link.uri())).thenReturn(downloadedDocument);
+        when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
+        doNothing().when(crawlerRepository).setLinkDownloaded(link);
 
         // act
-        webCrawler.downloadLinks();
+        webCrawler.downloadLink();
 
         // assert
         verify(crawlerRepository).getNextLinkIfAvailable();
-        verify(crawlerRepository).saveDocument(any(HtmlPage.class));
+        verify(webFetcher).downloadDocument(link.uri());
+        verify(crawlerRepository).saveDownloadedDocument(downloadedDocument);
+        verify(crawlerRepository).setLinkDownloaded(link);
     }
 
     @Test
@@ -121,7 +135,7 @@ class WebCrawlerTest {
         when(siteConfigurationProperties.isEligibleAndNotBlocked(link.uri())).thenReturn(true);
 
         // act
-        WebCrawler.LinkStatus linkStatus = webCrawler.downloadEligibleNextLink();
+        WebCrawler.LinkStatus linkStatus = webCrawler.findAndDownloadNextLink();
 
         // assert
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.DOWNLOADED);
@@ -135,7 +149,7 @@ class WebCrawlerTest {
         when(siteConfigurationProperties.isEligibleAndNotBlocked(link.uri())).thenReturn(false);
 
         // act
-        WebCrawler.LinkStatus linkStatus = webCrawler.downloadEligibleNextLink();
+        WebCrawler.LinkStatus linkStatus = webCrawler.findAndDownloadNextLink();
 
         // assert
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.SKIPPED);
@@ -147,7 +161,7 @@ class WebCrawlerTest {
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.empty());
 
         // act
-        WebCrawler.LinkStatus linkStatus = webCrawler.downloadEligibleNextLink();
+        WebCrawler.LinkStatus linkStatus = webCrawler.findAndDownloadNextLink();
 
         // assert
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.UNAVAILABLE);
@@ -157,12 +171,17 @@ class WebCrawlerTest {
     public void given_webcrawler_when_download_and_save_expect_status_downloaded() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></html>", new Date());
+        when(webFetcher.downloadDocument(link.uri())).thenReturn(downloadedDocument);
+        when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
+        doNothing().when(crawlerRepository).setLinkDownloaded(link);
 
         // act
         WebCrawler.LinkStatus linkStatus = webCrawler.downloadAndSave(link);
 
         // assert
-        verify(crawlerRepository).saveDocument(any());
+        verify(webFetcher).downloadDocument(link.uri());
+        verify(crawlerRepository).saveDownloadedDocument(downloadedDocument);
         verify(crawlerRepository).setLinkDownloaded(link);
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.DOWNLOADED);
     }

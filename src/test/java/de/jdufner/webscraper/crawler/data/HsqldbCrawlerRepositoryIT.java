@@ -26,24 +26,41 @@ class HsqldbCrawlerRepositoryIT {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    private void deleteAllDataFromTables() {
+        jdbcTemplate.update("delete from DOCUMENTS_TO_AUTHORS where id >= 0");
+        jdbcTemplate.update("delete from AUTHORS where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_CATEGORIES where id >= 0");
+        jdbcTemplate.update("delete from CATEGORIES where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where id >= 0");
+        jdbcTemplate.update("delete from LINKS where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where id >= 0");
+        jdbcTemplate.update("delete from IMAGES where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS where id >= 0");
+    }
+
     @Test
     public void when_html_page_fully_populated_expect_everything_saved() {
-        // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null,
-                asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
-                asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
-                asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
+        try {
+            // arrange
+            deleteAllDataFromTables();
+            HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null, null,
+                    asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
+                    asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
+                    asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
 
-        // act
-        hsqldbCrawlerRepository.saveDocument(htmlPage);
+            // act
+            hsqldbCrawlerRepository.saveDocument(htmlPage);
 
-        // assert
+            // assert
+        } finally {
+
+        }
     }
 
     @Test
     public void when_html_page_almost_empty_expect_saved() {
         // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null,
+        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null, null,
                 emptyList(), emptyList(), emptyList(), emptyList());
 
         // act
@@ -202,6 +219,40 @@ class HsqldbCrawlerRepositoryIT {
 
         // assert
         assertThat(downloadedDocument.isPresent()).isTrue();
+    }
+
+    @Test
+    public void given_not_yet_saved_uri_when_save_expect_new_id() {
+        try {
+            // arrange
+            jdbcTemplate.update("delete from LINKS");
+
+            // act
+            Optional<Number> linkId = hsqldbCrawlerRepository.saveUriAsLink(URI.create("https://localhost/"));
+
+            // assert
+            assertThat(linkId.isPresent()).isTrue();
+        }  finally {
+            jdbcTemplate.update("delete from LINKS");
+        }
+    }
+
+    @Test
+    public void given_already_saved_uri_when_save_expect_existing_id() {
+        try {
+            // arrange
+            jdbcTemplate.update("delete from LINKS");
+            jdbcTemplate.update("insert into LINKS (ID, URL) values (?, ?)", 1, "https://localhost/");
+
+            // act
+            Optional<Number> linkId = hsqldbCrawlerRepository.saveUriAsLink(URI.create("https://localhost/"));
+
+            // assert
+            assertThat(linkId.isPresent()).isTrue();
+            assertThat(linkId.get().intValue()).isEqualTo(1);
+        }  finally {
+            jdbcTemplate.update("delete from LINKS");
+        }
     }
 
 }

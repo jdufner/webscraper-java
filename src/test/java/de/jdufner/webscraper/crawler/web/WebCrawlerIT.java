@@ -19,11 +19,11 @@ class WebCrawlerIT {
     private WebCrawler webCrawler;
 
     @Test
-    public void crawl() {
+    public void download() {
         // arrange
 
         // act
-        webCrawler.crawl();
+        webCrawler.download();
 
         // assert
     }

@@ -33,14 +33,18 @@
 
 ### Spring Profiles
 
+The preferred setup for local tests is hsqldb, localWebDriver, and heise.
+
+    spring.profiles.active=hsqldb,localWebDriver,heise
+
 | Name            | Purpose                                                     |
 |-----------------|-------------------------------------------------------------|
 | apod            | Fetches HTML pages from www.apod.org                        |
 | heise           | Fetches HTML pages from www.heise.de                        |
 | localWebDriver  | Uses a local Selenium Web Driver with local Chrome browser. |
 | remoteWebDriver | Uses a remote Selenium Web Driver as Docker container.      |
-
-
+| hsqldb          | Uses a local in-memory database.                            |
+| postgresql      | Uses a remote PostgreSQL database.                          |
 
 ### Todo
 
