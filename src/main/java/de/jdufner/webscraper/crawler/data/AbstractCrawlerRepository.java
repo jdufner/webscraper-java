@@ -44,39 +44,34 @@ public abstract class AbstractCrawlerRepository {
         return getIdFromKeyholder(keyHolder).intValue();
     }
 
-    public int saveDocument(@NonNull HtmlPage htmlPage) {
-        Number documentId = saveDocumentInternal(htmlPage);
-        saveAuthors(htmlPage, documentId);
-        saveCategories(htmlPage, documentId);
-        saveLinks(htmlPage, documentId);
-        saveImages(htmlPage, documentId);
-        return documentId.intValue();
+    public void saveAnalyzedDocument(@NonNull AnalyzedDocument analyzedDocument) {
+        updateAnalyzedDocument(analyzedDocument);
+        saveAuthors(analyzedDocument, analyzedDocument.documentId());
+        saveCategories(analyzedDocument, analyzedDocument.documentId());
+        saveLinks(analyzedDocument, analyzedDocument.documentId());
+        saveImages(analyzedDocument, analyzedDocument.documentId());
     }
 
-    protected @NonNull Number saveDocumentInternal(@NonNull HtmlPage htmlPage) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    protected void updateAnalyzedDocument(@NonNull AnalyzedDocument analyzedDocument) {
         PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO DOCUMENTS (URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE, TITLE, CREATED_AT) VALUES (?, ?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-            ps.setString(1, htmlPage.uri().toString());
-            ps.setString(2, htmlPage.html());
-            ps.setTimestamp(3, convert(htmlPage.downloadedAt()));
-            ps.setString(4, DocumentProcessState.DOWNLOADED.toString());
-            ps.setString(5, htmlPage.title());
-            ps.setTimestamp(6, convert(htmlPage.createdAt()));
+            PreparedStatement ps = con.prepareStatement("update DOCUMENTS set PROCESS_STATE = ?, TITLE = ?, CREATED_AT = ? where ID = ?");
+            ps.setString(1, DocumentProcessState.ANALYZED.toString());
+            ps.setString(2, analyzedDocument.title());
+            ps.setTimestamp(3, convert(analyzedDocument.createdAt()));
+            ps.setInt(4, analyzedDocument.documentId());
             return ps;
         };
-        jdbcTemplate.update(psc, keyHolder);
-        return getIdFromKeyholder(keyHolder);
+        jdbcTemplate.update(psc);
     }
 
-    protected void saveAuthors(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
+    protected void saveAuthors(@NonNull AnalyzedDocument analyzedDocument, @NonNull Number documentId) {
         ResultSetExtractor<Optional<Number>> rse = rs -> {
             if (rs.next()) {
                 return Optional.of(rs.getLong("ID"));
             }
             return Optional.empty();
         };
-        htmlPage.authors().forEach(
+        analyzedDocument.authors().forEach(
                 author -> {
                     Optional<Number> authorId = (Objects.requireNonNull(jdbcTemplate.query("select ID from AUTHORS where NAME = ?", rse, author)));
                     if (authorId.isEmpty()) {
@@ -94,14 +89,14 @@ public abstract class AbstractCrawlerRepository {
         );
     }
 
-    protected void saveCategories(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
+    protected void saveCategories(@NonNull AnalyzedDocument analyzedDocument, @NonNull Number documentId) {
         ResultSetExtractor<Optional<Number>> rse = rs -> {
             if (rs.next()) {
                 return Optional.of(rs.getLong("ID"));
             }
             return Optional.empty();
         };
-        htmlPage.categories().forEach(category -> {
+        analyzedDocument.categories().forEach(category -> {
             Optional<Number> categoryId = Objects.requireNonNull(jdbcTemplate.query("select ID from CATEGORIES where NAME = ?", rse, category));
             if (categoryId.isEmpty()) {
                 KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -117,21 +112,21 @@ public abstract class AbstractCrawlerRepository {
         });
     }
 
-    protected void saveLinks(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
-        htmlPage.links().forEach(uri -> {
+    protected void saveLinks(@NonNull AnalyzedDocument analyzedDocument, @NonNull Number documentId) {
+        analyzedDocument.links().forEach(uri -> {
             Optional<Number> linkId = saveUriAsLink(uri);
             linkId.ifPresent(number -> jdbcTemplate.update("INSERT INTO DOCUMENTS_TO_LINKS (DOCUMENT_ID, LINK_ID) values (?, ?)", documentId, number));
         });
     }
 
-    protected void saveImages(@NonNull HtmlPage htmlPage, @NonNull Number documentId) {
+    protected void saveImages(@NonNull AnalyzedDocument analyzedDocument, @NonNull Number documentId) {
         ResultSetExtractor<Optional<Number>> rse = rs -> {
             if (rs.next()) {
                 return Optional.of(rs.getLong("ID"));
             }
             return Optional.empty();
         };
-        htmlPage.images().forEach(image -> {
+        analyzedDocument.images().forEach(image -> {
             Optional<Number> imageId = Objects.requireNonNull(jdbcTemplate.query("SELECT ID FROM IMAGES WHERE URL = ?", rse, image.toString()));
             if (imageId.isEmpty()) {
                 KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -227,7 +222,7 @@ public abstract class AbstractCrawlerRepository {
             jdbcTemplate.update(psc, keyHolder);
             linkId = Optional.of(getIdFromKeyholder(keyHolder));
         }
-        LOGGER.debug("LINKS (ID = {}, URI = {})", linkId.get(), uri.toString());
+        LOGGER.debug("LINKS (ID = {}, URI = {})", linkId.get(), uri);
         return linkId;
     }
 

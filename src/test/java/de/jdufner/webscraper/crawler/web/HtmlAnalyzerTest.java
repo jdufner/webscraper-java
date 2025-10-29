@@ -65,7 +65,7 @@ class HtmlAnalyzerTest {
         String timestamp = "2024-09-05T21:30:00+02:00";
         Date date;
         try {
-            date = WebFetcher.DATE_FORMAT.parse(timestamp);
+            date = HtmlAnalyzer.DATE_FORMAT.parse(timestamp);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
@@ -95,7 +95,7 @@ class HtmlAnalyzerTest {
         String timestamp = "05.09.2024 21:30:00";
         Date date = null;
         try {
-            date = WebFetcher.DATE_FORMAT.parse(timestamp);
+            date = HtmlAnalyzer.DATE_FORMAT.parse(timestamp);
         } catch (ParseException ignored) {
         }
         Document document = Jsoup.parse("""

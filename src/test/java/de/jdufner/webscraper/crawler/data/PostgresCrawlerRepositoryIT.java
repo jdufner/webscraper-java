@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
 import java.util.Objects;
@@ -27,16 +28,30 @@ class PostgresCrawlerRepositoryIT {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
+    private void deleteAllDataFromTables() {
+        jdbcTemplate.update("delete from DOCUMENTS_TO_AUTHORS where id >= 0");
+        jdbcTemplate.update("delete from AUTHORS where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_CATEGORIES where id >= 0");
+        jdbcTemplate.update("delete from CATEGORIES where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where id >= 0");
+        jdbcTemplate.update("delete from LINKS where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where id >= 0");
+        jdbcTemplate.update("delete from IMAGES where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS where id >= 0");
+    }
+
     @Test
     public void when_html_page_fully_populated_expect_everything_saved() {
         // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null, null,
+        deleteAllDataFromTables();
+        jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT) values (?, ?, ?, ?)", -1, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()));
+        AnalyzedDocument analyzedDocument = new AnalyzedDocument(-1, "title", new Date(),
                 asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                 asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
                 asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
 
         // act
-        postgresCrawlerRepository.saveDocument(htmlPage);
+        postgresCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
 
         // assert
     }
@@ -44,14 +59,15 @@ class PostgresCrawlerRepositoryIT {
     @Test
     public void when_html_page_almost_empty_expect_saved() {
         // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null, null,
+        deleteAllDataFromTables();
+        jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT) values (?, ?, ?, ?)", -2, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()));
+        AnalyzedDocument analyzedDocument = new AnalyzedDocument(-2, null, null,
                 emptyList(), emptyList(), emptyList(), emptyList());
 
         // act
-        int id = postgresCrawlerRepository.saveDocument(htmlPage);
+        postgresCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
 
         // assert
-        assertThat(id).isGreaterThanOrEqualTo(0);
     }
 
     @Test

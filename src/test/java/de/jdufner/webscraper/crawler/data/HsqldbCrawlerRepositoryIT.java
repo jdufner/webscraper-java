@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.io.File;
 import java.net.URI;
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
@@ -43,13 +44,14 @@ class HsqldbCrawlerRepositoryIT {
         try {
             // arrange
             deleteAllDataFromTables();
-            HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null, null,
+            jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?)", -1, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()), DocumentProcessState.DOWNLOADED.toString());
+            AnalyzedDocument analyzedDocument = new AnalyzedDocument(-1, "title", new Date(),
                     asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                     asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
                     asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
 
             // act
-            hsqldbCrawlerRepository.saveDocument(htmlPage);
+            hsqldbCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
 
             // assert
         } finally {
@@ -60,14 +62,16 @@ class HsqldbCrawlerRepositoryIT {
     @Test
     public void when_html_page_almost_empty_expect_saved() {
         // arrange
-        HtmlPage htmlPage = new HtmlPage(URI.create("https://localhost/"), "<html></html>", new Date(), null, null,
+        deleteAllDataFromTables();
+        jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?)", -2, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()), DocumentProcessState.DOWNLOADED.toString());
+        AnalyzedDocument analyzedDocument = new AnalyzedDocument(-2, null, null,
                 emptyList(), emptyList(), emptyList(), emptyList());
 
         // act
-        int id = hsqldbCrawlerRepository.saveDocument(htmlPage);
+        hsqldbCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
 
         // assert
-        assertThat(id).isGreaterThanOrEqualTo(0);
+
     }
 
     @Test

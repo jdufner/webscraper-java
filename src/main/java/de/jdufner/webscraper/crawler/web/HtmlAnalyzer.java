@@ -1,13 +1,14 @@
 package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.data.DownloadedDocument;
-import de.jdufner.webscraper.crawler.data.HtmlPage;
+import de.jdufner.webscraper.crawler.data.AnalyzedDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import java.net.URI;
@@ -17,15 +18,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Service
 public class HtmlAnalyzer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HtmlAnalyzer.class);
     static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
     
-    public HtmlPage analyze(@NonNull DownloadedDocument downloadedDocument) {
+    public AnalyzedDocument analyze(@NonNull DownloadedDocument downloadedDocument) {
         Document document = Jsoup.parse(downloadedDocument.content());
         Optional<String> title = extractTitle(document);
         Optional<Date> createdAt = extractCreatedAt(document);
@@ -33,7 +36,7 @@ public class HtmlAnalyzer {
         List<String> categories = extractCategories(document);
         List<URI> links = extractLinks(downloadedDocument.uri(), document);
         List<URI> images = extractImages(downloadedDocument.uri(), document);
-        return new HtmlPage(downloadedDocument.uri(), downloadedDocument.content(), downloadedDocument.downloadedAt(), title.get(), createdAt.get(), authors, categories, links, images);
+        return new AnalyzedDocument(Objects.requireNonNull(downloadedDocument.id()), title.get(), createdAt.get(), authors, categories, links, images);
     }
 
     @NonNull

@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface CrawlerRepository {
 
-    int saveDocument(@NonNull HtmlPage htmlPage);
+    void saveAnalyzedDocument(@NonNull AnalyzedDocument analyzedDocument);
 
     @NonNull Optional<Image> getNextImageIfAvailable();
 

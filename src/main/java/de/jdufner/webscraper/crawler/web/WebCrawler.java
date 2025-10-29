@@ -3,6 +3,7 @@ package de.jdufner.webscraper.crawler.web;
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.CrawlerRepository;
 import de.jdufner.webscraper.crawler.data.DownloadedDocument;
+import de.jdufner.webscraper.crawler.data.AnalyzedDocument;
 import de.jdufner.webscraper.crawler.data.Link;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -29,6 +30,8 @@ public class WebCrawler {
     @NonNull
     private final WebFetcher webFetcher;
     @NonNull
+    private final HtmlAnalyzer htmlAnalyzer;
+    @NonNull
     private final CrawlerRepository crawlerRepository;
 
     private boolean initialized = false;
@@ -37,10 +40,12 @@ public class WebCrawler {
     public WebCrawler(@NonNull WebCrawlerConfigurationProperties webCrawlerConfigurationProperties,
                       @NonNull SiteConfigurationProperties siteConfigurationProperties,
                       @NonNull WebFetcher webFetcher,
+                      @NonNull HtmlAnalyzer htmlAnalyzer,
                       @NonNull CrawlerRepository crawlerRepository) {
         this.webCrawlerConfigurationProperties = webCrawlerConfigurationProperties;
         this.siteConfigurationProperties = siteConfigurationProperties;
         this.webFetcher = webFetcher;
+        this.htmlAnalyzer = htmlAnalyzer;
         this.crawlerRepository = crawlerRepository;
     }
 
@@ -58,13 +63,13 @@ public class WebCrawler {
     void downloadInitialUrl() {
         URI uri = URI.create(webCrawlerConfigurationProperties.startUrl());
         Optional<Number> linkId = crawlerRepository.saveUriAsLink(uri);
-        int downloadedDocumentId = downloadAndSave(uri);
+        downloadAndSave(uri);
         linkId.ifPresent(number -> crawlerRepository.setLinkDownloaded(new Link(number.intValue(), uri)));
     }
 
-    private int downloadAndSave(URI uri) {
+    private void downloadAndSave(URI uri) {
         DownloadedDocument downloadedDocument = webFetcher.downloadDocument(uri);
-        return crawlerRepository.saveDownloadedDocument(downloadedDocument);
+        crawlerRepository.saveDownloadedDocument(downloadedDocument);
     }
 
     void findAndDownloadLinkUntilConfiguredNumberReached() {
@@ -93,7 +98,7 @@ public class WebCrawler {
     }
 
     @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
-        int downloadedDocumentId = downloadAndSave(link.uri());
+        downloadAndSave(link.uri());
         crawlerRepository.setLinkDownloaded(link);
         return LinkStatus.DOWNLOADED;
     }
@@ -110,7 +115,11 @@ public class WebCrawler {
         // The next document is the document with the lowest ID in state DOWNLOADED
         Optional<DownloadedDocument> optionalDownloadedDocument = crawlerRepository.findNextDownloadedDocument();
 
-        optionalDownloadedDocument.ifPresent(downloadedDocument -> {});
+        if (optionalDownloadedDocument.isPresent()) {
+            AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(optionalDownloadedDocument.get());
+            crawlerRepository.saveAnalyzedDocument(analyzedDocument);
+        }
+
 
         // HtmlPage / AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(downloadedDocument)
         // crawlerRepository.saveAnalyzedDocument()
