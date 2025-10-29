@@ -10,7 +10,7 @@ import static java.util.Arrays.stream;
 @ConfigurationProperties(prefix = "webscraper.crawler.sites")
 public record SiteConfigurationProperties(@NonNull String[] whiteList, @NonNull String[] blackList) {
 
-    public boolean isEligibleAndNotBlocked(@NonNull URI uri) {
+    public boolean isNotBlocked(@NonNull URI uri) {
         return isInArray(whiteList, uri) && !isInArray(blackList, uri);
     }
 

@@ -215,7 +215,7 @@ class HsqldbCrawlerRepositoryIT {
         jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?)", 1, "https://localhost/", "<html></html>", new Date(), DocumentProcessState.DOWNLOADED.toString());
 
         // act
-        Optional<DownloadedDocument> downloadedDocument = hsqldbCrawlerRepository.getDownloadedDocument();
+        Optional<DownloadedDocument> downloadedDocument = hsqldbCrawlerRepository.findNextDownloadedDocument();
 
         // assert
         assertThat(downloadedDocument.isPresent()).isTrue();

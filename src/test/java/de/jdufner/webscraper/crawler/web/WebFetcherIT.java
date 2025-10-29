@@ -1,11 +1,13 @@
 package de.jdufner.webscraper.crawler.web;
 
-import de.jdufner.webscraper.crawler.data.HtmlPage;
+import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+
+import java.net.URI;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,10 +24,10 @@ class WebFetcherIT {
         // arrange
 
         // act
-        HtmlPage htmlPage = webFetcher.get("https://www.heise.de");
+        DownloadedDocument downloadedDocument = webFetcher.downloadDocument(URI.create("https://www.heise.de"));
 
         // assert
-        assertThat(htmlPage).isNotNull();
+        assertThat(downloadedDocument).isNotNull();
     }
 
 }

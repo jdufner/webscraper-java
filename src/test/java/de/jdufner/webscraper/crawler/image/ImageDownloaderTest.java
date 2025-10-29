@@ -42,7 +42,7 @@ class ImageDownloaderTest {
         URI uri = URI.create(url);
         Image image = new Image(1, uri);
         when(crawlerRepository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
-        when(siteConfigurationProperties.isEligibleAndNotBlocked(any())).thenReturn(true);
+        when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
 
         // act
         imageDownloader.downloadAll();

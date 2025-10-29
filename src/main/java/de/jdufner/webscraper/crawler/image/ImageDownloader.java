@@ -46,7 +46,7 @@ public class ImageDownloader {
         Optional<Image> optionalImage = crawlerRepository.getNextImageIfAvailable();
         if (optionalImage.isPresent()) {
             Image image = optionalImage.get();
-            if (siteConfigurationProperties.isEligibleAndNotBlocked(optionalImage.get().uri())) {
+            if (siteConfigurationProperties.isNotBlocked(optionalImage.get().uri())) {
                 // TODO why to store the file locally instead of using S3 protocol (MinIO)
                 File file = download(image.uri());
                 crawlerRepository.setImageDownloadedAndFilename(image, file);

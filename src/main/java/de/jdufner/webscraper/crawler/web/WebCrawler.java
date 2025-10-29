@@ -51,7 +51,7 @@ public class WebCrawler {
             downloadInitialUrl();
             initialized = true;
         } else {
-            downloadLink();
+            findAndDownloadLinkUntilConfiguredNumberReached();
         }
     }
 
@@ -67,7 +67,7 @@ public class WebCrawler {
         return crawlerRepository.saveDownloadedDocument(downloadedDocument);
     }
 
-    void downloadLink() {
+    void findAndDownloadLinkUntilConfiguredNumberReached() {
         while (numberDownloadedLinks < webCrawlerConfigurationProperties.numberPages()) {
             LinkStatus linkStatus = findAndDownloadNextLink();
             if (linkStatus == LinkStatus.DOWNLOADED) {
@@ -81,15 +81,15 @@ public class WebCrawler {
 
     @NonNull LinkStatus findAndDownloadNextLink() {
         Optional<Link> optionalLink = crawlerRepository.getNextLinkIfAvailable();
-        if (optionalLink.isPresent()) {
-            Link link = optionalLink.get();
-            if (siteConfigurationProperties.isEligibleAndNotBlocked(link.uri())) {
-                return downloadAndSave(link);
-            } else {
-                return skip(link);
-            }
+        return optionalLink.map(this::downloadLinkAndUpdateStatus).orElse(LinkStatus.UNAVAILABLE);
+    }
+
+    @NonNull LinkStatus downloadLinkAndUpdateStatus(Link link) {
+        if (siteConfigurationProperties.isNotBlocked(link.uri())) {
+            return downloadAndSave(link);
+        } else {
+            return skip(link);
         }
-        return LinkStatus.UNAVAILABLE;
     }
 
     @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
@@ -99,7 +99,7 @@ public class WebCrawler {
     }
 
     @NonNull LinkStatus skip(@NonNull Link link) {
-        LOGGER.info("Link skipped {}", link.uri());
+        LOGGER.debug("Skip Link {}", link.uri());
         crawlerRepository.setLinkSkip(link);
         return LinkStatus.SKIPPED;
     }
@@ -108,7 +108,10 @@ public class WebCrawler {
     public void analyze() {
         LOGGER.info("startUrl = {}", webCrawlerConfigurationProperties.startUrl());
         // The next document is the document with the lowest ID in state DOWNLOADED
-        // DownloadedDocument downloadedDocument = crawlerRepository.findNextDownloadedDocument();
+        Optional<DownloadedDocument> optionalDownloadedDocument = crawlerRepository.findNextDownloadedDocument();
+
+        optionalDownloadedDocument.ifPresent(downloadedDocument -> {});
+
         // HtmlPage / AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(downloadedDocument)
         // crawlerRepository.saveAnalyzedDocument()
     }

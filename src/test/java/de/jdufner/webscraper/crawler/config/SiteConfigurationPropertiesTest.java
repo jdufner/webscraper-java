@@ -16,7 +16,7 @@ class SiteConfigurationPropertiesTest {
         SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         // act
-        boolean eligibleAndNotBlocked = config.isEligibleAndNotBlocked(URI.create("https://localhost"));
+        boolean eligibleAndNotBlocked = config.isNotBlocked(URI.create("https://localhost"));
 
         // assert
         assertThat(eligibleAndNotBlocked).isTrue();
@@ -30,7 +30,7 @@ class SiteConfigurationPropertiesTest {
         SiteConfigurationProperties config = new SiteConfigurationProperties(whiteList, blackList);
 
         // act
-        boolean eligibleAndNotBlocked = config.isEligibleAndNotBlocked(URI.create("https://localhost"));
+        boolean eligibleAndNotBlocked = config.isNotBlocked(URI.create("https://localhost"));
 
         // assert
         assertThat(eligibleAndNotBlocked).isFalse();

@@ -196,7 +196,7 @@ public abstract class AbstractCrawlerRepository {
         return new Timestamp(date.getTime());
     }
 
-    public @NonNull Optional<DownloadedDocument> getDownloadedDocument() {
+    public @NonNull Optional<DownloadedDocument> findNextDownloadedDocument() {
         return Objects.requireNonNull(
                 jdbcTemplate.query(
                         "select ID, URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED' and ID = (select min(ID) from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED') limit 1",

@@ -22,6 +22,14 @@
 
 ### Environment variables
 
+To avoid warnings regarding the use of Mockito, the following parameter must be set.  
+
+    -javaagent:$MAVEN_REPOSITORY$/org/mockito/mockito-core/5.17.0/mockito-core-5.17.0.jar
+
+The preferred setup for local tests is hsqldb, localWebDriver, and heise.
+
+    spring.profiles.active=hsqldb,localWebDriver,heise
+
 ## Developer information
 
 ### Maven Profiles
@@ -32,10 +40,6 @@
 | buildserver | Remote Test | heise, remoteWebDriver |
 
 ### Spring Profiles
-
-The preferred setup for local tests is hsqldb, localWebDriver, and heise.
-
-    spring.profiles.active=hsqldb,localWebDriver,heise
 
 | Name            | Purpose                                                     |
 |-----------------|-------------------------------------------------------------|
