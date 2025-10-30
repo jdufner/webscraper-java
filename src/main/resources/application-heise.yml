@@ -7,8 +7,8 @@ webscraper:
     image:
       number-images: 100
     web:
-      start-automatically: false
-      start-url: https://www.heise.de
+      start-automatically: true
+      start-url: https://www.heise.de/
       number-pages: 30
       consent-cookies: true
       consent-css-selector:

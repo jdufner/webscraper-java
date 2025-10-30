@@ -61,6 +61,7 @@ public class WebCrawler {
     }
 
     void downloadInitialUrl() {
+        LOGGER.info("downloadInitialUrl()");
         URI uri = URI.create(webCrawlerConfigurationProperties.startUrl());
         Optional<Number> linkId = crawlerRepository.saveUriAsLink(uri);
         downloadAndSave(uri);
@@ -73,7 +74,8 @@ public class WebCrawler {
     }
 
     void findAndDownloadLinkUntilConfiguredNumberReached() {
-        while (numberDownloadedLinks < webCrawlerConfigurationProperties.numberPages()) {
+        LOGGER.info("findAndDownloadLinkUntilConfiguredNumberReached()");
+        if (numberDownloadedLinks < webCrawlerConfigurationProperties.numberPages()) {
             LinkStatus linkStatus = findAndDownloadNextLink();
             if (linkStatus == LinkStatus.DOWNLOADED) {
                 numberDownloadedLinks++;
@@ -111,11 +113,11 @@ public class WebCrawler {
 
     @Transactional
     public void analyze() {
-        LOGGER.info("startUrl = {}", webCrawlerConfigurationProperties.startUrl());
         // The next document is the document with the lowest ID in state DOWNLOADED
         Optional<DownloadedDocument> optionalDownloadedDocument = crawlerRepository.findNextDownloadedDocument();
 
         if (optionalDownloadedDocument.isPresent()) {
+            LOGGER.info("analyze = {}", optionalDownloadedDocument.get().uri());
             AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(optionalDownloadedDocument.get());
             crawlerRepository.saveAnalyzedDocument(analyzedDocument);
         }
