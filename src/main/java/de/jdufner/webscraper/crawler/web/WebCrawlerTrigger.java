@@ -30,7 +30,7 @@ public class WebCrawlerTrigger {
         }
     }
 
-    @Scheduled(fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
+    @Scheduled(fixedDelay = 1000, timeUnit = TimeUnit.MILLISECONDS)
     public void doStartAnalysis() {
         LOGGER.info("Starting WebCrawler.doStartAnalysis()");
         if (webCrawlerConfigurationProperties.startAutomatically()) {

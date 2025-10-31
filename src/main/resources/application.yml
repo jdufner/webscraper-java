@@ -15,6 +15,10 @@ spring:
   profiles:
     active: @spring.profiles.active@
   #active: hsqldb,localWebDriver,heise
+  task:
+    scheduling:
+      pool:
+        size: 2
 management:
   endpoints:
     web:
