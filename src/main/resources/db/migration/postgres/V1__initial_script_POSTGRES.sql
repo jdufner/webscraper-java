@@ -1,79 +1,86 @@
 create table if not exists DOCUMENTS (
-    id integer generated always as identity primary key,
-    url varchar(1000) not null,
-    content varchar(10000000) not null,
-    downloaded_at timestamp not null,
-    title varchar(1000),
-    created_at timestamp,
-    process_state varchar(20) not null
+    ID integer generated always as identity primary key,
+    URL varchar(1000) not null,
+    CONTENT text not null,
+    DOWNLOAD_STARTED_AT timestamp not null,
+    DOWNLOAD_STOPPED_AT timestamp not null,
+    ANALYSIS_STARTED_AT timestamp,
+    ANALYSIS_STOPPED_AT timestamp,
+    TITLE varchar(1000),
+    CREATED_AT timestamp,
+    PROCESS_STATE varchar(20) not null
 );
 
 create table if not exists AUTHORS (
-    id integer generated always as identity primary key,
-    name varchar(100) not null
+    ID integer generated always as identity primary key,
+    NAME varchar(100) not null
 );
 
 create table if not exists DOCUMENTS_TO_AUTHORS (
-    id integer generated always as identity primary key,
-    document_id integer not null,
-    author_id integer not null,
-    constraint fk_dta_document_id foreign key (document_id) references DOCUMENTS(id),
-    constraint fk_dta_author_id foreign key (author_id) references AUTHORS(id)
+    ID integer generated always as identity primary key,
+    DOCUMENT_ID integer not null,
+    AUTHOR_ID integer not null,
+    constraint FK_DTA_DOCUMENT_ID foreign key (DOCUMENT_ID) references DOCUMENTS(ID),
+    constraint FK_DTA_AUTHOR_ID foreign key (AUTHOR_ID) references AUTHORS(ID)
 );
 
-create unique index if not exists DOCUMENTS_TO_AUTHORS_IDX on DOCUMENTS_TO_AUTHORS(document_id, author_id);
+create unique index if not exists DOCUMENTS_TO_AUTHORS_IDX on DOCUMENTS_TO_AUTHORS(DOCUMENT_ID, AUTHOR_ID);
 
 create table if not exists CATEGORIES (
-    id integer generated always as identity primary key,
-    name varchar(100) not null
+    ID integer generated always as identity primary key,
+    NAME varchar(100) not null
 );
 
 create table if not exists DOCUMENTS_TO_CATEGORIES (
-    id integer generated always as identity primary key,
-    document_id integer not null,
-    category_id integer not null,
-    constraint fk_dtc_document_id foreign key (document_id) references DOCUMENTS(id),
-    constraint fk_dtc_category_id foreign key (category_id) references CATEGORIES(id)
+    ID integer generated always as identity primary key,
+    DOCUMENT_ID integer not null,
+    CATEGORY_ID integer not null,
+    constraint FK_DTC_DOCUMENT_ID foreign key (DOCUMENT_ID) references DOCUMENTS(ID),
+    constraint FK_DTC_CATEGORY_ID foreign key (CATEGORY_ID) references CATEGORIES(ID)
 );
 
-create unique index if not exists DOCUMENTS_TO_CATEGORIES_IDX on DOCUMENTS_TO_CATEGORIES(document_id, category_id);
+create unique index if not exists DOCUMENTS_TO_CATEGORIES_IDX on DOCUMENTS_TO_CATEGORIES(DOCUMENT_ID, CATEGORY_ID);
 
 create table if not exists LINKS (
-    id integer generated always as identity primary key,
-    url varchar(1000) not null,
-    skip boolean default false not null,
-    downloaded boolean default false not null
+    ID integer generated always as identity primary key,
+    URL varchar(1000) not null,
+    SKIP boolean default false not null,
+    SKIPPED_AT timestamp,
+    DOWNLOADED boolean default false not null,
+    DOWNLOADED_AT timestamp
 );
 
-create unique index if not exists LINKS_IDX on LINKS(url);
+create unique index if not exists LINKS_IDX on LINKS(URL);
 
 create table if not exists DOCUMENTS_TO_LINKS (
-    id integer generated always as identity primary key,
-    document_id integer not null,
-    link_id integer not null,
-    constraint fk_dtl_document_id foreign key (document_id) references DOCUMENTS(id),
-    constraint fk_dtl_link_id foreign key (link_id) references  LINKS(id)
+    ID integer generated always as identity primary key,
+    DOCUMENT_ID integer not null,
+    LINK_ID integer not null,
+    constraint FK_DTL_DOCUMENT_ID foreign key (DOCUMENT_ID) references DOCUMENTS(ID),
+    constraint FK_DTL_LINK_ID foreign key (LINK_ID) references LINKS(ID)
 );
 
-create unique index if not exists DOCUMENTS_TO_LINKS_IDX on DOCUMENTS_TO_LINKS(document_id, link_id);
+create unique index if not exists DOCUMENTS_TO_LINKS_IDX on DOCUMENTS_TO_LINKS(DOCUMENT_ID, LINK_ID);
 
 create table if not exists IMAGES (
-    id integer generated always as identity primary key,
-    url varchar(1000) not null,
-    filename varchar(1000),
-    size integer,
-    width integer,
-    height integer,
-    skip boolean default false not null,
-    downloaded boolean default false not null
+    ID integer generated always as identity primary key,
+    URL varchar(1000) not null,
+    FILENAME varchar(1000),
+    SIZE integer,
+    WIDTH integer,
+    HEIGHT integer,
+    SKIP boolean default false not null,
+    SKIPPED_AT timestamp,
+    DOWNLOADED boolean default false not null,
+    DOWNLOADED_AT timestamp
 );
 
 create table if not exists DOCUMENTS_TO_IMAGES (
-    id integer generated always as identity primary key,
-    document_id integer not null,
-    image_id integer not null,
-    constraint fk_dti_document_id foreign key (document_id) references DOCUMENTS(id),
-    constraint fk_dti_image_id foreign key (image_id) references IMAGES(id)
+    ID integer generated always as identity primary key,
+    DOCUMENT_ID integer not null,
+    IMAGE_ID integer not null,
+    constraint FK_DTI_DOCUMENT_ID foreign key (DOCUMENT_ID) references DOCUMENTS(ID),
+    constraint FK_DTI_IMAGE_ID foreign key (IMAGE_ID) references IMAGES(ID)
 );
 
-create unique index if not exists DOCUMENTS_TO_IMAGES_IDX on DOCUMENTS_TO_IMAGES(document_id, image_id);
+create unique index if not exists DOCUMENTS_TO_IMAGES_IDX on DOCUMENTS_TO_IMAGES(DOCUMENT_ID, IMAGE_ID);

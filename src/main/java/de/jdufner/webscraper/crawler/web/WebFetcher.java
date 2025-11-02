@@ -22,9 +22,10 @@ public class WebFetcher {
 
     public @NonNull DownloadedDocument downloadDocument(@NonNull URI uri) {
         LOGGER.info("get url = {}", uri);
+        Date downloadStartedAt = new Date();
         String html = webdriverWrapper.getHtml(uri.toString());
-        Date downloadedAt = new Date();
-        return new DownloadedDocument(null, uri, html, downloadedAt);
+        Date downloadStoppedAt = new Date();
+        return new DownloadedDocument(null, uri, html, downloadStartedAt, downloadStoppedAt);
     }
 
 }

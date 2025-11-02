@@ -33,11 +33,12 @@ public abstract class AbstractCrawlerRepository {
     public int saveDownloadedDocument(@NonNull DownloadedDocument downloadedDocument) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO documents (url, content, downloaded_at, process_state) VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement("INSERT INTO documents (url, content, download_started_at, download_stopped_at, process_state) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, downloadedDocument.uri().toString());
             ps.setString(2, downloadedDocument.content());
-            ps.setTimestamp(3, convert(downloadedDocument.downloadedAt()));
-            ps.setString(4, DocumentProcessState.DOWNLOADED.toString());
+            ps.setTimestamp(3, convert(downloadedDocument.downloadStartedAt()));
+            ps.setTimestamp(4, convert(downloadedDocument.downloadStoppedAt()));
+            ps.setString(5, DocumentProcessState.DOWNLOADED.toString());
             return ps;
         };
         jdbcTemplate.update(psc, keyHolder);
@@ -194,10 +195,10 @@ public abstract class AbstractCrawlerRepository {
     public @NonNull Optional<DownloadedDocument> findNextDownloadedDocument() {
         return Objects.requireNonNull(
                 jdbcTemplate.query(
-                        "select ID, URL, CONTENT, DOWNLOADED_AT, PROCESS_STATE from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED' and ID = (select min(ID) from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED') limit 1",
+                        "select ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, PROCESS_STATE from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED' and ID = (select min(ID) from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED') limit 1",
                         rs -> {
                             if (rs.next()) {
-                                return Optional.of(new DownloadedDocument(rs.getInt("ID"), URI.create(rs.getString("URL")), rs.getString("CONTENT"),  rs.getTimestamp("DOWNLOADED_AT")));
+                                return Optional.of(new DownloadedDocument(rs.getInt("ID"), URI.create(rs.getString("URL")), rs.getString("CONTENT"), rs.getTimestamp("DOWNLOAD_STARTED_AT"), rs.getTimestamp("DOWNLOAD_STOPPED_AT")));
                             }
                             return Optional.empty();
                         })

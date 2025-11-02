@@ -17,3 +17,5 @@ drop sequence if exists images_id_seq cascade;
 drop sequence if exists documents_to_links_id_seq cascade;
 drop sequence if exists links_id_seq cascade;
 drop sequence if exists documents_id_seq cascade;
+
+drop table if exists flyway_schema_history;

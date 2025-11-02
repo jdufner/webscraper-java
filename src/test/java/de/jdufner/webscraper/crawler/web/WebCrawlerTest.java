@@ -75,7 +75,7 @@ class WebCrawlerTest {
         URI uri = URI.create("https://localhost");
         when(webCrawlerConfigurationProperties.startUrl()).thenReturn(uri.toString());
         when(crawlerRepository.saveUriAsLink(uri)).thenReturn(Optional.of(1));
-        DownloadedDocument downloadedDocument = new DownloadedDocument(null, uri, "<html></hml>", new Date());
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null, uri, "<html></hml>", new Date(), new Date());
         when(webFetcher.downloadDocument(uri)).thenReturn(downloadedDocument);
         when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
         doNothing().when(crawlerRepository).setLinkDownloaded(any(Link.class));
@@ -110,7 +110,7 @@ class WebCrawlerTest {
         Link link = new Link(1, URI.create("http://localhost"));
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
         when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
-        DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></hml>", new Date());
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></hml>", new Date(), new Date());
         when(webFetcher.downloadDocument(link.uri())).thenReturn(downloadedDocument);
         when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
         doNothing().when(crawlerRepository).setLinkDownloaded(link);
@@ -197,7 +197,7 @@ class WebCrawlerTest {
     public void given_webcrawler_when_download_and_save_expect_status_downloaded() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
-        DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></html>", new Date());
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></html>", new Date(), new Date());
         when(webFetcher.downloadDocument(link.uri())).thenReturn(downloadedDocument);
         when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
         doNothing().when(crawlerRepository).setLinkDownloaded(link);
