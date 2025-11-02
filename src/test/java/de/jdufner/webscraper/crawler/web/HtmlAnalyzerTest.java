@@ -305,8 +305,8 @@ class HtmlAnalyzerTest {
                 <html>
                   <body>
                     <h1>A Header</>
-                    <a href="https://www.google.com/">Google</a>
-                    <a href="https://www.heise.de/">Heise Medien</a>
+                    <a href="https://www.google.com">Google</a>
+                    <a href="https://www.heise.de">Heise Medien</a>
                   </body>
                 </html>""");
 
@@ -314,7 +314,7 @@ class HtmlAnalyzerTest {
         List<URI> urls = htmlAnalyzer.extractLinks(URI.create("https://localhost"), document);
 
         // assert
-        assertThat(urls).containsExactly(URI.create("https://www.google.com/"),URI.create("https://www.heise.de/"));
+        assertThat(urls).containsExactly(URI.create("https://www.google.com"),URI.create("https://www.heise.de"));
     }
 
     @Test

@@ -21,7 +21,7 @@ class WebdriverWrapperIT {
         // arrange
 
         // act
-        String html = wrapper.getHtml("https://www.heise.de/");
+        String html = wrapper.getHtml("https://www.heise.de");
 
         // assert
         assertThat(html).isNotEmpty();
