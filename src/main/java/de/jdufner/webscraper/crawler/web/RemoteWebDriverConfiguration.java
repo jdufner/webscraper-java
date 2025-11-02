@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
 
 @Configuration
 @Profile("remoteWebDriver")
@@ -24,9 +24,9 @@ public class RemoteWebDriverConfiguration {
     @Bean
     public @NonNull WebDriver webDriver() {
         try {
-        ChromeOptions chromeOptions = new ChromeOptions();
-        webdriverConfigurationProperties.options().forEach(chromeOptions::addArguments);
-            return new RemoteWebDriver(new URL("http://localhost:4444"), chromeOptions);
+            ChromeOptions chromeOptions = new ChromeOptions();
+            webdriverConfigurationProperties.options().forEach(chromeOptions::addArguments);
+            return new RemoteWebDriver(URI.create("http://localhost:4444").toURL(), chromeOptions);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);
         }

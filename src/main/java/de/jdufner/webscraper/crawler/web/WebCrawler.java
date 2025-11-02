@@ -1,9 +1,9 @@
 package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
+import de.jdufner.webscraper.crawler.data.AnalyzedDocument;
 import de.jdufner.webscraper.crawler.data.CrawlerRepository;
 import de.jdufner.webscraper.crawler.data.DownloadedDocument;
-import de.jdufner.webscraper.crawler.data.AnalyzedDocument;
 import de.jdufner.webscraper.crawler.data.Link;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -79,9 +79,6 @@ public class WebCrawler {
             LinkStatus linkStatus = findAndDownloadNextLink();
             if (linkStatus == LinkStatus.DOWNLOADED) {
                 numberDownloadedLinks++;
-            }
-            if (linkStatus == LinkStatus.UNAVAILABLE) {
-                return;
             }
         }
     }

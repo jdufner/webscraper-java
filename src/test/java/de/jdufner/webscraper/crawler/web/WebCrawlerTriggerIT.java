@@ -17,9 +17,8 @@ public class WebCrawlerTriggerIT {
     @Test
     @Disabled("Since this test takes 20 seconds, it is disabled for now.")
     public void given_scheduler_when_running_expect_called_periodically() {
-        Awaitility.await().atMost(Durations.ONE_MINUTE).untilAsserted(() -> {
-           Mockito.verify(webCrawlerTrigger, Mockito.atLeast(2)).doStartAnalysis();
-        });
+        Awaitility.await().atMost(Durations.ONE_MINUTE).untilAsserted(() ->
+                Mockito.verify(webCrawlerTrigger, Mockito.atLeast(2)).doStartAnalysis());
     }
 
 }

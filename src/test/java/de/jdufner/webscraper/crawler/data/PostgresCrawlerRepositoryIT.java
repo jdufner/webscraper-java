@@ -5,9 +5,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import java.io.File;
 import java.net.URI;
+import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
@@ -44,8 +48,8 @@ class PostgresCrawlerRepositoryIT {
     public void when_html_page_fully_populated_expect_everything_saved() {
         // arrange
         deleteAllDataFromTables();
-        jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT) values (?, ?, ?, ?)", -1, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()));
-        AnalyzedDocument analyzedDocument = new AnalyzedDocument(-1, "title", new Date(),
+        int documentId = insertDownloadedDocument();
+        AnalyzedDocument analyzedDocument = new AnalyzedDocument(documentId, "title", new Date(),
                 asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                 asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
                 asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
@@ -60,14 +64,29 @@ class PostgresCrawlerRepositoryIT {
     public void when_html_page_almost_empty_expect_saved() {
         // arrange
         deleteAllDataFromTables();
-        jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOADED_AT) values (?, ?, ?, ?)", -2, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()));
-        AnalyzedDocument analyzedDocument = new AnalyzedDocument(-2, null, null,
+        int documentId = insertDownloadedDocument();
+        AnalyzedDocument analyzedDocument = new AnalyzedDocument(documentId, null, null,
                 emptyList(), emptyList(), emptyList(), emptyList());
 
         // act
         postgresCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
 
         // assert
+    }
+
+    private int insertDownloadedDocument() {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        PreparedStatementCreator psc = con -> {
+            PreparedStatement ps = con.prepareStatement("insert into DOCUMENTS (URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setString(1, "https://localhost");
+            ps.setString(2, "<html></html>");
+            ps.setTimestamp(3, new Timestamp((new Date()).getTime()));
+            ps.setTimestamp(4, new Timestamp((new Date()).getTime()));
+            ps.setString(5, DocumentProcessState.DOWNLOADED.toString());
+            return ps;
+        };
+        jdbcTemplate.update(psc, keyHolder);
+        return ((Number) Objects.requireNonNull(keyHolder.getKeys()).get("ID")).intValue();
     }
 
     @Test

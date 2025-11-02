@@ -2,7 +2,7 @@
 
 # Next
 
-4. Harmonize names `*HtmlPage` classes, `DOCUMENT` tables, and method names
+1. Harmonize names `*HtmlPage` classes, `DOCUMENT` tables, and method names
 
 # Later
 
