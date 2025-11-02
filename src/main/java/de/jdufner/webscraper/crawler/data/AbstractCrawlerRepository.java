@@ -157,7 +157,7 @@ public abstract class AbstractCrawlerRepository {
     }
 
     public void setImageDownloadedAndFilename(@NonNull Image image, @NonNull File file) {
-        jdbcTemplate.update("update IMAGES set DOWNLOADED = true, FILENAME = ? where ID = ?", file.getPath(), image.id());
+        jdbcTemplate.update("update IMAGES set DOWNLOADED = true, DOWNLOADED_AT = ?, FILENAME = ? where ID = ?", convert(new Date()), file.getPath(), image.id());
     }
 
     public @NonNull Optional<Link> getNextLinkIfAvailable() {
@@ -174,15 +174,15 @@ public abstract class AbstractCrawlerRepository {
     }
 
     public void setLinkDownloaded(@NonNull Link link) {
-        jdbcTemplate.update("update LINKS set DOWNLOADED = true where ID = ?", link.id());
+        jdbcTemplate.update("update LINKS set DOWNLOADED = true, DOWNLOADED_AT = ? where ID = ?", convert(new Date()), link.id());
     }
 
     public void setImageSkip(@NonNull Image image) {
-        jdbcTemplate.update("update IMAGES set SKIP = true where ID = ?", image.id());
+        jdbcTemplate.update("update IMAGES set SKIP = true, SKIPPED_AT = ? where ID = ?", convert(new Date()), image.id());
     }
 
     public void setLinkSkip(@NonNull Link link) {
-        jdbcTemplate.update("update LINKS set SKIP = true where ID = ?", link.id());
+        jdbcTemplate.update("update LINKS set SKIP = true, SKIPPED_AT = ? where ID = ?", convert(new Date()), link.id());
     }
 
     protected static @Nullable Timestamp convert(@Nullable Date date) {
