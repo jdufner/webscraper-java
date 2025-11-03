@@ -5,6 +5,7 @@ spring:
 webscraper:
   crawler:
     image:
+      start-download-automatically: true
       number-images: 100
     web:
       start-download-automatically: true
