@@ -7,9 +7,10 @@ webscraper:
     image:
       number-images: 100
     web:
-      start-automatically: true
       start-url: https://www.heise.de
+      start-download-automatically: true
       number-pages: 30
+      start-analysis-automatically: true
       consent-cookies: true
       consent-css-selector:
         - button[title='Zustimmen']

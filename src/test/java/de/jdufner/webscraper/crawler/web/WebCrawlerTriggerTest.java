@@ -25,7 +25,7 @@ class WebCrawlerTriggerTest {
     @Test
     void given_start_automatically_is_true_when_do_start_download_expect_download() {
         // arrange
-        when(webCrawlerConfigurationProperties.startAutomatically()).thenReturn(true);
+        when(webCrawlerConfigurationProperties.startDownloadAutomatically()).thenReturn(true);
 
         // act
         webCrawlerTrigger.doStartDownload();
@@ -37,7 +37,7 @@ class WebCrawlerTriggerTest {
     @Test
     void given_start_automatically_is_false_when_do_start_download_expect_download() {
         // arrange
-        when(webCrawlerConfigurationProperties.startAutomatically()).thenReturn(false);
+        when(webCrawlerConfigurationProperties.startDownloadAutomatically()).thenReturn(false);
 
         // act
         webCrawlerTrigger.doStartDownload();
@@ -49,7 +49,7 @@ class WebCrawlerTriggerTest {
     @Test
     void given_start_automatically_is_true_when_do_start_analysis_expect_analyze() {
         // arrange
-        when(webCrawlerConfigurationProperties.startAutomatically()).thenReturn(true);
+        when(webCrawlerConfigurationProperties.startAnalysisAutomatically()).thenReturn(true);
 
         // act
         webCrawlerTrigger.doStartAnalysis();
@@ -61,7 +61,7 @@ class WebCrawlerTriggerTest {
     @Test
     void given_start_automatically_is_false_when_do_start_analysis_expect_analyze() {
         // arrange
-        when(webCrawlerConfigurationProperties.startAutomatically()).thenReturn(false);
+        when(webCrawlerConfigurationProperties.startAnalysisAutomatically()).thenReturn(false);
 
         // act
         webCrawlerTrigger.doStartAnalysis();

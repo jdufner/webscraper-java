@@ -7,7 +7,8 @@ webscraper:
     image:
       number-images: 100
     web:
-      start-automatically: true
+      start-download-automatically: true
+      start-analysis-automatically: true
       start-url: https://apod.nasa.gov/apod/astropix.html
       number-pages: 200
       consent-cookies: false

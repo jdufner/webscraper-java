@@ -25,7 +25,7 @@ public class WebCrawlerTrigger {
     @Scheduled(fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     public void doStartDownload() {
         LOGGER.info("Starting WebCrawler.doStartDownload()");
-        if (webCrawlerConfigurationProperties.startAutomatically()) {
+        if (webCrawlerConfigurationProperties.startDownloadAutomatically()) {
             webCrawler.download();
         }
     }
@@ -33,7 +33,7 @@ public class WebCrawlerTrigger {
     @Scheduled(fixedDelay = 1000, timeUnit = TimeUnit.MILLISECONDS)
     public void doStartAnalysis() {
         LOGGER.info("Starting WebCrawler.doStartAnalysis()");
-        if (webCrawlerConfigurationProperties.startAutomatically()) {
+        if (webCrawlerConfigurationProperties.startAnalysisAutomatically()) {
             webCrawler.analyze();
         }
     }
