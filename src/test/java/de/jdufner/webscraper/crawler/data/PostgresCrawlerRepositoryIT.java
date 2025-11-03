@@ -45,14 +45,15 @@ class PostgresCrawlerRepositoryIT {
     }
 
     @Test
-    public void when_html_page_fully_populated_expect_everything_saved() {
+    public void when_analyzed_document_fully_populated_expect_everything_saved() {
         // arrange
         deleteAllDataFromTables();
         int documentId = insertDownloadedDocument();
         AnalyzedDocument analyzedDocument = new AnalyzedDocument(documentId, "title", new Date(),
                 asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                 asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
-                asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
+                asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")),
+                new Date(), new Date());
 
         // act
         postgresCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
@@ -61,12 +62,12 @@ class PostgresCrawlerRepositoryIT {
     }
 
     @Test
-    public void when_html_page_almost_empty_expect_saved() {
+    public void when_analyzed_document_almost_empty_expect_saved() {
         // arrange
         deleteAllDataFromTables();
         int documentId = insertDownloadedDocument();
         AnalyzedDocument analyzedDocument = new AnalyzedDocument(documentId, null, null,
-                emptyList(), emptyList(), emptyList(), emptyList());
+                emptyList(), emptyList(), emptyList(), emptyList(), new Date(),  new Date());
 
         // act
         postgresCrawlerRepository.saveAnalyzedDocument(analyzedDocument);

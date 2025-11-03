@@ -1,7 +1,7 @@
 package de.jdufner.webscraper.crawler.web;
 
-import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import de.jdufner.webscraper.crawler.data.AnalyzedDocument;
+import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -29,6 +29,7 @@ public class HtmlAnalyzer {
     static final DateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssX");
     
     public AnalyzedDocument analyze(@NonNull DownloadedDocument downloadedDocument) {
+        Date analysisStartedAt = new Date();
         Document document = Jsoup.parse(downloadedDocument.content());
         Optional<String> title = extractTitle(document);
         Optional<Date> createdAt = extractCreatedAt(document);
@@ -36,7 +37,9 @@ public class HtmlAnalyzer {
         List<String> categories = extractCategories(document);
         List<URI> links = extractLinks(downloadedDocument.uri(), document);
         List<URI> images = extractImages(downloadedDocument.uri(), document);
-        return new AnalyzedDocument(Objects.requireNonNull(downloadedDocument.id()), title.orElse(null), createdAt.orElse(null), authors, categories, links, images);
+        Date analysisStoppedAt = new Date();
+        return new AnalyzedDocument(Objects.requireNonNull(downloadedDocument.id()), title.orElse(null),
+                createdAt.orElse(null), authors, categories, links, images, analysisStartedAt, analysisStoppedAt);
     }
 
     @NonNull

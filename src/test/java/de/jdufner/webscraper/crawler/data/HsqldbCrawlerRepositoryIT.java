@@ -28,44 +28,47 @@ class HsqldbCrawlerRepositoryIT {
     JdbcTemplate jdbcTemplate;
 
     private void deleteAllDataFromTables() {
-        jdbcTemplate.update("delete from DOCUMENTS_TO_AUTHORS where id >= 0");
-        jdbcTemplate.update("delete from AUTHORS where id >= 0");
-        jdbcTemplate.update("delete from DOCUMENTS_TO_CATEGORIES where id >= 0");
-        jdbcTemplate.update("delete from CATEGORIES where id >= 0");
-        jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where id >= 0");
-        jdbcTemplate.update("delete from LINKS where id >= 0");
-        jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where id >= 0");
-        jdbcTemplate.update("delete from IMAGES where id >= 0");
-        jdbcTemplate.update("delete from DOCUMENTS where id >= 0");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_AUTHORS");
+        jdbcTemplate.update("delete from AUTHORS");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_CATEGORIES");
+        jdbcTemplate.update("delete from CATEGORIES");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS");
+        jdbcTemplate.update("delete from LINKS");
+        jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES");
+        jdbcTemplate.update("delete from IMAGES");
+        jdbcTemplate.update("delete from DOCUMENTS");
     }
 
     @Test
-    public void when_html_page_fully_populated_expect_everything_saved() {
+    public void when_analyzed_document_fully_populated_expect_everything_saved() {
         // arrange
         deleteAllDataFromTables();
         jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?, ?)",
-                -1, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()),
+                -1, "https://localhost", "<html></html>", new Timestamp((new Date()).getTime()),
                 new Timestamp((new Date()).getTime()), DocumentProcessState.DOWNLOADED.toString());
         AnalyzedDocument analyzedDocument = new AnalyzedDocument(-1, "title", new Date(),
                 asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                 asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
-                asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")));
+                asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")),
+                new Date(), new Date());
 
         // act
         hsqldbCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
 
         // assert
+        Timestamp timestamp = jdbcTemplate.queryForObject("select ANALYSIS_STARTED_AT from DOCUMENTS where ID = ?", Timestamp.class, -1);
+        assertThat(timestamp).isNotNull();
     }
 
     @Test
-    public void when_html_page_almost_empty_expect_saved() {
+    public void when_analyzed_date_almost_empty_expect_saved() {
         // arrange
         deleteAllDataFromTables();
         jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?, ?)",
                 -2, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()),
                 new Timestamp((new Date()).getTime()), DocumentProcessState.DOWNLOADED.toString());
         AnalyzedDocument analyzedDocument = new AnalyzedDocument(-2, null, null,
-                emptyList(), emptyList(), emptyList(), emptyList());
+                emptyList(), emptyList(), emptyList(), emptyList(), new Date(), new Date());
 
         // act
         hsqldbCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
@@ -77,6 +80,7 @@ class HsqldbCrawlerRepositoryIT {
     @Test
     public void given_at_least_one_image_in_database_when_get_next_image_expect_image() {
         // arrange
+        deleteAllDataFromTables();
         jdbcTemplate.update("insert into IMAGES (URL) values (?)", "https://www.google.com/image.jpg");
 
         // act
@@ -219,7 +223,7 @@ class HsqldbCrawlerRepositoryIT {
     @Test
     public void given_saved_downloaded_document_when_load_document_then_downloaded_document_with_id() {
         // arrange
-        jdbcTemplate.update("delete from DOCUMENTS");
+        deleteAllDataFromTables();
         jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?, ?)", 1, "https://localhost/", "<html></html>", new Date(), new Date(), DocumentProcessState.DOWNLOADED.toString());
 
         // act

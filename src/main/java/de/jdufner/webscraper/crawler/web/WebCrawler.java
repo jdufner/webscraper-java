@@ -118,10 +118,6 @@ public class WebCrawler {
             AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(optionalDownloadedDocument.get());
             crawlerRepository.saveAnalyzedDocument(analyzedDocument);
         }
-
-
-        // HtmlPage / AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(downloadedDocument)
-        // crawlerRepository.saveAnalyzedDocument()
     }
 
 }
