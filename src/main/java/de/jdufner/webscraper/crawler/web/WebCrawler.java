@@ -74,7 +74,7 @@ public class WebCrawler {
     }
 
     void findAndDownloadLinkUntilConfiguredNumberReached() {
-        LOGGER.info("findAndDownloadLinkUntilConfiguredNumberReached()");
+        LOGGER.debug("findAndDownloadLinkUntilConfiguredNumberReached()");
         if (numberDownloadedLinks < webCrawlerConfigurationProperties.numberPages()) {
             LinkStatus linkStatus = findAndDownloadNextLink();
             if (linkStatus == LinkStatus.DOWNLOADED) {
