@@ -35,7 +35,8 @@ public class ImageGetterAhc implements ImageGetter {
                                 @Override
                                 public State onBodyPartReceived(HttpResponseBodyPart content) throws Exception {
                                     logger.debug("Downloaded {} bytes of HTTP response", content.length());
-                                    fos.getChannel().write(content.getBodyByteBuffer());
+                                    int size = fos.getChannel().write(content.getBodyByteBuffer());
+                                    logger.debug("Wrote {} bytes to file", size);
                                     return State.CONTINUE;
                                 }
 

@@ -25,9 +25,9 @@ public class ImageDownloaderTrigger {
 
     @Scheduled(fixedDelay = 100, timeUnit = TimeUnit.MILLISECONDS)
     public void doStartDownload() {
-        LOGGER.info("Starting ImageDownloaderTrigger.doStartDownload()");
+        LOGGER.debug("Starting ImageDownloaderTrigger.doStartDownload()");
         if (imageDownloaderConfigurationProperties.startDownloadAutomatically()) {
-            // imageDownloader.downloadAll();
+            imageDownloader.download();
         }
     }
 

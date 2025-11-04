@@ -46,6 +46,9 @@ logging:
       jdufner:
         webscraper:
           crawler:
+            image:
+              ImageDownloader: DEBUG
+              ImageGetterAhc: INFO
             web:
               WebCrawlerTrigger: INFO
               WebFetcher: INFO

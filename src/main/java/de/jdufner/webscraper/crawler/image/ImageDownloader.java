@@ -10,12 +10,17 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.net.URI;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
 public class ImageDownloader {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImageDownloader.class);
+    enum ImageStatus {
+        DOWNLOADED, SKIPPED, ERROR
+    }
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageDownloader.class);
 
     @NonNull
     private final ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties;
@@ -25,6 +30,8 @@ public class ImageDownloader {
     private final CrawlerRepository crawlerRepository;
     @NonNull
     private final ImageGetter imageGetter;
+
+    private int numberDownloadedImages = 0;
 
     public ImageDownloader(@NonNull ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties,
                            @NonNull SiteConfigurationProperties siteConfigurationProperties,
@@ -36,42 +43,59 @@ public class ImageDownloader {
         this.imageGetter = imageGetter;
     }
 
-    void downloadAll() {
-        for(int i = 0; i < imageDownloaderConfigurationProperties.numberImages(); i++) {
-            downloadNextImage();
-        }
-    }
-
-    private void downloadNextImage() {
-        Optional<Image> optionalImage = crawlerRepository.getNextImageIfAvailable();
-        if (optionalImage.isPresent()) {
-            Image image = optionalImage.get();
-            if (siteConfigurationProperties.isNotBlocked(optionalImage.get().uri())) {
-                // TODO why to store the file locally instead of using S3 protocol (MinIO)
-                File file = download(image.uri());
-                crawlerRepository.setImageDownloadedAndFilename(image, file);
-            } else {
-                crawlerRepository.setImageSkip(image);
+    void download() {
+        LOGGER.debug("download()");
+        if (numberDownloadedImages < imageDownloaderConfigurationProperties.numberImages()) {
+            ImageStatus imageStatus = findAndDownloadNextImage();
+            if (imageStatus == ImageStatus.DOWNLOADED) {
+                numberDownloadedImages++;
             }
         }
     }
 
+    private ImageStatus findAndDownloadNextImage() {
+        Optional<Image> optionalImage = crawlerRepository.getNextImageIfAvailable();
+        if (optionalImage.isPresent()) {
+            Image image = optionalImage.get();
+            if (siteConfigurationProperties.isNotBlocked(optionalImage.get().uri())) {
+                downloadAndSave(image);
+                return ImageStatus.DOWNLOADED;
+            } else {
+                skip(image);
+                return ImageStatus.SKIPPED;
+            }
+        }
+        return ImageStatus.ERROR;
+    }
+
+    private void downloadAndSave(Image image) {
+        // TODO why to store the file locally instead of using S3 protocol (MinIO)
+        File file = download(image.uri());
+        crawlerRepository.setImageDownloadedAndFilename(image, file);
+    }
+
+    private void skip(Image image) {
+        crawlerRepository.setImageSkip(image);
+    }
+
     @NonNull File download(@NonNull URI uri) {
-        logger.debug("Downloading {}", uri);
-        File file = buildAndValidateFilename(uri);
+        LOGGER.debug("Downloading {}", uri);
+        Date downloadStartedAt = new Date();
+        File file = buildAndValidateFileName(uri);
         imageGetter.download(uri, file);
-        logger.debug("Downloaded {}", file.getPath());
+        Date downloadStoppedAt = new Date();
+        LOGGER.debug("Downloaded {} of size {} in {} seconds", file.getPath(), file.length(), (downloadStoppedAt.getTime() - downloadStartedAt.getTime())/1000d);
         return file;
     }
 
-    private static @NonNull File buildAndValidateFilename(URI uri) {
+    private static @NonNull File buildAndValidateFileName(@NonNull URI uri) {
         File file = getFileName(uri);
         hasImageExtension(file);
         file = validateFilename(file);
         return file;
     }
 
-    static @NonNull File validateFilename(File file) {
+    static @NonNull File validateFilename(@NonNull File file) {
         String fileName = file.getName();
         String baseName = fileName.substring(0, fileName.lastIndexOf('.'));
         String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
@@ -83,9 +107,9 @@ public class ImageDownloader {
         return file;
     }
 
-    static boolean hasImageExtension(File file) {
+    static boolean hasImageExtension(@NonNull File file) {
         String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1).toLowerCase();
-        return extension.equals("png") || extension.equals("jpg") || extension.equals("jpeg");
+        return extension.equals("png") || extension.equals("jpg") || extension.equals("jpeg") || extension.equals("webp");
     }
 
     private static @NonNull File getFileName(@NonNull URI uri) {

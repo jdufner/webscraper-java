@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 class ImageDownloaderTest {
 
     @Mock
-    private ImageDownloaderConfigurationProperties configuration;
+    private ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties;
 
     @Mock
     private SiteConfigurationProperties siteConfigurationProperties;
@@ -37,7 +37,7 @@ class ImageDownloaderTest {
     @Test
     void given_configuration_when_download_all_expect_url_multiple_times() {
         // arrange
-        when(configuration.numberImages()).thenReturn(2);
+        when(imageDownloaderConfigurationProperties.numberImages()).thenReturn(2);
         String url = "https://localhost/image.jpg";
         URI uri = URI.create(url);
         Image image = new Image(1, uri);
@@ -45,7 +45,9 @@ class ImageDownloaderTest {
         when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
 
         // act
-        imageDownloader.downloadAll();
+        imageDownloader.download();
+        imageDownloader.download();
+        imageDownloader.download();
 
         // assert
         verify(imageGetter, times(2)).download(uri, new File("./image.jpg"));
