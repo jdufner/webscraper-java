@@ -5,13 +5,13 @@ spring:
 webscraper:
   crawler:
     image:
-      start-download-automatically: true
+      start-download-automatically: false
       number-images: 100
     web:
       start-url: https://www.heise.de
-      start-download-automatically: true
+      start-download-automatically: false
       number-pages: 30
-      start-analysis-automatically: true
+      start-analysis-automatically: false
       consent-cookies: true
       consent-css-selector:
         - button[title='Zustimmen']
