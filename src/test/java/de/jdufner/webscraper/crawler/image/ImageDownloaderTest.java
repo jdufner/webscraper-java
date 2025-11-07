@@ -35,11 +35,22 @@ class ImageDownloaderTest {
     private ImageDownloader imageDownloader;
 
     @Test
+    void given_configuration_when_download_expect_file() {
+        // arrange
+        URI uri = URI.create("https://localhost/image.jpg");
+
+        // act
+        File file = imageDownloader.download(uri);
+
+        // assert
+        assertThat(file.getName()).isEqualTo("image.jpg");
+    }
+
+    @Test
     void given_configuration_when_download_all_expect_url_multiple_times() {
         // arrange
         when(imageDownloaderConfigurationProperties.numberImages()).thenReturn(2);
-        String url = "https://localhost/image.jpg";
-        URI uri = URI.create(url);
+        URI uri = URI.create("https://localhost/image.jpg");
         Image image = new Image(1, uri);
         when(crawlerRepository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
         when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
@@ -51,19 +62,6 @@ class ImageDownloaderTest {
 
         // assert
         verify(imageGetter, times(2)).download(uri, new File("./image.jpg"));
-    }
-
-    @Test
-    void given_configuration_when_download_expect_file() {
-        // arrange
-        String url = "https://localhost/image.jpg";
-        URI uri = URI.create(url);
-
-        // act
-        File file = imageDownloader.download(uri);
-
-        // assert
-        assertThat(file.getName()).isEqualTo("image.jpg");
     }
 
     @Test

@@ -33,12 +33,12 @@ public abstract class AbstractCrawlerRepository {
     public int saveDownloadedDocument(@NonNull DownloadedDocument downloadedDocument) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO documents (url, content, download_started_at, download_stopped_at, process_state) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement("INSERT INTO documents (url, content, download_started_at, download_stopped_at, STATE) VALUES (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, downloadedDocument.uri().toString());
             ps.setString(2, downloadedDocument.content());
             ps.setTimestamp(3, convert(downloadedDocument.downloadStartedAt()));
             ps.setTimestamp(4, convert(downloadedDocument.downloadStoppedAt()));
-            ps.setString(5, DocumentProcessState.DOWNLOADED.toString());
+            ps.setString(5, DocumentState.DOWNLOADED.toString());
             return ps;
         };
         jdbcTemplate.update(psc, keyHolder);
@@ -55,8 +55,8 @@ public abstract class AbstractCrawlerRepository {
 
     protected void updateAnalyzedDocument(@NonNull AnalyzedDocument analyzedDocument) {
         PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("update DOCUMENTS set PROCESS_STATE = ?, TITLE = ?, CREATED_AT = ?, ANALYSIS_STARTED_AT = ?, ANALYSIS_STOPPED_AT = ? where ID = ?");
-            ps.setString(1, DocumentProcessState.ANALYZED.toString());
+            PreparedStatement ps = con.prepareStatement("update DOCUMENTS set STATE = ?, TITLE = ?, CREATED_AT = ?, ANALYSIS_STARTED_AT = ?, ANALYSIS_STOPPED_AT = ? where ID = ?");
+            ps.setString(1, DocumentState.ANALYZED.toString());
             ps.setString(2, analyzedDocument.title());
             ps.setTimestamp(3, convert(analyzedDocument.createdAt()));
             ps.setTimestamp(4, convert(analyzedDocument.analysisStartedAt()));
@@ -134,8 +134,9 @@ public abstract class AbstractCrawlerRepository {
             if (imageId.isEmpty()) {
                 KeyHolder keyHolder = new GeneratedKeyHolder();
                 PreparedStatementCreator psc = con -> {
-                    PreparedStatement ps = con.prepareStatement("INSERT INTO IMAGES (URL) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                    PreparedStatement ps = con.prepareStatement("INSERT INTO IMAGES (URL, STATE) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
                     ps.setString(1, image.toString());
+                    ps.setString(2, ImageState.INITIALIZED.toString());
                     return ps;
                 };
                 jdbcTemplate.update(psc, keyHolder);
@@ -148,43 +149,44 @@ public abstract class AbstractCrawlerRepository {
     public @NonNull Optional<Image> getNextImageIfAvailable() {
         return Objects.requireNonNull(
                 jdbcTemplate.query(
-                        "select ID, URL from IMAGES where SKIP = false and DOWNLOADED = false order by ID limit 1",
+                        "select ID, URL from IMAGES where STATE = ? order by ID limit 1",
                         rs -> {
                             if (rs.next()) {
                                 return Optional.of(new Image(rs.getInt("ID"), URI.create(rs.getString("URL"))));
                             }
                             return Optional.empty();
-                        })
+                        }, ImageState.INITIALIZED.toString())
         );
     }
 
     public void setImageDownloadedAndFilename(@NonNull Image image, @NonNull File file) {
-        jdbcTemplate.update("update IMAGES set DOWNLOADED = true, DOWNLOADED_AT = ?, FILENAME = ? where ID = ?", convert(new Date()), file.getPath(), image.id());
+        jdbcTemplate.update("update IMAGES set STATE = ?, FILENAME = ? where ID = ?", ImageState.DOWNLOADED.toString(), file.getPath(), image.id());
     }
 
     public @NonNull Optional<Link> getNextLinkIfAvailable() {
         return Objects.requireNonNull(
                 jdbcTemplate.query(
-                        "select ID, URL from LINKS where SKIP = false and DOWNLOADED = false order by ID limit 1",
+                        "select ID, URL from LINKS where STATE = ? order by ID limit 1",
                         rs -> {
                             if (rs.next()) {
-                                return Optional.of(new Link(rs.getInt("id"), URI.create(rs.getString("url"))));
+                                return Optional.of(new Link(rs.getInt("ID"), URI.create(rs.getString("URL"))));
                             }
                             return Optional.empty();
-                        })
+                        },
+                        ImageState.INITIALIZED.toString())
         );
     }
 
     public void setLinkDownloaded(@NonNull Link link) {
-        jdbcTemplate.update("update LINKS set DOWNLOADED = true, DOWNLOADED_AT = ? where ID = ?", convert(new Date()), link.id());
+        jdbcTemplate.update("update LINKS set STATE = ?, DOWNLOADED_AT = ? where ID = ?", LinkState.DOWNLOADED.toString(), convert(new Date()), link.id());
     }
 
     public void setImageSkip(@NonNull Image image) {
-        jdbcTemplate.update("update IMAGES set SKIP = true, SKIPPED_AT = ? where ID = ?", convert(new Date()), image.id());
+        jdbcTemplate.update("update IMAGES set STATE = ? where ID = ?", ImageState.SKIPPED.toString(), image.id());
     }
 
     public void setLinkSkip(@NonNull Link link) {
-        jdbcTemplate.update("update LINKS set SKIP = true, SKIPPED_AT = ? where ID = ?", convert(new Date()), link.id());
+        jdbcTemplate.update("update LINKS set STATE = ?, SKIPPED_AT = ? where ID = ?", LinkState.SKIPPED.toString(), convert(new Date()), link.id());
     }
 
     protected static @Nullable Timestamp convert(@Nullable Date date) {
@@ -197,7 +199,7 @@ public abstract class AbstractCrawlerRepository {
     public @NonNull Optional<DownloadedDocument> findNextDownloadedDocument() {
         return Objects.requireNonNull(
                 jdbcTemplate.query(
-                        "select ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, PROCESS_STATE from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED' and ID = (select min(ID) from DOCUMENTS where PROCESS_STATE = 'DOWNLOADED') limit 1",
+                        "select ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, STATE from DOCUMENTS where STATE = 'DOWNLOADED' and ID = (select min(ID) from DOCUMENTS where STATE = 'DOWNLOADED') limit 1",
                         rs -> {
                             if (rs.next()) {
                                 return Optional.of(new DownloadedDocument(rs.getInt("ID"), URI.create(rs.getString("URL")), rs.getString("CONTENT"), rs.getTimestamp("DOWNLOAD_STARTED_AT"), rs.getTimestamp("DOWNLOAD_STOPPED_AT")));
@@ -218,8 +220,9 @@ public abstract class AbstractCrawlerRepository {
         if (linkId.isEmpty()) {
             KeyHolder keyHolder = new GeneratedKeyHolder();
             PreparedStatementCreator psc = con -> {
-                PreparedStatement ps = con.prepareStatement("INSERT INTO LINKS (URL) VALUES (?)", PreparedStatement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = con.prepareStatement("INSERT INTO LINKS (URL, STATE) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
                 ps.setString(1, uri.toString());
+                ps.setString(2, LinkState.INITIALIZED.toString());
                 return ps;
             };
             jdbcTemplate.update(psc, keyHolder);

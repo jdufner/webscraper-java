@@ -1,8 +1,9 @@
 package de.jdufner.webscraper.crawler.data;
 
-public enum DocumentProcessState {
+public enum LinkState {
 
+    INITIALIZED,
     DOWNLOADED,
-    ANALYZED,
+    SKIPPED,
 
 }

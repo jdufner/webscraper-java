@@ -8,7 +8,7 @@ create table if not exists DOCUMENTS (
     ANALYSIS_STOPPED_AT timestamp,
     TITLE varchar(1000),
     CREATED_AT timestamp,
-    PROCESS_STATE varchar(20) not null
+    STATE varchar(20) not null
 );
 
 create table if not exists AUTHORS (
@@ -44,9 +44,8 @@ create unique index if not exists DOCUMENTS_TO_CATEGORIES_IDX on DOCUMENTS_TO_CA
 create table if not exists LINKS (
     ID integer generated always as identity primary key,
     URL varchar(1000) not null,
-    SKIP boolean default false not null,
+    STATE varchar(20) not null,
     SKIPPED_AT timestamp,
-    DOWNLOADED boolean default false not null,
     DOWNLOADED_AT timestamp
 );
 
@@ -65,14 +64,14 @@ create unique index if not exists DOCUMENTS_TO_LINKS_IDX on DOCUMENTS_TO_LINKS(D
 create table if not exists IMAGES (
     ID integer generated always as identity primary key,
     URL varchar(1000) not null,
+    STATE varchar(20) not null,
     FILENAME varchar(1000),
     SIZE integer,
     WIDTH integer,
     HEIGHT integer,
-    SKIP boolean default false not null,
-    SKIPPED_AT timestamp,
-    DOWNLOADED boolean default false not null,
-    DOWNLOADED_AT timestamp
+    DOWNLOAD_STARTED_AT timestamp,
+    DOWNLOAD_FINISHED_AT timestamp,
+    SKIPPED_AT timestamp
 );
 
 create table if not exists DOCUMENTS_TO_IMAGES (

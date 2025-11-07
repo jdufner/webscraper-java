@@ -78,12 +78,12 @@ class PostgresCrawlerRepositoryIT {
     private int insertDownloadedDocument() {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("insert into DOCUMENTS (URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, PROCESS_STATE) values (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement("insert into DOCUMENTS (URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, STATE) values (?, ?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, "https://localhost");
             ps.setString(2, "<html></html>");
             ps.setTimestamp(3, new Timestamp((new Date()).getTime()));
             ps.setTimestamp(4, new Timestamp((new Date()).getTime()));
-            ps.setString(5, DocumentProcessState.DOWNLOADED.toString());
+            ps.setString(5, DocumentState.DOWNLOADED.toString());
             return ps;
         };
         jdbcTemplate.update(psc, keyHolder);
@@ -95,7 +95,7 @@ class PostgresCrawlerRepositoryIT {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where ID > -1000");
         jdbcTemplate.update("delete from IMAGES where ID > -1000");
-        jdbcTemplate.update("insert into IMAGES (URL) values (?)", "https://localhost/image_hgjyRxggitggoNEm38Ds.jpg");
+        jdbcTemplate.update("insert into IMAGES (URL, STATE) values (?, ?)", "https://localhost/image_hgjyRxggitggoNEm38Ds.jpg", ImageState.INITIALIZED.toString());
 
         // act
         Optional<Image> image = postgresCrawlerRepository.getNextImageIfAvailable();
@@ -125,7 +125,7 @@ class PostgresCrawlerRepositoryIT {
         jdbcTemplate.update("delete from IMAGES where ID > -1000");
         var filename = "image_p9W5QuCf2kgagJc5ViKu.jpg";
         Image image = new Image(-1, URI.create("http://localhost/" + filename));
-        jdbcTemplate.update("insert into IMAGES (URL) values (?)", image.uri().toString());
+        jdbcTemplate.update("insert into IMAGES (URL, STATE) values (?, ?)", image.uri().toString(), ImageState.INITIALIZED.toString());
         Integer id = jdbcTemplate.queryForObject("select ID from IMAGES where URL = ?", new Object[]{image.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
         image = new Image(Optional.ofNullable(id).orElse(0), image.uri());
         File file = new File(filename);
@@ -135,25 +135,25 @@ class PostgresCrawlerRepositoryIT {
 
         // assert
         Object[] data = Objects.requireNonNull(jdbcTemplate.queryForObject(
-                "select filename, downloaded from IMAGES where URL = ?",
-                (rs, rowNum) ->  new Object[]{rs.getString("filename"), rs.getBoolean("downloaded")},
+                "select FILENAME, STATE from IMAGES where URL = ?",
+                (rs, rowNum) ->  new Object[]{rs.getString("FILENAME"), ImageState.valueOf(rs.getString("STATE"))},
                 image.uri().toString()
         ));
         assertThat(data[0]).isEqualTo(file.getPath());
-        assertThat(data[1]).isEqualTo(Boolean.TRUE);
+        assertThat(data[1]).isEqualTo(ImageState.DOWNLOADED);
     }
 
     @Test
     public void given_at_least_one_link_in_database_when_get_next_link_expect_link() {
         // arrange
-        jdbcTemplate.update("insert into LINKS (URL) values (?)", "https://www.google.com/");
+        jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", "https://www.google.com", LinkState.INITIALIZED.toString());
 
         // act
         Optional<Link> link = postgresCrawlerRepository.getNextLinkIfAvailable();
 
         // assert
         assertThat(link.isPresent()).isTrue();
-        assertThat(link.get().uri()).isEqualTo(URI.create("https://www.google.com/"));
+        assertThat(link.get().uri()).isEqualTo(URI.create("https://www.google.com"));
     }
 
     @Test
@@ -173,8 +173,8 @@ class PostgresCrawlerRepositoryIT {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where ID > -1000");
         jdbcTemplate.update("delete from LINKS where id > -1000");
-        Link link = new Link(-1, URI.create("https://localhost/"));
-        jdbcTemplate.update("insert into LINKS (URL) values (?)", link.uri().toString());
+        Link link = new Link(-1, URI.create("https://localhost"));
+        jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", link.uri().toString(), LinkState.INITIALIZED.toString());
         Integer id = jdbcTemplate.queryForObject("select ID from LINKS where URL = ?", new Object[]{link.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
         link = new Link(Optional.ofNullable(id).orElse(0), link.uri());
 
@@ -182,12 +182,12 @@ class PostgresCrawlerRepositoryIT {
         postgresCrawlerRepository.setLinkDownloaded(link);
 
         // assert
-        Boolean downloaded = jdbcTemplate.queryForObject(
-                "select DOWNLOADED from LINKS where id = ?",
-                (rs, rowNum) -> rs.getBoolean("DOWNLOADED"),
+        LinkState linkState = jdbcTemplate.queryForObject(
+                "select STATE from LINKS where id = ?",
+                (rs, rowNum) -> LinkState.valueOf(rs.getString("STATE")),
                 link.id()
         );
-        assertThat(downloaded).isTrue();
+        assertThat(linkState).isEqualTo(LinkState.DOWNLOADED);
     }
 
     @Test
@@ -196,7 +196,7 @@ class PostgresCrawlerRepositoryIT {
         jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where ID > -1000");
         jdbcTemplate.update("delete from IMAGES where id > -1000");
         Image image = new Image(-1, URI.create("https://localhost/image_p9W5QuCf2kgagJc5ViKu.jpg"));
-        jdbcTemplate.update("insert into IMAGES (URL) values (?)", image.uri().toString());
+        jdbcTemplate.update("insert into IMAGES (URL, STATE) values (?, ?)", image.uri().toString(), ImageState.INITIALIZED.toString());
         Integer id = jdbcTemplate.queryForObject("select ID from IMAGES where URL = ?", new Object[]{image.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
         image = new Image(Optional.ofNullable(id).orElse(0), image.uri());
 
@@ -204,12 +204,12 @@ class PostgresCrawlerRepositoryIT {
         postgresCrawlerRepository.setImageSkip(image);
 
         // assert
-        Boolean skipped = jdbcTemplate.queryForObject(
-                "select SKIP from IMAGES where URL = ?",
-                (rs, rowNum) -> rs.getBoolean("SKIP"),
+        ImageState imageState = jdbcTemplate.queryForObject(
+                "select STATE from IMAGES where URL = ?",
+                (rs, rowNum) -> ImageState.valueOf(rs.getString("STATE")),
                 image.uri().toString()
         );
-        assertThat(skipped).isTrue();
+        assertThat(imageState).isEqualTo(ImageState.SKIPPED);
     }
 
     @Test
@@ -218,7 +218,7 @@ class PostgresCrawlerRepositoryIT {
         jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where ID > -1000");
         jdbcTemplate.update("delete from LINKS where id > -1000");
         Link link = new Link(-2, URI.create("https://localhost/"));
-        jdbcTemplate.update("insert into LINKS (URL) values (?)", link.uri().toString());
+        jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", link.uri().toString(), LinkState.INITIALIZED.toString());
         Integer id = jdbcTemplate.queryForObject("select ID from LINKS where URL = ?", new Object[]{link.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
         link = new Link(Optional.ofNullable(id).orElse(0), link.uri());
 
@@ -226,12 +226,12 @@ class PostgresCrawlerRepositoryIT {
         postgresCrawlerRepository.setLinkSkip(link);
 
         // assert
-        Boolean skipped = jdbcTemplate.queryForObject(
-                "select SKIP from LINKS where id = ?",
-                (rs, rowNum) -> rs.getBoolean("SKIP"),
+        LinkState linkState = jdbcTemplate.queryForObject(
+                "select STATE from LINKS where id = ?",
+                (rs, rowNum) -> LinkState.valueOf(rs.getString("STATE")),
                 link.id()
         );
-        assertThat(skipped).isTrue();
+        assertThat(linkState).isEqualTo(LinkState.SKIPPED);
     }
 
 }
