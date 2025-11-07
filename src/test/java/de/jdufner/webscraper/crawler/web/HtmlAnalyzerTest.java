@@ -1,5 +1,7 @@
 package de.jdufner.webscraper.crawler.web;
 
+import de.jdufner.webscraper.crawler.data.AnalyzedDocument;
+import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
@@ -20,6 +22,48 @@ class HtmlAnalyzerTest {
 
     @InjectMocks
     private HtmlAnalyzer htmlAnalyzer;
+
+    @Test
+    public void given_downloaded_document_when_analyze_expect() {
+        // arrange
+        DownloadedDocument downloadedDocument = new DownloadedDocument(1,URI.create("http://localhost"), """
+                <html>
+                    <head>
+                        <title>title</title>
+                    </head>
+                    <body>
+                        <div class="a-publish-info">
+                            <time datetime="2024-09-05T21:30:00+02:00"></time>
+                        </div>
+                        <div class="creator">
+                            <ul>
+                                <li>Vorname Nachname</li>
+                            </ul>
+                        </div>
+                        <div class="content-categories">
+                            <a>Category 1</a>
+                            <a>Category 2</a>
+                        </div>
+                        <a href="./test.html">test.html</a>
+                        <img src="https://localhost/test.jpg">
+                    </body>
+                </html>
+                """, new Date(), new Date());
+
+        // act
+        AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(downloadedDocument);
+
+        // assert
+        assertThat(analyzedDocument).isNotNull();
+        assertThat(analyzedDocument.title()).isEqualTo("title");
+        assertThat(analyzedDocument.createdAt()).isNotNull();
+        assertThat(analyzedDocument.authors()).hasSize(1);
+        assertThat(analyzedDocument.categories()).hasSize(2);
+        assertThat(analyzedDocument.links()).hasSize(1);
+        assertThat(analyzedDocument.images()).hasSize(1);
+        assertThat(analyzedDocument.analysisStartedAt()).isNotNull();
+        assertThat(analyzedDocument.analysisStoppedAt()).isNotNull();
+    }
 
     @Test
     public void given_html_when_title_present_then_expect_title() {
@@ -359,7 +403,7 @@ class HtmlAnalyzerTest {
                 <html>
                   <body>
                     <h1>A Header</>
-                    <img src="https://www.google.com/test.jpg">
+                    <img src="https://localhost/test.jpg">
                   </body>
                 </html>""");
 
@@ -367,7 +411,7 @@ class HtmlAnalyzerTest {
         List<URI> urls = htmlAnalyzer.extractImages(URI.create("https://localhost"), document);
 
         // assert
-        assertThat(urls).containsExactly(URI.create("https://www.google.com/test.jpg"));
+        assertThat(urls).containsExactly(URI.create("https://localhost/test.jpg"));
     }
 
     @Test
