@@ -83,6 +83,7 @@ public class ImageDownloader {
         Date downloadStartedAt = new Date();
         File file = buildAndValidateFileName(uri);
         imageGetter.download(uri, file);
+        imageAnalyzer.analyze(file);
         Date downloadStoppedAt = new Date();
         LOGGER.debug("Downloaded {} of size {} in {} seconds", file.getPath(), file.length(), (downloadStoppedAt.getTime() - downloadStartedAt.getTime())/1000d);
         return file;
