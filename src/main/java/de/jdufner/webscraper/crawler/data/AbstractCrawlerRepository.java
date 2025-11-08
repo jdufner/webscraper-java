@@ -165,7 +165,7 @@ public abstract class AbstractCrawlerRepository {
 
     public void saveDownloadedImage(@NonNull DownloadedImage downloadedImage) {
         jdbcTemplate.update("update IMAGES set STATE = ?, FILENAME = ?, SIZE = ?, WIDTH = ?, HEIGHT = ?, DOWNLOAD_STARTED_AT = ?, DOWNLOAD_FINISHED_AT = ? where ID = ?",
-                ImageState.DOWNLOADED.toString(), downloadedImage.fileName(), downloadedImage.size(),
+                downloadedImage.state().toString(), downloadedImage.fileName(), downloadedImage.size(),
                 downloadedImage.width(), downloadedImage.height(), downloadedImage.downloadStartedAt(),
                 downloadedImage.downloadFinishedAt(), downloadedImage.id());
     }
