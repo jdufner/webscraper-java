@@ -163,6 +163,13 @@ public abstract class AbstractCrawlerRepository {
         jdbcTemplate.update("update IMAGES set STATE = ?, FILENAME = ? where ID = ?", ImageState.DOWNLOADED.toString(), file.getPath(), image.id());
     }
 
+    public void saveDownloadedImage(@NonNull DownloadedImage downloadedImage) {
+        jdbcTemplate.update("update IMAGES set STATE = ?, FILENAME = ?, SIZE = ?, WIDTH = ?, HEIGHT = ?, DOWNLOAD_STARTED_AT = ?, DOWNLOAD_FINISHED_AT = ? where ID = ?",
+                ImageState.DOWNLOADED.toString(), downloadedImage.fileName(), downloadedImage.size(),
+                downloadedImage.width(), downloadedImage.height(), downloadedImage.downloadStartedAt(),
+                downloadedImage.downloadFinishedAt(), downloadedImage.id());
+    }
+
     public @NonNull Optional<Link> getNextLinkIfAvailable() {
         return Objects.requireNonNull(
                 jdbcTemplate.query(

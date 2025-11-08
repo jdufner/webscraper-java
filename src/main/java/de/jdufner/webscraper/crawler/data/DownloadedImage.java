@@ -5,5 +5,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Date;
 
-public record DownloadedImage(int id, @NonNull String state, @Nullable String fileName, @NonNull Date downloadStartedAt, @NonNull Date downloadFinishedAt, @Nullable Integer size, @Nullable Integer height, @Nullable Integer width) {
+public record DownloadedImage(int id, @NonNull ImageState state, @Nullable String fileName,
+                              @NonNull Date downloadStartedAt, @NonNull Date downloadFinishedAt, @Nullable Integer size,
+                              @Nullable Integer height, @Nullable Integer width) {
 }

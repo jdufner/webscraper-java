@@ -268,4 +268,29 @@ class HsqldbCrawlerRepositoryIT {
         }
     }
 
+    @Test
+    public void given_downloaded_image_when_save_fully_populated_expect_all_saved() {
+        try {
+            // arrange
+            jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", "1", "https://localhost/image.jpg", ImageState.INITIALIZED.toString());
+            DownloadedImage downloadedImage = new DownloadedImage(1, ImageState.DOWNLOADED, "image.jpg", new Date(), new Date(), 1, 1, 1);
+
+            // act
+            hsqldbCrawlerRepository.saveDownloadedImage(downloadedImage);
+
+
+            // assert
+            Object[] objects = jdbcTemplate.queryForObject("select STATE, FILENAME, DOWNLOAD_STARTED_AT from IMAGES where ID = ?",
+                    (rs, rowNum) -> new Object[]{
+                            ImageState.valueOf(rs.getString("STATE")),
+                            rs.getString("FILENAME"),
+                            rs.getTimestamp("DOWNLOAD_STARTED_AT")}, 1);
+            assertThat(Objects.requireNonNull(objects)[0]).isEqualTo(ImageState.DOWNLOADED);
+            assertThat(Objects.requireNonNull(objects)[1]).isEqualTo("image.jpg");
+            assertThat(Objects.requireNonNull(objects)[0]).isNotNull();
+        } finally {
+            jdbcTemplate.update("delete from IMAGES");
+        }
+    }
+
 }

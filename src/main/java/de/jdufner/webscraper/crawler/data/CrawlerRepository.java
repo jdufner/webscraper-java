@@ -29,4 +29,7 @@ public interface CrawlerRepository {
     @NonNull Optional<Number> saveUriAsLink(@NonNull URI uri);
 
     @NonNull Optional<DownloadedDocument> findNextDownloadedDocument();
+
+    void saveDownloadedImage(@NonNull DownloadedImage downloadedImage);
+
 }
