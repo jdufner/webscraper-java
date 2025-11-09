@@ -58,36 +58,29 @@ public class ImageDownloader {
         }
     }
 
-    private ImageStatus findAndDownloadNextImage() {
+    ImageStatus findAndDownloadNextImage() {
         Optional<Image> optionalImage = crawlerRepository.getNextImageIfAvailable();
-        return optionalImage.map(this::handleImage).orElse(ImageStatus.NOT_FOUND);
+        return optionalImage.map(this::downloadImageIfNotBlocked).orElse(ImageStatus.NOT_FOUND);
     }
 
-    private @NonNull ImageStatus handleImage(Image image) {
-        try {
-            if (siteConfigurationProperties.isNotBlocked(image.uri()) &&
-                    hasAcceptedFileExtension(image.uri().toString())) {
-                downloadAndSave(image);
-                return ImageStatus.DOWNLOADED;
-            } else {
-                setState(image, ImageState.SKIPPED);
-                return ImageStatus.SKIPPED;
-            }
-        } catch (Exception e) {
-            LOGGER.error("Error while downloading image", e);
-            setState(image, ImageState.ERROR);
-            return ImageStatus.ERROR;
+    @NonNull ImageStatus downloadImageIfNotBlocked(Image image) {
+        if (siteConfigurationProperties.isNotBlocked(image.uri()) &&
+                hasAcceptedFileExtension(image.uri().toString())) {
+            downloadAndSave(image);
+            return ImageStatus.DOWNLOADED;
+        } else {
+            setState(image, ImageState.SKIPPED);
+            return ImageStatus.SKIPPED;
         }
     }
 
     private void downloadAndSave(Image image) {
         // TODO why to store the file locally instead of using S3 protocol (MinIO)
         DownloadedImage downloadedImage = download(image);
-        //crawlerRepository.setImageDownloadedAndFilename(image, file);
         crawlerRepository.saveDownloadedImage(downloadedImage);
     }
 
-    private void setState(@NonNull Image image, @NonNull ImageState state) {
+    void setState(@NonNull Image image, @NonNull ImageState state) {
         crawlerRepository.setImageState(image, state);
     }
 
@@ -125,11 +118,10 @@ public class ImageDownloader {
     }
 
     boolean hasAcceptedFileExtension(@NonNull String fileName) {
-        try {
+        if (fileName.contains(".")) {
             String extension = fileName.substring(fileName.toLowerCase().lastIndexOf('.') + 1);
             return asList(imageDownloaderConfigurationProperties.fileExtensions()).contains(extension);
-        }  catch (Exception e) {
-            LOGGER.error("Error while checking file extension", e);
+        }  else {
             return false;
         }
     }

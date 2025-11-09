@@ -1,10 +1,7 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.AnalyzedImage;
-import de.jdufner.webscraper.crawler.data.CrawlerRepository;
-import de.jdufner.webscraper.crawler.data.DownloadedImage;
-import de.jdufner.webscraper.crawler.data.Image;
+import de.jdufner.webscraper.crawler.data.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -251,7 +248,7 @@ class ImageDownloaderTest {
     void given_file_extensions_when_has_jpg_extension_expect_true() {
         // arrange
         when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
-        String filename = "./image.jpg";
+        String filename = "path/image.jpg";
 
         // act
         boolean hasFileExtension = imageDownloader.hasAcceptedFileExtension(filename);
@@ -263,8 +260,7 @@ class ImageDownloaderTest {
     @Test
     void given_file_extensions_when_has_no_extension_expect_true() {
         // arrange
-        when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
-        String filename = "./image";
+        String filename = "path/image";
 
         // act
         boolean hasFileExtension = imageDownloader.hasAcceptedFileExtension(filename);
@@ -277,13 +273,81 @@ class ImageDownloaderTest {
     void given_file_extensions_when_has_other_extension_expect_true() {
         // arrange
         when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
-        String filename = "./image.svg";
+        String filename = "path/image.svg";
 
         // act
         boolean hasFileExtension = imageDownloader.hasAcceptedFileExtension(filename);
 
         // assert
         assertThat(hasFileExtension).isFalse();
+    }
+
+    @Test
+    void given_stat_when_skipped_expect_repository_called() {
+        // arrange
+        Image image = new Image(1, URI.create("https://localhost"));
+        ImageState state = ImageState.SKIPPED;
+
+        // act
+        imageDownloader.setState(image, state);
+
+        // assert
+        verify(crawlerRepository).setImageState(image, state);
+    }
+
+    @Test
+    void given_image_when_image_not_present_expect_state_not_found() {
+        // arrange
+        Optional<Image> optionalImage = Optional.empty();
+        when(crawlerRepository.getNextImageIfAvailable()).thenReturn(optionalImage);
+
+        // act
+        ImageDownloader.ImageStatus imageStatus = imageDownloader.findAndDownloadNextImage();
+
+        // assert
+        assertThat(imageStatus).isEqualTo(ImageDownloader.ImageStatus.NOT_FOUND);
+    }
+
+    @Test
+    void given_image_when_image_downloaded_expect_state_downloaded() {
+        // arrange
+        when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
+        when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
+        when(imageAnalyzer.analyze(any())).thenReturn(new AnalyzedImage(0L, null, null, null));
+        Image image = new Image(1, URI.create("https://localhost/image.jpg"));
+
+        // act
+        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
+
+        // assert
+        assertThat(imageStatus).isEqualTo(ImageDownloader.ImageStatus.DOWNLOADED);
+    }
+
+    @Test
+    void given_image_when_image_blacklisted_expect_state_skipped() {
+        // arrange
+        when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(false);
+        Image image = new Image(1, URI.create("https://localhost/image.jpg"));
+
+        // act
+        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
+
+        // assert
+        assertThat(imageStatus).isEqualTo(ImageDownloader.ImageStatus.SKIPPED);
+    }
+
+    @Test
+    void given_image_when_image_extension_not_allowed_expect_state_skipped() {
+        // arrange
+        when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
+        when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
+        Image image = new Image(1, URI.create("https://localhost/image.svg"));
+
+        // act
+        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
+
+        // assert
+        assertThat(imageStatus).isEqualTo(ImageDownloader.ImageStatus.SKIPPED);
     }
 
 }
