@@ -127,7 +127,7 @@ public class ImageDownloader {
     }
 
     private static @NonNull File getFileName(@NonNull URI uri) {
-        String filename = uri.getPath();
+        String filename = uri.getHost() + "/" + uri.getPath();
         filename = checkSecurity(filename);
         File file = new File(filename);
         file.getParentFile().mkdirs();

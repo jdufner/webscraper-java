@@ -48,7 +48,7 @@ class ImageDownloaderTest {
         DownloadedImage downloadedImage = imageDownloader.download(image);
 
         // assert
-        assertThat(downloadedImage.fileName()).isEqualTo(".\\image.jpg");
+        assertThat(downloadedImage.fileName()).isEqualTo(".\\localhost\\image.jpg");
     }
 
     @Test
@@ -68,7 +68,7 @@ class ImageDownloaderTest {
         imageDownloader.download();
 
         // assert
-        verify(imageGetter, times(2)).download(uri, new File("./image.jpg"));
+        verify(imageGetter, times(2)).download(uri, new File("./localhost/image.jpg"));
     }
 
     @Test
