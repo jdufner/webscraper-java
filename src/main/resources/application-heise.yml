@@ -26,6 +26,7 @@ webscraper:
         - document.querySelectorAll('a-sticky-footer button[data-hide-trigger]').forEach((element) => element.click())
     sites:
       whitelist:
+        - https://heise.cloudimg.io
         - https://www.heise.de
       blacklist:
         - https://aktionen.heise.de/
