@@ -69,6 +69,7 @@ create table if not exists IMAGES (
     SIZE integer,
     WIDTH integer,
     HEIGHT integer,
+    HASH_VALUE integer,
     DOWNLOAD_STARTED_AT timestamp,
     DOWNLOAD_FINISHED_AT timestamp,
     SKIPPED_AT timestamp

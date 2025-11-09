@@ -30,17 +30,21 @@ public class ImageDownloader {
     private final CrawlerRepository crawlerRepository;
     @NonNull
     private final ImageGetter imageGetter;
+    @NonNull
+    private final ImageAnalyzer imageAnalyzer;
 
     private int numberDownloadedImages = 0;
 
     public ImageDownloader(@NonNull ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties,
                            @NonNull SiteConfigurationProperties siteConfigurationProperties,
                            @NonNull CrawlerRepository crawlerRepository,
-                           @NonNull ImageGetterAhc imageGetter) {
+                           @NonNull ImageGetterAhc imageGetter,
+                           @NonNull ImageAnalyzer imageAnalyzer) {
         this.imageDownloaderConfigurationProperties = imageDownloaderConfigurationProperties;
         this.siteConfigurationProperties = siteConfigurationProperties;
         this.crawlerRepository = crawlerRepository;
         this.imageGetter = imageGetter;
+        this.imageAnalyzer = imageAnalyzer;
     }
 
     void download() {
