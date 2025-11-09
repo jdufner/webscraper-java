@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler.image;
 
+import de.jdufner.webscraper.crawler.data.AnalyzedImage;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -12,7 +13,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Iterator;
 
@@ -24,18 +24,21 @@ public class ImageAnalyzer {
     @NonNull
     private final ImageConfiguration imageConfiguration;
 
-    record Dimension(int width, int height) {
+    record Dimension(@Nullable Integer width, @Nullable Integer height) {
     }
 
     public ImageAnalyzer(@NonNull ImageConfiguration imageConfiguration) {
         this.imageConfiguration = imageConfiguration;
     }
 
-    @Nullable Dimension analyze(@NonNull File file) {
-        return getImageDimensions(file);
+    @NonNull AnalyzedImage analyze(@NonNull File file) {
+        long fileSize = getFileSize(file);
+        Dimension dimension = getImageDimensions(file);
+        String hashValue = calculateHash(file);
+        return new AnalyzedImage(fileSize, dimension.width, dimension.height, hashValue);
     }
 
-    static @Nullable Dimension getImageDimensions(File file) {
+    static @NonNull Dimension getImageDimensions(File file) {
         try {
             String mimeType = Files.probeContentType(file.toPath());
             Iterator<ImageReader> readers = ImageIO.getImageReadersByMIMEType(mimeType);
@@ -50,10 +53,11 @@ public class ImageAnalyzer {
                     reader.dispose();
                 }
             }
-            return null;
+            LOGGER.error("Image reader for mime type {} not found", mimeType);
+            return new Dimension(null, null);
         }  catch (IOException e) {
             LOGGER.error("Error while reading image file {}", file.getAbsolutePath(), e);
-            return null;
+            return new Dimension(null, null);
         }
     }
 
@@ -61,7 +65,7 @@ public class ImageAnalyzer {
         return file.length();
     }
 
-    @NonNull String calculateHash1(@NonNull File file) {
+    @Nullable String calculateHash(@NonNull File file) {
         MessageDigest messageDigest = imageConfiguration.messageDigest();
         try (FileInputStream fis = new FileInputStream(file)) {
             byte[] buffer = new byte[8192];
@@ -73,23 +77,8 @@ public class ImageAnalyzer {
             byte[] digest = messageDigest.digest();
             return bytesToHex(digest);
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @NonNull String calculateHash2(@NonNull File file) {
-        MessageDigest messageDigest = imageConfiguration.messageDigest();
-        try (FileInputStream fis = new FileInputStream(file);
-             DigestInputStream dis = new DigestInputStream(fis, messageDigest)) {
-            byte[] buffer = new byte[8192];
-            while (dis.read(buffer) != -1) {
-            }
-            dis.close();
-            fis.close();
-            byte[] digest = messageDigest.digest();
-            return bytesToHex(digest);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            LOGGER.error("Error while reading image file {}", file.getAbsolutePath(), e);
+            return null;
         }
     }
 
@@ -100,4 +89,5 @@ public class ImageAnalyzer {
         }
         return sb.toString();
     }
+
 }

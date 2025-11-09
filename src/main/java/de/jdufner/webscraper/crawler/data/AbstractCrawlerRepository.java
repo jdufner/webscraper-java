@@ -10,7 +10,6 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import java.io.File;
 import java.net.URI;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -159,15 +158,11 @@ public abstract class AbstractCrawlerRepository {
         );
     }
 
-    public void setImageDownloadedAndFilename(@NonNull Image image, @NonNull File file) {
-        jdbcTemplate.update("update IMAGES set STATE = ?, FILENAME = ? where ID = ?", ImageState.DOWNLOADED.toString(), file.getPath(), image.id());
-    }
-
     public void saveDownloadedImage(@NonNull DownloadedImage downloadedImage) {
-        jdbcTemplate.update("update IMAGES set STATE = ?, FILENAME = ?, SIZE = ?, WIDTH = ?, HEIGHT = ?, DOWNLOAD_STARTED_AT = ?, DOWNLOAD_FINISHED_AT = ? where ID = ?",
+        jdbcTemplate.update("update IMAGES set STATE = ?, FILENAME = ?, SIZE = ?, WIDTH = ?, HEIGHT = ?, HASH_VALUE = ?, DOWNLOAD_STARTED_AT = ?, DOWNLOAD_FINISHED_AT = ? where ID = ?",
                 downloadedImage.state().toString(), downloadedImage.fileName(), downloadedImage.size(),
-                downloadedImage.width(), downloadedImage.height(), downloadedImage.downloadStartedAt(),
-                downloadedImage.downloadFinishedAt(), downloadedImage.id());
+                downloadedImage.width(), downloadedImage.height(), downloadedImage.hashValue(),
+                downloadedImage.downloadStartedAt(), downloadedImage.downloadFinishedAt(), downloadedImage.id());
     }
 
     public @NonNull Optional<Link> getNextLinkIfAvailable() {
@@ -188,8 +183,8 @@ public abstract class AbstractCrawlerRepository {
         jdbcTemplate.update("update LINKS set STATE = ?, DOWNLOADED_AT = ? where ID = ?", LinkState.DOWNLOADED.toString(), convert(new Date()), link.id());
     }
 
-    public void setImageSkip(@NonNull Image image) {
-        jdbcTemplate.update("update IMAGES set STATE = ? where ID = ?", ImageState.SKIPPED.toString(), image.id());
+    public void setImageState(@NonNull Image image, @NonNull ImageState state) {
+        jdbcTemplate.update("update IMAGES set STATE = ? where ID = ?", state.toString(), image.id());
     }
 
     public void setLinkSkip(@NonNull Link link) {

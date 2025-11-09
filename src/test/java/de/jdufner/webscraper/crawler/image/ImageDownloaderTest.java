@@ -1,7 +1,9 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
+import de.jdufner.webscraper.crawler.data.AnalyzedImage;
 import de.jdufner.webscraper.crawler.data.CrawlerRepository;
+import de.jdufner.webscraper.crawler.data.DownloadedImage;
 import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,29 +33,37 @@ class ImageDownloaderTest {
     @Mock
     private ImageGetterAhc imageGetter;
 
+    @Mock
+    private ImageAnalyzer imageAnalyzer;
+
     @InjectMocks
     private ImageDownloader imageDownloader;
 
     @Test
     void given_configuration_when_download_expect_file() {
         // arrange
+        when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
         URI uri = URI.create("https://localhost/image.jpg");
+        Image image = new Image(1, uri);
+        when(imageAnalyzer.analyze(any())).thenReturn(new AnalyzedImage(0L, null, null, null));
 
         // act
-        File file = imageDownloader.download(uri);
+        DownloadedImage downloadedImage = imageDownloader.download(image);
 
         // assert
-        assertThat(file.getName()).isEqualTo("image.jpg");
+        assertThat(downloadedImage.fileName()).isEqualTo(".\\image.jpg");
     }
 
     @Test
     void given_configuration_when_download_all_expect_url_multiple_times() {
         // arrange
         when(imageDownloaderConfigurationProperties.numberImages()).thenReturn(2);
+        when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
         URI uri = URI.create("https://localhost/image.jpg");
         Image image = new Image(1, uri);
         when(crawlerRepository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
         when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
+        when(imageAnalyzer.analyze(any())).thenReturn(new AnalyzedImage(0L, null, null, null));
 
         // act
         imageDownloader.download();
@@ -238,51 +248,42 @@ class ImageDownloaderTest {
     }
 
     @Test
-    void given_filename_when_filename_has_no_image_extension_expect_false() {
+    void given_file_extensions_when_has_jpg_extension_expect_true() {
         // arrange
-        File file = new File("./basename.ext");
+        when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
+        String filename = "./image.jpg";
 
         // act
-        boolean hasImageExtension = ImageDownloader.hasImageExtension(file);
+        boolean hasFileExtension = imageDownloader.hasAcceptedFileExtension(filename);
 
         // assert
-        assertThat(hasImageExtension).isFalse();
+        assertThat(hasFileExtension).isTrue();
     }
 
     @Test
-    void given_filename_when_filename_has_png_extension_expect_true() {
+    void given_file_extensions_when_has_no_extension_expect_true() {
         // arrange
-        File file = new File("./image.png");
+        when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
+        String filename = "./image";
 
         // act
-        boolean hasImageExtension = ImageDownloader.hasImageExtension(file);
+        boolean hasFileExtension = imageDownloader.hasAcceptedFileExtension(filename);
 
         // assert
-        assertThat(hasImageExtension).isTrue();
+        assertThat(hasFileExtension).isFalse();
     }
 
     @Test
-    void given_filename_when_filename_has_jpg_extension_expect_true() {
+    void given_file_extensions_when_has_other_extension_expect_true() {
         // arrange
-        File file = new File("./image.jpg");
+        when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
+        String filename = "./image.svg";
 
         // act
-        boolean hasImageExtension = ImageDownloader.hasImageExtension(file);
+        boolean hasFileExtension = imageDownloader.hasAcceptedFileExtension(filename);
 
         // assert
-        assertThat(hasImageExtension).isTrue();
-    }
-
-    @Test
-    void given_filename_when_filename_has_jpeg_extension_expect_true() {
-        // arrange
-        File file = new File("./image.jpeg");
-
-        // act
-        boolean hasImageExtension = ImageDownloader.hasImageExtension(file);
-
-        // assert
-        assertThat(hasImageExtension).isTrue();
+        assertThat(hasFileExtension).isFalse();
     }
 
 }

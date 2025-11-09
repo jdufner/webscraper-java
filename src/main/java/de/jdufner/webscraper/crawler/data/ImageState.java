@@ -5,5 +5,6 @@ public enum ImageState {
     INITIALIZED,
     DOWNLOADED,
     SKIPPED,
+    ERROR
 
 }

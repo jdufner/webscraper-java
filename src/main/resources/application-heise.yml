@@ -6,11 +6,17 @@ webscraper:
   crawler:
     image:
       start-download-automatically: false
+      #download-path: .
       number-images: 100
+      file-extensions:
+        - jpeg
+        - jpg
+        - png
+        - webp
     web:
       start-url: https://www.heise.de
       start-download-automatically: false
-      number-pages: 30
+      number-pages: 100
       start-analysis-automatically: false
       consent-cookies: true
       consent-css-selector:

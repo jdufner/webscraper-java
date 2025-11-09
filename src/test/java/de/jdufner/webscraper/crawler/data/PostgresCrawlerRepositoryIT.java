@@ -9,7 +9,6 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
-import java.io.File;
 import java.net.URI;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -119,31 +118,6 @@ class PostgresCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_image_when_image_exists_expect_updated() {
-        // arrange
-        jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where ID > -1000");
-        jdbcTemplate.update("delete from IMAGES where ID > -1000");
-        var filename = "image_p9W5QuCf2kgagJc5ViKu.jpg";
-        Image image = new Image(-1, URI.create("http://localhost/" + filename));
-        jdbcTemplate.update("insert into IMAGES (URL, STATE) values (?, ?)", image.uri().toString(), ImageState.INITIALIZED.toString());
-        Integer id = jdbcTemplate.queryForObject("select ID from IMAGES where URL = ?", new Object[]{image.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
-        image = new Image(Optional.ofNullable(id).orElse(0), image.uri());
-        File file = new File(filename);
-
-        // act
-        postgresCrawlerRepository.setImageDownloadedAndFilename(image, file);
-
-        // assert
-        Object[] data = Objects.requireNonNull(jdbcTemplate.queryForObject(
-                "select FILENAME, STATE from IMAGES where URL = ?",
-                (rs, rowNum) ->  new Object[]{rs.getString("FILENAME"), ImageState.valueOf(rs.getString("STATE"))},
-                image.uri().toString()
-        ));
-        assertThat(data[0]).isEqualTo(file.getPath());
-        assertThat(data[1]).isEqualTo(ImageState.DOWNLOADED);
-    }
-
-    @Test
     public void given_at_least_one_link_in_database_when_get_next_link_expect_link() {
         // arrange
         jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", "https://www.google.com", LinkState.INITIALIZED.toString());
@@ -201,7 +175,7 @@ class PostgresCrawlerRepositoryIT {
         image = new Image(Optional.ofNullable(id).orElse(0), image.uri());
 
         // act
-        postgresCrawlerRepository.setImageSkip(image);
+        postgresCrawlerRepository.setImageState(image, ImageState.SKIPPED);
 
         // assert
         ImageState imageState = jdbcTemplate.queryForObject(

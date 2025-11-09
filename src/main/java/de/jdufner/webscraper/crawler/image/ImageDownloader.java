@@ -1,8 +1,7 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.CrawlerRepository;
-import de.jdufner.webscraper.crawler.data.Image;
+import de.jdufner.webscraper.crawler.data.*;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,11 +12,13 @@ import java.net.URI;
 import java.util.Date;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
+
 @Service
 public class ImageDownloader {
 
     enum ImageStatus {
-        DOWNLOADED, SKIPPED, ERROR
+        NOT_FOUND, DOWNLOADED, SKIPPED, ERROR
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageDownloader.class);
@@ -59,43 +60,54 @@ public class ImageDownloader {
 
     private ImageStatus findAndDownloadNextImage() {
         Optional<Image> optionalImage = crawlerRepository.getNextImageIfAvailable();
-        if (optionalImage.isPresent()) {
-            Image image = optionalImage.get();
-            if (siteConfigurationProperties.isNotBlocked(optionalImage.get().uri())) {
+        return optionalImage.map(this::handleImage).orElse(ImageStatus.NOT_FOUND);
+    }
+
+    private @NonNull ImageStatus handleImage(Image image) {
+        try {
+            if (siteConfigurationProperties.isNotBlocked(image.uri()) &&
+                    hasAcceptedFileExtension(image.uri().toString())) {
                 downloadAndSave(image);
                 return ImageStatus.DOWNLOADED;
             } else {
-                skip(image);
+                setState(image, ImageState.SKIPPED);
                 return ImageStatus.SKIPPED;
             }
+        } catch (Exception e) {
+            LOGGER.error("Error while downloading image", e);
+            setState(image, ImageState.ERROR);
+            return ImageStatus.ERROR;
         }
-        return ImageStatus.ERROR;
     }
 
     private void downloadAndSave(Image image) {
         // TODO why to store the file locally instead of using S3 protocol (MinIO)
-        File file = download(image.uri());
-        crawlerRepository.setImageDownloadedAndFilename(image, file);
+        DownloadedImage downloadedImage = download(image);
+        //crawlerRepository.setImageDownloadedAndFilename(image, file);
+        crawlerRepository.saveDownloadedImage(downloadedImage);
     }
 
-    private void skip(Image image) {
-        crawlerRepository.setImageSkip(image);
+    private void setState(@NonNull Image image, @NonNull ImageState state) {
+        crawlerRepository.setImageState(image, state);
     }
 
-    @NonNull File download(@NonNull URI uri) {
-        LOGGER.debug("Downloading {}", uri);
+    @NonNull DownloadedImage download(@NonNull Image image) {
+        LOGGER.debug("Downloading {}", image.uri());
         Date downloadStartedAt = new Date();
-        File file = buildAndValidateFileName(uri);
-        imageGetter.download(uri, file);
-        imageAnalyzer.analyze(file);
-        Date downloadStoppedAt = new Date();
-        LOGGER.debug("Downloaded {} of size {} in {} seconds", file.getPath(), file.length(), (downloadStoppedAt.getTime() - downloadStartedAt.getTime())/1000d);
-        return file;
+        File file = buildAndValidateFileName(image.uri());
+        imageGetter.download(image.uri(), file);
+        AnalyzedImage analyzedImage = imageAnalyzer.analyze(file);
+        Date downloadFinishedAt = new Date();
+        LOGGER.debug("Downloaded {} of size {} in {} seconds", file.getPath(), file.length(), (downloadFinishedAt.getTime() - downloadStartedAt.getTime())/1000d);
+        return new DownloadedImage(image.id(), ImageState.DOWNLOADED, file.getPath(),
+                downloadStartedAt, downloadFinishedAt,
+                analyzedImage.fileSize(), analyzedImage.dimensionHeight(), analyzedImage.dimensionWidth(),
+                analyzedImage.hashValue());
     }
 
-    private static @NonNull File buildAndValidateFileName(@NonNull URI uri) {
+    private @NonNull File buildAndValidateFileName(@NonNull URI uri) {
         File file = getFileName(uri);
-        hasImageExtension(file);
+        hasAcceptedFileExtension(file.getPath());
         file = validateFilename(file);
         return file;
     }
@@ -112,9 +124,14 @@ public class ImageDownloader {
         return file;
     }
 
-    static boolean hasImageExtension(@NonNull File file) {
-        String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1).toLowerCase();
-        return extension.equals("png") || extension.equals("jpg") || extension.equals("jpeg") || extension.equals("webp");
+    boolean hasAcceptedFileExtension(@NonNull String fileName) {
+        try {
+            String extension = fileName.substring(fileName.toLowerCase().lastIndexOf('.') + 1);
+            return asList(imageDownloaderConfigurationProperties.fileExtensions()).contains(extension);
+        }  catch (Exception e) {
+            LOGGER.error("Error while checking file extension", e);
+            return false;
+        }
     }
 
     private static @NonNull File getFileName(@NonNull URI uri) {

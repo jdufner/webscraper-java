@@ -1,10 +1,11 @@
 package de.jdufner.webscraper.crawler.image;
 
+import de.jdufner.webscraper.crawler.data.DownloadedImage;
+import de.jdufner.webscraper.crawler.data.Image;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import java.io.File;
 import java.net.URI;
 import java.util.Arrays;
 
@@ -20,12 +21,13 @@ class ImageDownloaderIT {
     void given_configuration_when_download_expect_output_file_created() {
         // arrange
         URI uri = URI.create("https://apod.nasa.gov/apod/image/2409/iss071e564695_4096.jpg");
+        Image image = new Image(1, uri);
 
         // act
-        File file = imageDownloader.download(uri);
+        DownloadedImage downloadedImage = imageDownloader.download(image);
 
         // assert
-        assertThat(file).exists();
+        assertThat(downloadedImage.fileName()).isNotNull();
     }
 
     @Test
@@ -70,7 +72,8 @@ class ImageDownloaderIT {
         // act
         Arrays.stream(urls).forEach(url -> {
             URI uri = URI.create(url);
-            imageDownloader.download(uri);
+            Image image = new Image(1, uri);
+            imageDownloader.download(image);
         });
     }
 

@@ -104,23 +104,10 @@ class ImageAnalyzerTest {
         File file = new File("src/test/resources/images/Schmetterling.jpg");
 
         // act
-        String hash = imageAnalyzer.calculateHash1(file);
+        String hash = imageAnalyzer.calculateHash(file);
 
         // assert
-        assertThat(hash).isEqualTo("QVcanzKRuYW9iKcX3yKkIQ==");
-    }
-
-    @Test
-    public void given_jpeg_when_calculate_hash2_expect_value() throws Exception {
-        // arrange
-        when(imageConfiguration.messageDigest()).thenReturn(MessageDigest.getInstance("MD5"));
-        File file = new File("src/test/resources/images/Schmetterling.jpg");
-
-        // act
-        String hash = imageAnalyzer.calculateHash2(file);
-
-        // assert
-        assertThat(hash).isEqualTo("QVcanzKRuYW9iKcX3yKkIQ==");
+        assertThat(hash).isEqualTo("41571a9f3291b985bd88a717df22a421");
     }
 
 }

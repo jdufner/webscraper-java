@@ -3,7 +3,6 @@ package de.jdufner.webscraper.crawler.data;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Repository;
 
-import java.io.File;
 import java.net.URI;
 import java.util.Optional;
 
@@ -14,13 +13,11 @@ public interface CrawlerRepository {
 
     @NonNull Optional<Image> getNextImageIfAvailable();
 
-    void setImageDownloadedAndFilename(@NonNull Image image, @NonNull File file);
-
     @NonNull Optional<Link> getNextLinkIfAvailable();
 
     void setLinkDownloaded(@NonNull Link link);
 
-    void setImageSkip(@NonNull Image image);
+    void setImageState(@NonNull Image image, @NonNull ImageState state);
 
     void setLinkSkip(Link link);
 

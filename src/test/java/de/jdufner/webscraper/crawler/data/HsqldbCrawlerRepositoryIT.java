@@ -6,7 +6,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.io.File;
 import java.net.URI;
 import java.sql.Timestamp;
 import java.util.Date;
@@ -105,26 +104,6 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_image_when_image_exists_expect_updated() {
-        // arrange
-        Image image = new Image(-1, URI.create("http://localhost/image.jpg"));
-        jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", image.id(), image.uri().toString(), ImageState.INITIALIZED.toString());
-        File file = new File("image.jpg");
-
-        // act
-        hsqldbCrawlerRepository.setImageDownloadedAndFilename(image, file);
-
-        // assert
-        Object[] data = Objects.requireNonNull(jdbcTemplate.queryForObject(
-                "select FILENAME, STATE from IMAGES where ID = ?",
-                (rs, rowNum) ->  new Object[]{rs.getString("FILENAME"), ImageState.valueOf(rs.getString("STATE"))},
-                image.id()
-        ));
-        assertThat(data[0]).isEqualTo(file.getPath());
-        assertThat(data[1]).isEqualTo(ImageState.DOWNLOADED);
-    }
-
-    @Test
     public void given_at_least_one_link_in_database_when_get_next_link_expect_link() {
         // arrange
         jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", "https://www.google.com", LinkState.INITIALIZED.toString());
@@ -177,7 +156,7 @@ class HsqldbCrawlerRepositoryIT {
         jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", image.id(), image.uri().toString(), ImageState.INITIALIZED.toString());
 
         // act
-        hsqldbCrawlerRepository.setImageSkip(image);
+        hsqldbCrawlerRepository.setImageState(image, ImageState.SKIPPED);
 
         // assert
         ImageState processState = jdbcTemplate.queryForObject(
@@ -273,7 +252,7 @@ class HsqldbCrawlerRepositoryIT {
         try {
             // arrange
             jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", "1", "https://localhost/image.jpg", ImageState.INITIALIZED.toString());
-            DownloadedImage downloadedImage = new DownloadedImage(1, ImageState.DOWNLOADED, "image.jpg", new Date(), new Date(), 1, 1, 1);
+            DownloadedImage downloadedImage = new DownloadedImage(1, ImageState.DOWNLOADED, "image.jpg", new Date(), new Date(), 1L, 1, 1, "0123456789abcdef0123456789abcdef");
 
             // act
             hsqldbCrawlerRepository.saveDownloadedImage(downloadedImage);
@@ -298,7 +277,7 @@ class HsqldbCrawlerRepositoryIT {
         try {
             // arrange
             jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", "2", "https://localhost/image.jpg", ImageState.INITIALIZED.toString());
-            DownloadedImage downloadedImage = new DownloadedImage(1, ImageState.SKIPPED, null, new Date(), new Date(), null, null, null);
+            DownloadedImage downloadedImage = new DownloadedImage(1, ImageState.SKIPPED, null, new Date(), new Date(), null, null, null, null);
 
             // act
             hsqldbCrawlerRepository.saveDownloadedImage(downloadedImage);
