@@ -47,7 +47,7 @@ logging:
         webscraper:
           crawler:
             image:
-              ImageDownloader: DEBUG
+              ImageDownloader: INFO
               ImageGetterAhc: INFO
             web:
               WebCrawlerTrigger: INFO
