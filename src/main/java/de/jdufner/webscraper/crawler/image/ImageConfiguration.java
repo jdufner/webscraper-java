@@ -6,6 +6,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.http.HttpClient;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -15,6 +16,11 @@ public class ImageConfiguration {
     @Bean
     public @NonNull AsyncHttpClient asyncHttpClient() {
         return Dsl.asyncHttpClient();
+    }
+
+    @Bean
+    public @NonNull HttpClient httpClient() {
+        return HttpClient.newHttpClient();
     }
 
     @Bean

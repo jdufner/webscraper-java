@@ -28,7 +28,7 @@ class ImageDownloaderTest {
     private CrawlerRepository crawlerRepository;
 
     @Mock
-    private ImageGetterAhc imageGetter;
+    private ImageGetterAsyncHttpClient imageGetter;
 
     @Mock
     private ImageAnalyzer imageAnalyzer;

@@ -39,7 +39,7 @@ public class ImageDownloader {
     public ImageDownloader(@NonNull ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties,
                            @NonNull SiteConfigurationProperties siteConfigurationProperties,
                            @NonNull CrawlerRepository crawlerRepository,
-                           @NonNull ImageGetterAhc imageGetter,
+                           @NonNull ImageGetterAsyncHttpClient imageGetter,
                            @NonNull ImageAnalyzer imageAnalyzer) {
         this.imageDownloaderConfigurationProperties = imageDownloaderConfigurationProperties;
         this.siteConfigurationProperties = siteConfigurationProperties;
@@ -66,9 +66,11 @@ public class ImageDownloader {
     @NonNull ImageStatus downloadImageIfNotBlocked(Image image) {
         if (siteConfigurationProperties.isNotBlocked(image.uri()) &&
                 hasAcceptedFileExtension(image.uri().toString())) {
+            LOGGER.debug("Trying to download image {}", image.uri());
             downloadAndSave(image);
             return ImageStatus.DOWNLOADED;
         } else {
+            LOGGER.debug("Skipping download image {}", image.uri());
             setState(image, ImageState.SKIPPED);
             return ImageStatus.SKIPPED;
         }

@@ -14,13 +14,13 @@ import java.io.FileOutputStream;
 import java.net.URI;
 
 @Service
-public class ImageGetterAhc implements ImageGetter {
+public class ImageGetterAsyncHttpClient implements ImageGetter {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImageGetterAhc.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImageGetterAsyncHttpClient.class);
 
     private final AsyncHttpClient asyncHttpClient;
 
-    public ImageGetterAhc(@NonNull AsyncHttpClient asyncHttpClient) {
+    public ImageGetterAsyncHttpClient(@NonNull AsyncHttpClient asyncHttpClient) {
         this.asyncHttpClient = asyncHttpClient;
     }
 
