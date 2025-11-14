@@ -1,8 +1,12 @@
 package de.jdufner.webscraper.crawler.image;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.*;
+import de.jdufner.webscraper.crawler.data.AnalyzedImage;
+import de.jdufner.webscraper.crawler.data.CrawlerRepository;
+import de.jdufner.webscraper.crawler.data.DownloadedImage;
+import de.jdufner.webscraper.crawler.data.Image;
+import de.jdufner.webscraper.crawler.data.ImageState;
+import de.jdufner.webscraper.crawler.logger.JsonLogger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,7 +18,10 @@ import java.net.URI;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ImageDownloaderTest {
@@ -35,7 +42,7 @@ class ImageDownloaderTest {
     private ImageAnalyzer imageAnalyzer;
 
     @Mock
-    private ObjectMapper objectMapper;
+    private JsonLogger jsonLogger;
 
     @InjectMocks
     private ImageDownloader imageDownloader;
@@ -53,6 +60,7 @@ class ImageDownloaderTest {
 
         // assert
         assertThat(downloadedImage.fileName()).isEqualTo(".\\localhost\\image.jpg");
+        verify(jsonLogger).failsafeInfo(downloadedImage);
     }
 
     @Test
