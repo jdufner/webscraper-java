@@ -35,8 +35,10 @@ class ImageDownloaderIT {
             // assert
             assertThat(downloadedImage.fileName()).isNotNull();
         } finally {
-            File file = new File(fileName);
-            file.delete();
+            if (fileName != null) {
+                File file = new File(fileName);
+                file.delete();
+            }
         }
     }
 

@@ -42,7 +42,7 @@ public class ImageDownloader {
     public ImageDownloader(@NonNull ImageDownloaderConfigurationProperties imageDownloaderConfigurationProperties,
                            @NonNull SiteConfigurationProperties siteConfigurationProperties,
                            @NonNull CrawlerRepository crawlerRepository,
-                           @NonNull ImageGetterAsyncHttpClient imageGetter,
+                           @NonNull ImageGetterJavaHttpClient imageGetter,
                            @NonNull ImageAnalyzer imageAnalyzer,
                            @NonNull JsonLogger jsonLogger) {
         this.imageDownloaderConfigurationProperties = imageDownloaderConfigurationProperties;

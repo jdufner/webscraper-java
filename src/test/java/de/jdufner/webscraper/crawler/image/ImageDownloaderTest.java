@@ -1,11 +1,7 @@
 package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.AnalyzedImage;
-import de.jdufner.webscraper.crawler.data.CrawlerRepository;
-import de.jdufner.webscraper.crawler.data.DownloadedImage;
-import de.jdufner.webscraper.crawler.data.Image;
-import de.jdufner.webscraper.crawler.data.ImageState;
+import de.jdufner.webscraper.crawler.data.*;
 import de.jdufner.webscraper.crawler.logger.JsonLogger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,10 +14,7 @@ import java.net.URI;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ImageDownloaderTest {
@@ -36,7 +29,10 @@ class ImageDownloaderTest {
     private CrawlerRepository crawlerRepository;
 
     @Mock
-    private ImageGetterAsyncHttpClient imageGetter;
+    private ImageGetterAsyncHttpClient imageGetterAsyncHttpClient;
+
+    @Mock
+    private ImageGetterJavaHttpClient imageGetterJavaHttpClient;
 
     @Mock
     private ImageAnalyzer imageAnalyzer;
@@ -79,7 +75,8 @@ class ImageDownloaderTest {
         imageDownloader.download();
 
         // assert
-        verify(imageGetter, times(2)).download(uri, new File("./localhost/image.jpg"));
+        //verify(imageGetterAsyncHttpClient, times(2)).download(uri, new File("./localhost/image.jpg"));
+        verify(imageGetterJavaHttpClient, times(2)).download(uri, new File("./localhost/image.jpg"));
     }
 
     @Test
