@@ -21,8 +21,7 @@ public class JsonLogger {
         try {
             String valueAsString = objectMapper.writeValueAsString(object);
             LOGGER.info(valueAsString);
-        } catch (
-                JsonProcessingException e) {
+        } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
