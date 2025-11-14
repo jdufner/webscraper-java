@@ -6,8 +6,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,12 +25,19 @@ class ImageDownloaderIT {
         // arrange
         URI uri = URI.create("https://apod.nasa.gov/apod/image/2409/iss071e564695_4096.jpg");
         Image image = new Image(1, uri);
+        String fileName = null;
 
-        // act
-        DownloadedImage downloadedImage = imageDownloader.download(image);
+        try {
+            // act
+            DownloadedImage downloadedImage = imageDownloader.download(image);
+            fileName = downloadedImage.fileName();
 
-        // assert
-        assertThat(downloadedImage.fileName()).isNotNull();
+            // assert
+            assertThat(downloadedImage.fileName()).isNotNull();
+        } finally {
+            File file = new File(fileName);
+            file.delete();
+        }
     }
 
     @Test
@@ -68,13 +78,22 @@ class ImageDownloaderIT {
                 "https://apod.nasa.gov/apod/image/2506/APODStarryNight30thanniversary.jpg",
                 "https://apod.nasa.gov/apod/image/2506/Arp273Main_HubblePestana_3079.jpg"
         };
+        List<String> fileNames = new ArrayList<>();
 
-        // act
-        Arrays.stream(urls).forEach(url -> {
-            URI uri = URI.create(url);
-            Image image = new Image(1, uri);
-            imageDownloader.download(image);
-        });
+        try {
+            // act
+            Arrays.stream(urls).forEach(url -> {
+                URI uri = URI.create(url);
+                Image image = new Image(1, uri);
+                DownloadedImage downloadedImage = imageDownloader.download(image);
+                fileNames.add(downloadedImage.fileName());
+            });
+        } finally {
+            fileNames.forEach(fileName -> {
+                File file = new File(fileName);
+                file.delete();
+            });
+        }
     }
 
 }
