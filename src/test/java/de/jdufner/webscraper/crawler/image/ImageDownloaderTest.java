@@ -60,7 +60,6 @@ class ImageDownloaderTest {
 
         // assert
         assertThat(downloadedImage.fileName()).isEqualTo(".\\localhost\\image.jpg");
-        verify(jsonLogger).failsafeInfo(downloadedImage);
     }
 
     @Test
@@ -332,6 +331,7 @@ class ImageDownloaderTest {
         ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
 
         // assert
+        verify(jsonLogger).failsafeInfo(any());
         assertThat(imageStatus).isEqualTo(ImageDownloader.ImageStatus.DOWNLOADED);
     }
 
@@ -345,6 +345,7 @@ class ImageDownloaderTest {
         ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
 
         // assert
+        verify(jsonLogger).failsafeInfo(any());
         assertThat(imageStatus).isEqualTo(ImageDownloader.ImageStatus.SKIPPED);
     }
 
@@ -359,6 +360,7 @@ class ImageDownloaderTest {
         ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
 
         // assert
+        verify(jsonLogger).failsafeInfo(any());
         assertThat(imageStatus).isEqualTo(ImageDownloader.ImageStatus.SKIPPED);
     }
 

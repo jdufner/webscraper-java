@@ -77,6 +77,8 @@ public class ImageDownloader {
         } else {
             LOGGER.debug("Skipping download image {}", image.uri());
             setState(image, ImageState.SKIPPED);
+            record SkippedImageRecord(@NonNull Image image, @NonNull ImageState imageState) {}
+            jsonLogger.failsafeInfo(new SkippedImageRecord(image, ImageState.SKIPPED));
             return ImageStatus.SKIPPED;
         }
     }
@@ -84,6 +86,8 @@ public class ImageDownloader {
     private void downloadAndSave(Image image) {
         // TODO why to store the file locally instead of using S3 protocol (MinIO)
         DownloadedImage downloadedImage = download(image);
+        record DownloadedImageRecord (@NonNull Image image, @NonNull DownloadedImage downloadedImage) {}
+        jsonLogger.failsafeInfo(new DownloadedImageRecord (image, downloadedImage));
         crawlerRepository.saveDownloadedImage(downloadedImage);
     }
 
@@ -99,12 +103,10 @@ public class ImageDownloader {
         AnalyzedImage analyzedImage = imageAnalyzer.analyze(file);
         Date downloadFinishedAt = new Date();
         LOGGER.debug("Downloaded {} of size {} in {} seconds", file.getPath(), file.length(), (downloadFinishedAt.getTime() - downloadStartedAt.getTime())/1000d);
-        DownloadedImage downloadedImage = new DownloadedImage(image.id(), ImageState.DOWNLOADED, file.getPath(),
+        return new DownloadedImage(image.id(), ImageState.DOWNLOADED, file.getPath(),
                 downloadStartedAt, downloadFinishedAt,
                 analyzedImage.fileSize(), analyzedImage.dimensionHeight(), analyzedImage.dimensionWidth(),
                 analyzedImage.hashValue());
-        jsonLogger.failsafeInfo(downloadedImage);
-        return downloadedImage;
     }
 
     private @NonNull File buildAndValidateFileName(@NonNull URI uri) {
