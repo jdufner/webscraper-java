@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler.image;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.*;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,9 @@ class ImageDownloaderTest {
 
     @Mock
     private ImageAnalyzer imageAnalyzer;
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     @InjectMocks
     private ImageDownloader imageDownloader;

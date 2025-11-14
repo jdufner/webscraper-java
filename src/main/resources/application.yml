@@ -49,6 +49,8 @@ logging:
             image:
               ImageDownloader: INFO
               ImageGetterAhc: INFO
+            logger:
+              JsonLogger: INFO
             web:
               WebCrawlerTrigger: INFO
               WebFetcher: INFO

@@ -2,6 +2,7 @@ package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.*;
+import de.jdufner.webscraper.crawler.logger.JsonLogger;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ public class ImageDownloader {
     private final ImageGetter imageGetter;
     @NonNull
     private final ImageAnalyzer imageAnalyzer;
+    @NonNull
+    private final JsonLogger jsonLogger;
 
     private int numberDownloadedImages = 0;
 
@@ -40,12 +43,14 @@ public class ImageDownloader {
                            @NonNull SiteConfigurationProperties siteConfigurationProperties,
                            @NonNull CrawlerRepository crawlerRepository,
                            @NonNull ImageGetterAsyncHttpClient imageGetter,
-                           @NonNull ImageAnalyzer imageAnalyzer) {
+                           @NonNull ImageAnalyzer imageAnalyzer,
+                           @NonNull JsonLogger jsonLogger) {
         this.imageDownloaderConfigurationProperties = imageDownloaderConfigurationProperties;
         this.siteConfigurationProperties = siteConfigurationProperties;
         this.crawlerRepository = crawlerRepository;
         this.imageGetter = imageGetter;
         this.imageAnalyzer = imageAnalyzer;
+        this.jsonLogger = jsonLogger;
     }
 
     void download() {
@@ -94,10 +99,12 @@ public class ImageDownloader {
         AnalyzedImage analyzedImage = imageAnalyzer.analyze(file);
         Date downloadFinishedAt = new Date();
         LOGGER.debug("Downloaded {} of size {} in {} seconds", file.getPath(), file.length(), (downloadFinishedAt.getTime() - downloadStartedAt.getTime())/1000d);
-        return new DownloadedImage(image.id(), ImageState.DOWNLOADED, file.getPath(),
+        DownloadedImage downloadedImage = new DownloadedImage(image.id(), ImageState.DOWNLOADED, file.getPath(),
                 downloadStartedAt, downloadFinishedAt,
                 analyzedImage.fileSize(), analyzedImage.dimensionHeight(), analyzedImage.dimensionWidth(),
                 analyzedImage.hashValue());
+        jsonLogger.failsafeInfo(downloadedImage);
+        return downloadedImage;
     }
 
     private @NonNull File buildAndValidateFileName(@NonNull URI uri) {
