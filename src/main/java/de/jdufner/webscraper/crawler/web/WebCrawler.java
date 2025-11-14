@@ -5,6 +5,7 @@ import de.jdufner.webscraper.crawler.data.AnalyzedDocument;
 import de.jdufner.webscraper.crawler.data.CrawlerRepository;
 import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import de.jdufner.webscraper.crawler.data.Link;
+import de.jdufner.webscraper.crawler.logger.JsonLogger;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +34,8 @@ public class WebCrawler {
     private final HtmlAnalyzer htmlAnalyzer;
     @NonNull
     private final CrawlerRepository crawlerRepository;
+    @NonNull
+    private final JsonLogger jsonLogger;
 
     private boolean initialized = false;
     private int numberDownloadedLinks = 0;
@@ -41,12 +44,14 @@ public class WebCrawler {
                       @NonNull SiteConfigurationProperties siteConfigurationProperties,
                       @NonNull WebFetcher webFetcher,
                       @NonNull HtmlAnalyzer htmlAnalyzer,
-                      @NonNull CrawlerRepository crawlerRepository) {
+                      @NonNull CrawlerRepository crawlerRepository,
+                      @NonNull JsonLogger jsonLogger) {
         this.webCrawlerConfigurationProperties = webCrawlerConfigurationProperties;
         this.siteConfigurationProperties = siteConfigurationProperties;
         this.webFetcher = webFetcher;
         this.htmlAnalyzer = htmlAnalyzer;
         this.crawlerRepository = crawlerRepository;
+        this.jsonLogger = jsonLogger;
     }
 
     @Transactional
@@ -61,16 +66,19 @@ public class WebCrawler {
     }
 
     void downloadInitialUrl() {
-        LOGGER.info("downloadInitialUrl()");
+        LOGGER.debug("downloadInitialUrl()");
         URI uri = URI.create(webCrawlerConfigurationProperties.startUrl());
         Optional<Number> linkId = crawlerRepository.saveUriAsLink(uri);
-        downloadAndSave(uri);
-        linkId.ifPresent(number -> crawlerRepository.setLinkDownloaded(new Link(number.intValue(), uri)));
+        linkId.ifPresent(number -> {
+            Link link = new Link(number.intValue(), uri);
+            downloadLinkAndUpdateStatus(link);
+        });
     }
 
-    private void downloadAndSave(URI uri) {
+    private @NonNull DownloadedDocument downloadAndSave(URI uri) {
         DownloadedDocument downloadedDocument = webFetcher.downloadDocument(uri);
         crawlerRepository.saveDownloadedDocument(downloadedDocument);
+        return downloadedDocument;
     }
 
     void findAndDownloadLinkUntilConfiguredNumberReached() {
@@ -97,14 +105,22 @@ public class WebCrawler {
     }
 
     @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
-        downloadAndSave(link.uri());
+        DownloadedDocument downloadedDocument = downloadAndSave(link.uri());
         crawlerRepository.setLinkDownloaded(link);
+        record LinkDownloadedDocument(@NonNull Link link, @NonNull DownloadedDocument downloadedDocument) {}
+        DownloadedDocument shortContent = new DownloadedDocument(downloadedDocument.id(), downloadedDocument.uri(),
+                downloadedDocument.content().substring(0, Math.min(downloadedDocument.content().length(), 1000)),
+                downloadedDocument.downloadStartedAt(), downloadedDocument.downloadStoppedAt(),
+                downloadedDocument.documentState());
+        jsonLogger.failsafeInfo(new LinkDownloadedDocument(link, shortContent));
         return LinkStatus.DOWNLOADED;
     }
 
     @NonNull LinkStatus skip(@NonNull Link link) {
         LOGGER.debug("Skip Link {}", link.uri());
         crawlerRepository.setLinkSkip(link);
+        record LinkSkippedDocument(@NonNull Link link, @NonNull LinkStatus linkStatus) {}
+        jsonLogger.failsafeInfo(new LinkSkippedDocument(link, LinkStatus.SKIPPED));
         return LinkStatus.SKIPPED;
     }
 
@@ -112,7 +128,6 @@ public class WebCrawler {
     public void analyze() {
         // The next document is the document with the lowest ID in state DOWNLOADED
         Optional<DownloadedDocument> optionalDownloadedDocument = crawlerRepository.findNextDownloadedDocument();
-
         if (optionalDownloadedDocument.isPresent()) {
             LOGGER.info("analyze = {}", optionalDownloadedDocument.get().uri());
             AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(optionalDownloadedDocument.get());

@@ -5,6 +5,7 @@ import de.jdufner.webscraper.crawler.data.CrawlerRepository;
 import de.jdufner.webscraper.crawler.data.DocumentState;
 import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import de.jdufner.webscraper.crawler.data.Link;
+import de.jdufner.webscraper.crawler.logger.JsonLogger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,6 +35,9 @@ class WebCrawlerTest {
     @Mock
     private CrawlerRepository crawlerRepository;
 
+    @Mock
+    private JsonLogger jsonLogger;
+
     @InjectMocks
     private WebCrawler webCrawler;
 
@@ -60,6 +64,7 @@ class WebCrawlerTest {
         Link link = new Link(1, uri);
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
         when(siteConfigurationProperties.isNotBlocked(uri)).thenReturn(true);
+        when(webFetcher.downloadDocument(uri)).thenReturn(new DownloadedDocument(1, uri, "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED));
 
         // act
         webCrawler.download();
@@ -78,6 +83,7 @@ class WebCrawlerTest {
         DownloadedDocument downloadedDocument = new DownloadedDocument(null, uri, "<html></hml>", new Date(), new Date(), DocumentState.INITIALIZED);
         when(webFetcher.downloadDocument(uri)).thenReturn(downloadedDocument);
         when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
+        when(siteConfigurationProperties.isNotBlocked(uri)).thenReturn(true);
         doNothing().when(crawlerRepository).setLinkDownloaded(any(Link.class));
 
         // act
@@ -131,6 +137,7 @@ class WebCrawlerTest {
         Link link = new Link(1, URI.create("https://localhost"));
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
         when(siteConfigurationProperties.isNotBlocked(link.uri())).thenReturn(true);
+        when(webFetcher.downloadDocument(link.uri())).thenReturn(new DownloadedDocument(1, link.uri(), "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED));
 
         // act
         WebCrawler.LinkStatus linkStatus = webCrawler.findAndDownloadNextLink();
@@ -170,6 +177,7 @@ class WebCrawlerTest {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         when(siteConfigurationProperties.isNotBlocked(link.uri())).thenReturn(true);
+        when(webFetcher.downloadDocument(link.uri())).thenReturn(new DownloadedDocument(1, link.uri(), "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED));
 
         // act
         WebCrawler.LinkStatus linkStatus = webCrawler.downloadLinkAndUpdateStatus(link);
