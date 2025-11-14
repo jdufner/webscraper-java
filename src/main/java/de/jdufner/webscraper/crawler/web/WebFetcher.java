@@ -1,5 +1,6 @@
 package de.jdufner.webscraper.crawler.web;
 
+import de.jdufner.webscraper.crawler.data.DocumentState;
 import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class WebFetcher {
         Date downloadStartedAt = new Date();
         String html = webdriverWrapper.getHtml(uri.toString());
         Date downloadStoppedAt = new Date();
-        return new DownloadedDocument(null, uri, html, downloadStartedAt, downloadStoppedAt);
+        return new DownloadedDocument(null, uri, html, downloadStartedAt, downloadStoppedAt, DocumentState.DOWNLOADED);
     }
 
 }

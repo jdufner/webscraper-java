@@ -1,6 +1,7 @@
 package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.data.AnalyzedDocument;
+import de.jdufner.webscraper.crawler.data.DocumentState;
 import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -48,7 +49,7 @@ class HtmlAnalyzerTest {
                         <img src="https://localhost/test.jpg">
                     </body>
                 </html>
-                """, new Date(), new Date());
+                """, new Date(), new Date(), DocumentState.INITIALIZED);
 
         // act
         AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(downloadedDocument);

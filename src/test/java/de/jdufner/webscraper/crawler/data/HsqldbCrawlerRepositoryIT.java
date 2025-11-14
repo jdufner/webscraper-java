@@ -190,7 +190,8 @@ class HsqldbCrawlerRepositoryIT {
     @Test
     public void given_downloaded_document_when_save_document_then_id() {
         // arrange
-        DownloadedDocument downloadedDocument = new DownloadedDocument(null, URI.create("https://localhost/"), "<html></html>", new Date(), new Date());
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null, URI.create("https://localhost/"),
+                "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED);
 
         // act
         int i = hsqldbCrawlerRepository.saveDownloadedDocument(downloadedDocument);

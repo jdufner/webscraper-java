@@ -37,7 +37,7 @@ public abstract class AbstractCrawlerRepository {
             ps.setString(2, downloadedDocument.content());
             ps.setTimestamp(3, convert(downloadedDocument.downloadStartedAt()));
             ps.setTimestamp(4, convert(downloadedDocument.downloadStoppedAt()));
-            ps.setString(5, DocumentState.DOWNLOADED.toString());
+            ps.setString(5, downloadedDocument.documentState().toString());
             return ps;
         };
         jdbcTemplate.update(psc, keyHolder);
@@ -204,7 +204,10 @@ public abstract class AbstractCrawlerRepository {
                         "select ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, STATE from DOCUMENTS where STATE = 'DOWNLOADED' and ID = (select min(ID) from DOCUMENTS where STATE = 'DOWNLOADED') limit 1",
                         rs -> {
                             if (rs.next()) {
-                                return Optional.of(new DownloadedDocument(rs.getInt("ID"), URI.create(rs.getString("URL")), rs.getString("CONTENT"), rs.getTimestamp("DOWNLOAD_STARTED_AT"), rs.getTimestamp("DOWNLOAD_STOPPED_AT")));
+                                return Optional.of(new DownloadedDocument(rs.getInt("ID"),
+                                        URI.create(rs.getString("URL")), rs.getString("CONTENT"),
+                                        rs.getTimestamp("DOWNLOAD_STARTED_AT"), rs.getTimestamp("DOWNLOAD_STOPPED_AT"),
+                                        DocumentState.valueOf(rs.getString("STATE"))));
                             }
                             return Optional.empty();
                         })
