@@ -3,6 +3,7 @@ package de.jdufner.webscraper.crawler.image;
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.*;
 import de.jdufner.webscraper.crawler.logger.JsonLogger;
+import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,7 +56,15 @@ class ImageDownloaderTest {
         DownloadedImage downloadedImage = imageDownloader.download(image);
 
         // assert
-        assertThat(downloadedImage.fileName()).isEqualTo(".\\localhost\\image.jpg");
+        assertThat(downloadedImage.fileName()).isEqualTo(adaptFileNameToOs("./localhost/image.jpg"));
+    }
+
+    @NonNull private String adaptFileNameToOs(@NonNull String oldFileName) {
+        if (System.getProperties().getProperty("file.separator").equals("/")) {
+            return oldFileName.replace('\\', '/');
+        } else {
+            return oldFileName.replace('/', '\\');
+        }
     }
 
     @Test
