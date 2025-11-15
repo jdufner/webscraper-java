@@ -108,7 +108,7 @@ public class WebCrawler {
 
     @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
         DownloadedDocument downloadedDocument = downloadAndSave(link.uri());
-        crawlerRepository.setLinkDownloaded(link);
+        crawlerRepository.setLinkState(link, LinkState.DOWNLOADED);
         failsafeLog(link, downloadedDocument);
         return LinkStatus.DOWNLOADED;
     }
@@ -121,7 +121,7 @@ public class WebCrawler {
 
     @NonNull LinkStatus skip(@NonNull Link link) {
         LOGGER.debug("Skip Link {}", link.uri());
-        crawlerRepository.setLinkSkip(link);
+        crawlerRepository.setLinkState(link, LinkState.SKIPPED);
         failsafeLog(link, LinkState.SKIPPED);
         return LinkStatus.SKIPPED;
     }

@@ -175,20 +175,16 @@ public abstract class AbstractCrawlerRepository {
                             }
                             return Optional.empty();
                         },
-                        ImageState.INITIALIZED.toString())
+                        LinkState.INITIALIZED.toString())
         );
     }
 
-    public void setLinkDownloaded(@NonNull Link link) {
-        jdbcTemplate.update("update LINKS set STATE = ?, DOWNLOADED_AT = ? where ID = ?", LinkState.DOWNLOADED.toString(), convert(new Date()), link.id());
+    public void setLinkState(@NonNull Link link, @NonNull LinkState linkState) {
+        jdbcTemplate.update("update LINKS set STATE = ?, DOWNLOADED_AT = ? where ID = ?", linkState.toString(), convert(new Date()), link.id());
     }
 
     public void setImageState(@NonNull Image image, @NonNull ImageState state) {
         jdbcTemplate.update("update IMAGES set STATE = ? where ID = ?", state.toString(), image.id());
-    }
-
-    public void setLinkSkip(@NonNull Link link) {
-        jdbcTemplate.update("update LINKS set STATE = ?, SKIPPED_AT = ? where ID = ?", LinkState.SKIPPED.toString(), convert(new Date()), link.id());
     }
 
     protected static @Nullable Timestamp convert(@Nullable Date date) {

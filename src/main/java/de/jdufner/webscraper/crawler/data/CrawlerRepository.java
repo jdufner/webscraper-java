@@ -15,11 +15,9 @@ public interface CrawlerRepository {
 
     @NonNull Optional<Link> getNextLinkIfAvailable();
 
-    void setLinkDownloaded(@NonNull Link link);
+    void setLinkState(@NonNull Link link, @NonNull LinkState linkState);
 
     void setImageState(@NonNull Image image, @NonNull ImageState state);
-
-    void setLinkSkip(Link link);
 
     int saveDownloadedDocument(@NonNull DownloadedDocument downloadedDocument);
 

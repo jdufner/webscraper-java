@@ -134,17 +134,18 @@ class HsqldbCrawlerRepositoryIT {
         // arrange
         Link link = new Link(-1, URI.create("https://localhost/"));
         jdbcTemplate.update("insert into LINKS (ID, URL, STATE) values (?, ?, ?)", link.id(), link.uri().toString(), LinkState.INITIALIZED.toString());
+        LinkState linkState = LinkState.SKIPPED;
 
         // act
-        hsqldbCrawlerRepository.setLinkDownloaded(link);
+        hsqldbCrawlerRepository.setLinkState(link, linkState);
 
         // assert
-        LinkState linkSTate = jdbcTemplate.queryForObject(
+        LinkState loadedLinkState = jdbcTemplate.queryForObject(
                 "select STATE from LINKS where id = ?",
                 (rs, rowNum) -> LinkState.valueOf(rs.getString("STATE")),
                 link.id()
         );
-        assertThat(linkSTate).isEqualTo(LinkState.DOWNLOADED);
+        assertThat(loadedLinkState).isEqualTo(linkState);
     }
 
     @Test
@@ -165,26 +166,6 @@ class HsqldbCrawlerRepositoryIT {
                 image.id()
         );
         assertThat(processState).isEqualTo(ImageState.SKIPPED);
-    }
-
-    @Test
-    public void given_link_when_link_exists_expect_skip_updated() {
-        // arrange
-        jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where LINK_ID <= 0");
-        jdbcTemplate.update("delete from LINKS where id <= 0");
-        Link link = new Link(-2, URI.create("https://localhost/"));
-        jdbcTemplate.update("insert into LINKS (ID, URL, STATE) values (?, ?, ?)", link.id(), link.uri().toString(),  LinkState.INITIALIZED.toString());
-
-        // act
-        hsqldbCrawlerRepository.setLinkSkip(link);
-
-        // assert
-        LinkState linkState = jdbcTemplate.queryForObject(
-                "select STATE from LINKS where id = ?",
-                (rs, rowNum) -> LinkState.valueOf(rs.getString("STATE")),
-                link.id()
-        );
-        assertThat(linkState).isEqualTo(LinkState.SKIPPED);
     }
 
     @Test

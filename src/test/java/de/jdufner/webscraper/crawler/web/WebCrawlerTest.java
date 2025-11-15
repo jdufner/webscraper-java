@@ -83,7 +83,7 @@ class WebCrawlerTest {
         when(webFetcher.downloadDocument(uri)).thenReturn(downloadedDocument);
         when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
         when(siteConfigurationProperties.isNotBlocked(uri)).thenReturn(true);
-        doNothing().when(crawlerRepository).setLinkDownloaded(any(Link.class));
+        doNothing().when(crawlerRepository).setLinkState(any(Link.class), any(LinkState.class));
 
         // act
         webCrawler.downloadInitialUrl();
@@ -92,7 +92,7 @@ class WebCrawlerTest {
         verify(crawlerRepository).saveUriAsLink(uri);
         verify(webFetcher).downloadDocument(uri);
         verify(crawlerRepository).saveDownloadedDocument(downloadedDocument);
-        verify(crawlerRepository).setLinkDownloaded(new Link(1, uri));
+        verify(crawlerRepository).setLinkState(new Link(1, uri), LinkState.DOWNLOADED);
     }
 
     @Test
@@ -118,7 +118,7 @@ class WebCrawlerTest {
         DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></hml>", new Date(), new Date(), DocumentState.INITIALIZED);
         when(webFetcher.downloadDocument(link.uri())).thenReturn(downloadedDocument);
         when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
-        doNothing().when(crawlerRepository).setLinkDownloaded(link);
+        doNothing().when(crawlerRepository).setLinkState(link, LinkState.DOWNLOADED);
 
         // act
         webCrawler.findAndDownloadLinkUntilConfiguredNumberReached();
@@ -127,7 +127,7 @@ class WebCrawlerTest {
         verify(crawlerRepository).getNextLinkIfAvailable();
         verify(webFetcher).downloadDocument(link.uri());
         verify(crawlerRepository).saveDownloadedDocument(downloadedDocument);
-        verify(crawlerRepository).setLinkDownloaded(link);
+        verify(crawlerRepository).setLinkState(link, LinkState.DOWNLOADED);
     }
 
     @Test
@@ -182,7 +182,7 @@ class WebCrawlerTest {
         WebCrawler.LinkStatus linkStatus = webCrawler.downloadLinkAndUpdateStatus(link);
 
         // assert
-        verify(crawlerRepository).setLinkDownloaded(link);
+        verify(crawlerRepository).setLinkState(link, LinkState.DOWNLOADED);
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.DOWNLOADED);
     }
 
@@ -196,7 +196,7 @@ class WebCrawlerTest {
         WebCrawler.LinkStatus linkStatus = webCrawler.downloadLinkAndUpdateStatus(link);
 
         // assert
-        verify(crawlerRepository).setLinkSkip(link);
+        verify(crawlerRepository).setLinkState(link, LinkState.SKIPPED);
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.SKIPPED);
     }
 
@@ -207,7 +207,7 @@ class WebCrawlerTest {
         DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED);
         when(webFetcher.downloadDocument(link.uri())).thenReturn(downloadedDocument);
         when(crawlerRepository.saveDownloadedDocument(downloadedDocument)).thenReturn(1);
-        doNothing().when(crawlerRepository).setLinkDownloaded(link);
+        doNothing().when(crawlerRepository).setLinkState(link, LinkState.DOWNLOADED);
 
         // act
         WebCrawler.LinkStatus linkStatus = webCrawler.downloadAndSave(link);
@@ -215,7 +215,7 @@ class WebCrawlerTest {
         // assert
         verify(webFetcher).downloadDocument(link.uri());
         verify(crawlerRepository).saveDownloadedDocument(downloadedDocument);
-        verify(crawlerRepository).setLinkDownloaded(link);
+        verify(crawlerRepository).setLinkState(link, LinkState.DOWNLOADED);
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.DOWNLOADED);
     }
 
@@ -223,13 +223,13 @@ class WebCrawlerTest {
     void given_webcrawler_when_skip_link_expect_status_skipped() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
-        doNothing().when(crawlerRepository).setLinkSkip(any());
+        doNothing().when(crawlerRepository).setLinkState(link, LinkState.SKIPPED);
 
         // act
         WebCrawler.LinkStatus linkStatus = webCrawler.skip(link);
 
         // assert
-        verify(crawlerRepository).setLinkSkip(any());
+        verify(crawlerRepository).setLinkState(link, LinkState.SKIPPED);
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.SKIPPED);
     }
 

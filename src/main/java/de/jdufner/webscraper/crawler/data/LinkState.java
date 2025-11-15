@@ -5,5 +5,6 @@ public enum LinkState {
     INITIALIZED,
     DOWNLOADED,
     SKIPPED,
+    ERROR,
 
 }

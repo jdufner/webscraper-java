@@ -153,7 +153,7 @@ class PostgresCrawlerRepositoryIT {
         link = new Link(Optional.ofNullable(id).orElse(0), link.uri());
 
         // act
-        postgresCrawlerRepository.setLinkDownloaded(link);
+        postgresCrawlerRepository.setLinkState(link, LinkState.DOWNLOADED);
 
         // assert
         LinkState linkState = jdbcTemplate.queryForObject(
@@ -197,7 +197,7 @@ class PostgresCrawlerRepositoryIT {
         link = new Link(Optional.ofNullable(id).orElse(0), link.uri());
 
         // act
-        postgresCrawlerRepository.setLinkSkip(link);
+        postgresCrawlerRepository.setLinkState(link, LinkState.SKIPPED);
 
         // assert
         LinkState linkState = jdbcTemplate.queryForObject(
