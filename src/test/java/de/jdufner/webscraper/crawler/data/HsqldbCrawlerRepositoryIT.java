@@ -277,8 +277,9 @@ class HsqldbCrawlerRepositoryIT {
     public void given_downloaded_image_when_save_almost_empty_expect_all_saved() {
         try {
             // arrange
-            jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", "2", "https://localhost/image.jpg", ImageState.INITIALIZED.toString());
-            DownloadedImage downloadedImage = new DownloadedImage(1, ImageState.SKIPPED, null, new Date(), new Date(), null, null, null, null);
+            int imageId = 2;
+            jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", imageId, "https://localhost/image.jpg", ImageState.INITIALIZED.toString());
+            DownloadedImage downloadedImage = new DownloadedImage(imageId, ImageState.SKIPPED, null, new Date(), new Date(), null, null, null, null);
 
             // act
             hsqldbCrawlerRepository.saveDownloadedImage(downloadedImage);
@@ -289,10 +290,10 @@ class HsqldbCrawlerRepositoryIT {
                     (rs, rowNum) -> new Object[]{
                             ImageState.valueOf(rs.getString("STATE")),
                             rs.getString("FILENAME"),
-                            rs.getTimestamp("DOWNLOAD_STARTED_AT")}, 1);
+                            rs.getTimestamp("DOWNLOAD_STARTED_AT")}, imageId);
             assertThat(Objects.requireNonNull(objects)[0]).isEqualTo(ImageState.SKIPPED);
             assertThat(Objects.requireNonNull(objects)[1]).isNull();
-            assertThat(Objects.requireNonNull(objects)[0]).isNotNull();
+            assertThat(Objects.requireNonNull(objects)[2]).isNotNull();
         } finally {
             jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES");
             jdbcTemplate.update("delete from IMAGES");
