@@ -5,6 +5,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,8 +17,12 @@ import static java.util.Arrays.stream;
 @Service
 public class WebdriverWrapper {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebdriverWrapper.class);
+
     @NonNull
     private final WebCrawlerConfigurationProperties config;
+
+    @NonNull
     private final WebDriver webDriver;
 
     private boolean cookieConsented = false;
@@ -33,8 +39,9 @@ public class WebdriverWrapper {
     }
 
     private void waitUntilCookiesConsentedAndPageFullyLoaded() {
-        sleep(1000);
+        sleep(500);
         consentCookies();
+        sleep(500);
         executeScriptFromConfig();
         checkIfPageIsFullyLoaded();
     }
@@ -54,30 +61,44 @@ public class WebdriverWrapper {
 
     private void scrollDownPageByPage() {
         long innerHeight = executeScriptAndReturnLong("return window.innerHeight");
+        long scrollY = executeScriptAndReturnLong("return window.scrollY");
         long scrollHeight = executeScriptAndReturnLong("return document.body.scrollHeight");
+        double scrollYPercent = 1d * scrollY / scrollHeight;
+        long remainingHeight = scrollHeight - scrollY - innerHeight;
+        LOGGER.debug("scrollDownPageByPage innerHeight: {}, scrollY: {}, scrollHeight: {}, remainingHeight: {}, scrollY (%): {}}", innerHeight, scrollY, scrollHeight, remainingHeight, scrollYPercent);
         int index = 1;
-        while (executeScriptAndReturnLong("return document.body.scrollHeight - window.scrollY - window.innerHeight") >= 0.9 * innerHeight && index <= 100) {
+        while (remainingHeight > 0.1 * innerHeight && index <= 100) {
+            LOGGER.debug("scrollDownPageByPage index={}", index);
             executeScript("window.scrollBy(0, " + innerHeight + ")");
-            index += 1;
-            sleep(500);
+            long newScrollY = executeScriptAndReturnLong("return window.scrollY");
             long newScrollHeight = executeScriptAndReturnLong("return document.body.scrollHeight");
-            if (newScrollHeight > scrollHeight) {
+            double newScrollYPercent = 1d * newScrollY / newScrollHeight;
+            long newRemainingHeight = newScrollHeight - newScrollY - innerHeight;
+            LOGGER.debug("scrollDownPageByPage innerHeight: {}, scrollY: {}, scrollHeight: {}, remainingHeight: {}, scrollY (%): {}", innerHeight, newScrollY, newScrollHeight, newRemainingHeight, newScrollYPercent);
+            sleep(250);
+            index += 1;
+            if (newScrollHeight != scrollHeight) {
                 index = 1;
-                scrollHeight = newScrollHeight;
             }
-
+            scrollHeight = newScrollHeight;
+            remainingHeight = newRemainingHeight;
         }
         executeScript("window.scrollTo(0, document.body.scrollHeight)");
     }
 
     private long executeScriptAndReturnLong(@NonNull String script) {
+        LOGGER.debug("enter executeScriptAndReturnLong({})", script);
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
-        return ((Number) Objects.requireNonNull(javascriptExecutor.executeScript(script))).longValue();
+        long l = ((Number) Objects.requireNonNull(javascriptExecutor.executeScript(script))).longValue();
+        LOGGER.debug("exit executeScriptAndReturnLong(..): {}", l);
+        return l;
     }
 
     private void executeScript(@NonNull String script) {
+        LOGGER.debug("enter executeScript({})", script);
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         javascriptExecutor.executeScript(script);
+        LOGGER.debug("exit executeScript()");
     }
 
     private void consentCookies() {

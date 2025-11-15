@@ -53,4 +53,5 @@ logging:
               JsonLogger: INFO
             web:
               WebCrawlerTrigger: INFO
+              WebdriverWrapper: INFO
               WebFetcher: INFO

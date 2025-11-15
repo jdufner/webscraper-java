@@ -38,8 +38,8 @@ class WebdriverWrapperTest {
 
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         doReturn(100L).when(javascriptExecutor).executeScript("return window.innerHeight");
+        doReturn(0L).when(javascriptExecutor).executeScript("return window.scrollY");
         doReturn(100L).when(javascriptExecutor).executeScript("return document.body.scrollHeight");
-        doReturn(0L).when(javascriptExecutor).executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight");
         doReturn(0L).when(javascriptExecutor).executeScript("window.scrollTo(0, document.body.scrollHeight)");
 
         doReturn("<html></html>").when(webDriver).getPageSource();
@@ -63,8 +63,8 @@ class WebdriverWrapperTest {
 
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         doReturn(100L).when(javascriptExecutor).executeScript("return window.innerHeight");
-        doReturn(100L).when(javascriptExecutor).executeScript("return document.body.scrollHeight");
-        doReturn(100L).doReturn(0L).when(javascriptExecutor).executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight");
+        doReturn(0L, 100L).when(javascriptExecutor).executeScript("return window.scrollY");
+        doReturn(200L).when(javascriptExecutor).executeScript("return document.body.scrollHeight");
         doReturn(0L).when(javascriptExecutor).executeScript("window.scrollBy(0, 100)");
         doReturn(0L).when(javascriptExecutor).executeScript("window.scrollTo(0, document.body.scrollHeight)");
 
@@ -89,8 +89,8 @@ class WebdriverWrapperTest {
 
         JavascriptExecutor javascriptExecutor = (JavascriptExecutor) webDriver;
         doReturn(100L).when(javascriptExecutor).executeScript("return window.innerHeight");
+        doReturn(0L).when(javascriptExecutor).executeScript("return window.scrollY");
         doReturn(100L).when(javascriptExecutor).executeScript("return document.body.scrollHeight");
-        doReturn(0L).when(javascriptExecutor).executeScript("return document.body.scrollHeight - window.scrollY - window.innerHeight");
         doReturn(0L).when(javascriptExecutor).executeScript("window.scrollTo(0, document.body.scrollHeight)");
 
         doReturn("<title>Page Title</title>").when(webDriver).getPageSource();
