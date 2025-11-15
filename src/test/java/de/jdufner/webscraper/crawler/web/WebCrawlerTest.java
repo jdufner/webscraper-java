@@ -1,10 +1,7 @@
 package de.jdufner.webscraper.crawler.web;
 
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
-import de.jdufner.webscraper.crawler.data.CrawlerRepository;
-import de.jdufner.webscraper.crawler.data.DocumentState;
-import de.jdufner.webscraper.crawler.data.DownloadedDocument;
-import de.jdufner.webscraper.crawler.data.Link;
+import de.jdufner.webscraper.crawler.data.*;
 import de.jdufner.webscraper.crawler.logger.JsonLogger;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +12,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.net.URI;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +40,7 @@ class WebCrawlerTest {
     private WebCrawler webCrawler;
 
     @Test
-    public void given_webcrawler_when_download_and_not_initialized_expect_download_initial_url() {
+    void given_webcrawler_when_download_and_not_initialized_expect_download_initial_url() {
         // arrange
         URI uri = URI.create("https://localhost");
         when(webCrawlerConfigurationProperties.startUrl()).thenReturn(uri.toString());
@@ -56,7 +54,8 @@ class WebCrawlerTest {
         verify(crawlerRepository).saveUriAsLink(uri);
     }
 
-    @Test void given_webcrawler_when_download_and_initialized_expect_download_link() {
+    @Test
+    void given_webcrawler_when_download_and_initialized_expect_download_link() {
         // arrange
         URI uri = URI.create("https://localhost");
         when(webCrawlerConfigurationProperties.numberPages()).thenReturn(1);
@@ -75,7 +74,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_download_initial_url_expect_downloaded_and_saved() {
+    void given_webcrawler_when_download_initial_url_expect_downloaded_and_saved() {
         // arrange
         URI uri = URI.create("https://localhost");
         when(webCrawlerConfigurationProperties.startUrl()).thenReturn(uri.toString());
@@ -97,7 +96,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_no_links_available_expect_nothing_saved() {
+    void given_webcrawler_when_no_links_available_expect_nothing_saved() {
         // arrange
         when(webCrawlerConfigurationProperties.numberPages()).thenReturn(100);
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.empty());
@@ -110,7 +109,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_links_available_expect_downloaded_and_saved() {
+    void given_webcrawler_when_links_available_expect_downloaded_and_saved() {
         // arrange
         when(webCrawlerConfigurationProperties.numberPages()).thenReturn(1);
         Link link = new Link(1, URI.create("http://localhost"));
@@ -132,7 +131,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_next_link_available_and_not_blocked_expect_status_downloaded() {
+    void given_webcrawler_when_next_link_available_and_not_blocked_expect_status_downloaded() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
@@ -147,7 +146,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_next_link_available_but_blocked_expect_status_skipped() {
+    void given_webcrawler_when_next_link_available_but_blocked_expect_status_skipped() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.of(link));
@@ -161,7 +160,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_next_link_not_available_expect_status_unavailable() {
+    void given_webcrawler_when_next_link_not_available_expect_status_unavailable() {
         // arrange
         when(crawlerRepository.getNextLinkIfAvailable()).thenReturn(Optional.empty());
 
@@ -173,7 +172,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_download_link_and_update_status_is_not_blocked_expect_downloaded() {
+    void given_webcrawler_when_download_link_and_update_status_is_not_blocked_expect_downloaded() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         when(siteConfigurationProperties.isNotBlocked(link.uri())).thenReturn(true);
@@ -188,7 +187,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_download_link_and_update_status_is_blocked_expect_skipped() {
+    void given_webcrawler_when_download_link_and_update_status_is_blocked_expect_skipped() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         when(siteConfigurationProperties.isNotBlocked(link.uri())).thenReturn(false);
@@ -202,7 +201,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_download_and_save_expect_status_downloaded() {
+    void given_webcrawler_when_download_and_save_expect_status_downloaded() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         DownloadedDocument downloadedDocument = new DownloadedDocument(null, link.uri(), "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED);
@@ -221,7 +220,7 @@ class WebCrawlerTest {
     }
 
     @Test
-    public void given_webcrawler_when_skip_link_expect_status_skipped() {
+    void given_webcrawler_when_skip_link_expect_status_skipped() {
         // arrange
         Link link = new Link(1, URI.create("https://localhost"));
         doNothing().when(crawlerRepository).setLinkSkip(any());
@@ -232,6 +231,74 @@ class WebCrawlerTest {
         // assert
         verify(crawlerRepository).setLinkSkip(any());
         assertThat(linkStatus).isEqualTo(WebCrawler.LinkStatus.SKIPPED);
+    }
+
+    @Test
+    void given_webcrawler_when_clone_and_shorten_html_content_is_empty_expect_shortened_html_content() {
+        // arrange
+        DownloadedDocument downloadedDocument = new DownloadedDocument(null,URI.create("https://localhost"), "", new Date(), new Date(), DocumentState.INITIALIZED);
+
+        // act
+        DownloadedDocument downloadedDocumentWithShortenedHtmlContent = WebCrawler.cloneButShortenHtmlContent(downloadedDocument);
+
+        // assert
+        assertThat(downloadedDocumentWithShortenedHtmlContent).isNotNull();
+    }
+
+    @Test
+    void given_webcrawler_when_clone_and_shorten_html_content_is_large_expect_shortened_html_content() {
+        // arrange
+        DownloadedDocument downloadedDocument = new DownloadedDocument(1, URI.create("https://localhost"),
+                "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                new Date(), new Date(), DocumentState.INITIALIZED);
+
+        // act
+        DownloadedDocument downloadedDocumentWithShortenedHtmlContent = WebCrawler.cloneButShortenHtmlContent(downloadedDocument);
+
+        // assert
+        assertThat(downloadedDocumentWithShortenedHtmlContent.content().length()).isEqualTo(200);
+    }
+
+    @Test
+    void given_webcrawler_when_log_downloaded_document_and_analyzed_document_expect_log() {
+        // arrange
+        DownloadedDocument downloadedDocument = new DownloadedDocument(1, URI.create("https://localhost"),
+                "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED);
+        AnalyzedDocument analyzedDocument = new AnalyzedDocument(1, "title", null,
+                List.of(), List.of(), List.of(), List.of(), new Date(), new Date());
+
+        // act
+        webCrawler.failsafeLog(downloadedDocument, analyzedDocument);
+
+        // assert
+        verify(jsonLogger).failsafeInfo(any());
+    }
+
+    @Test
+    void given_webcrawler_when_log_link_and_downloaded_document_expect_log() {
+        // arrange
+        Link link = new Link(1, URI.create("https://localhost"));
+        DownloadedDocument downloadedDocument = new DownloadedDocument(1, URI.create("https://localhost"),
+                "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED);
+
+        // act
+        webCrawler.failsafeLog(link, downloadedDocument);
+
+        // assert
+        verify(jsonLogger).failsafeInfo(any());
+    }
+
+    @Test
+    void given_webcrawler_when_log_link_and_link_state_expect_log() {
+        // arrange
+        Link link = new Link(1, URI.create("https://localhost"));
+        LinkState linkState = LinkState.SKIPPED;
+
+        // act
+        webCrawler.failsafeLog(link, linkState);
+
+        // assert
+        verify(jsonLogger).failsafeInfo(any());
     }
 
 }
