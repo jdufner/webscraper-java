@@ -13,17 +13,18 @@ import org.springframework.test.annotation.DirtiesContext;
 @DirtiesContext
 class WebCrawlerIT {
 
-    private static final Logger logger = LoggerFactory.getLogger(WebCrawlerIT.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WebCrawlerIT.class);
 
     @Autowired
     private WebCrawler webCrawler;
 
     @Test
-    public void download() {
+    public void given_setup_when_download_and_analyze_expect_done() {
         // arrange
 
         // act
         webCrawler.download();
+        webCrawler.analyze();
 
         // assert
     }

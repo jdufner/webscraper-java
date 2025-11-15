@@ -7,12 +7,15 @@ import de.jdufner.webscraper.crawler.data.DownloadedDocument;
 import de.jdufner.webscraper.crawler.data.Link;
 import de.jdufner.webscraper.crawler.logger.JsonLogger;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -109,7 +112,7 @@ public class WebCrawler {
         crawlerRepository.setLinkDownloaded(link);
         record LinkDownloadedDocument(@NonNull Link link, @NonNull DownloadedDocument downloadedDocument) {}
         DownloadedDocument shortContent = new DownloadedDocument(downloadedDocument.id(), downloadedDocument.uri(),
-                downloadedDocument.content().substring(0, Math.min(downloadedDocument.content().length(), 1000)),
+                downloadedDocument.content().substring(0, Math.min(downloadedDocument.content().length(), 200)),
                 downloadedDocument.downloadStartedAt(), downloadedDocument.downloadStoppedAt(),
                 downloadedDocument.documentState());
         jsonLogger.failsafeInfo(new LinkDownloadedDocument(link, shortContent));
@@ -132,6 +135,22 @@ public class WebCrawler {
             LOGGER.info("analyze = {}", optionalDownloadedDocument.get().uri());
             AnalyzedDocument analyzedDocument = htmlAnalyzer.analyze(optionalDownloadedDocument.get());
             crawlerRepository.saveAnalyzedDocument(analyzedDocument);
+
+            DownloadedDocument downloadedDocument = optionalDownloadedDocument.get();
+            DownloadedDocument shortContent = new DownloadedDocument(downloadedDocument.id(), downloadedDocument.uri(),
+                    downloadedDocument.content().substring(0, Math.min(downloadedDocument.content().length(), 200)),
+                    downloadedDocument.downloadStartedAt(), downloadedDocument.downloadStoppedAt(),
+                    downloadedDocument.documentState());
+            record AnalyzedDocumentData(@Nullable String title, @Nullable Date createAt, @NonNull List<String> authors,
+                                        @NonNull List<String> categories, @NonNull Integer numberLinks,
+                                        @NonNull Integer numberImages, @NonNull Date analysisStartedAt,
+                                        @NonNull Date analysisStoppedAt) { }
+            record DownloadedAnalyzedDocument(@NonNull DownloadedDocument downloadedDocument, @NonNull AnalyzedDocumentData analyzedDocumentData) {}
+            AnalyzedDocumentData analyzedDocumentData = new AnalyzedDocumentData(analyzedDocument.title(),
+                    analyzedDocument.createdAt(), analyzedDocument.authors(), analyzedDocument.categories(),
+                    analyzedDocument.links().size(), analyzedDocument.images().size(),
+                    analyzedDocument.analysisStartedAt(), analyzedDocument.analysisStoppedAt());
+            jsonLogger.failsafeInfo(new DownloadedAnalyzedDocument(shortContent, analyzedDocumentData));
         }
     }
 
