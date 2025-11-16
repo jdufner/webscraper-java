@@ -20,4 +20,11 @@ public record Link(int id, @NonNull URI uri, @NonNull LinkState state) {
         return new Link(id, uri, LinkState.DOWNLOADED);
     }
 
+    public Link error() {
+        if (state != LinkState.ERROR) {
+            throw new IllegalStateException();
+        }
+        return new Link(id, uri, LinkState.ERROR);
+    }
+
 }

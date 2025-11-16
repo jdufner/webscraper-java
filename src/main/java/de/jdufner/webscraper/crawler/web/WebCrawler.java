@@ -21,7 +21,7 @@ import static java.lang.Math.min;
 public class WebCrawler {
 
     enum LinkStatus {
-        DOWNLOADED, SKIPPED, UNAVAILABLE
+        DOWNLOADED, SKIPPED, UNAVAILABLE, ERROR
     }
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WebCrawler.class);
@@ -99,10 +99,15 @@ public class WebCrawler {
     }
 
     @NonNull LinkStatus downloadLinkAndUpdateStatus(Link link) {
-        if (siteConfigurationProperties.isNotBlocked(link.uri())) {
-            return downloadAndSave(link);
-        } else {
-            return skip(link);
+        try {
+            if (siteConfigurationProperties.isNotBlocked(link.uri())) {
+                return downloadAndSave(link);
+            } else {
+                return skip(link);
+            }
+        } catch (Exception e) {
+            LOGGER.error("downloadLinkAndUpdateStatus", e);
+            return LinkStatus.ERROR;
         }
     }
 
@@ -122,10 +127,18 @@ public class WebCrawler {
 
     @NonNull LinkStatus skip(@NonNull Link link) {
         LOGGER.debug("Skip Link {}", link.uri());
-        Link skippedLink = new Link(link.id(), link.uri(), LinkState.SKIPPED);
+        Link skippedLink = link.skip();
         crawlerRepository.setLinkState(skippedLink);
         failsafeLog(skippedLink);
         return LinkStatus.SKIPPED;
+    }
+
+    @NonNull LinkStatus error(@NonNull Link link) {
+        LOGGER.debug("Couldn't download Link {}", link.uri());
+        Link errorLink = link.error();
+        crawlerRepository.setLinkState(errorLink);
+        failsafeLog(errorLink);
+        return LinkStatus.ERROR;
     }
 
     void failsafeLog(@NonNull Link link) {
