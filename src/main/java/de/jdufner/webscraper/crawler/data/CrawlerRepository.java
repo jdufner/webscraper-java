@@ -17,7 +17,7 @@ public interface CrawlerRepository {
 
     void setLinkState(@NonNull Link link);
 
-    void setImageState(@NonNull Image image, @NonNull ImageState state);
+    void setImageState(@NonNull Image image);
 
     int saveDownloadedDocument(@NonNull DownloadedDocument downloadedDocument);
 

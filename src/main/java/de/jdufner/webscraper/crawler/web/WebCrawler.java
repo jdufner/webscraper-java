@@ -107,6 +107,7 @@ public class WebCrawler {
             }
         } catch (Exception e) {
             LOGGER.error("downloadLinkAndUpdateStatus", e);
+            error(link);
             return LinkStatus.ERROR;
         }
     }

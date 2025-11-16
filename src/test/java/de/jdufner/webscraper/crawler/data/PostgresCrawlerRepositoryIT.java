@@ -170,21 +170,22 @@ class PostgresCrawlerRepositoryIT {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where ID > -1000");
         jdbcTemplate.update("delete from IMAGES where id > -1000");
-        Image image = new Image(-1, URI.create("https://localhost/image_p9W5QuCf2kgagJc5ViKu.jpg"));
-        jdbcTemplate.update("insert into IMAGES (URL, STATE) values (?, ?)", image.uri().toString(), ImageState.INITIALIZED.toString());
+        Image image = new Image(-1, URI.create("https://localhost/image_p9W5QuCf2kgagJc5ViKu.jpg"), ImageState.INITIALIZED);
+        jdbcTemplate.update("insert into IMAGES (URL, STATE) values (?, ?)", image.uri().toString(), image.state().toString());
         Integer id = jdbcTemplate.queryForObject("select ID from IMAGES where URL = ?", new Object[]{image.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
-        image = new Image(Optional.ofNullable(id).orElse(0), image.uri());
+        image = new Image(Optional.ofNullable(id).orElse(0), image.uri(), ImageState.INITIALIZED);
+        Image skippedImage = image.skip();
 
         // act
-        postgresCrawlerRepository.setImageState(image, ImageState.SKIPPED);
+        postgresCrawlerRepository.setImageState(skippedImage);
 
         // assert
-        ImageState imageState = jdbcTemplate.queryForObject(
+        ImageState state = jdbcTemplate.queryForObject(
                 "select STATE from IMAGES where URL = ?",
                 (rs, rowNum) -> ImageState.valueOf(rs.getString("STATE")),
                 image.uri().toString()
         );
-        assertThat(imageState).isEqualTo(ImageState.SKIPPED);
+        assertThat(state).isEqualTo(skippedImage.state());
     }
 
     @Test

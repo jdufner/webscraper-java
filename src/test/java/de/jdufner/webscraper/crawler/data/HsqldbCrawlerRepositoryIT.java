@@ -153,19 +153,20 @@ class HsqldbCrawlerRepositoryIT {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where IMAGE_ID <= 0");
         jdbcTemplate.update("delete from IMAGES where id <= 0");
-        Image image = new Image(-2, URI.create("https://localhost/"));
-        jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", image.id(), image.uri().toString(), ImageState.INITIALIZED.toString());
+        Image image = new Image(-2, URI.create("https://localhost/"), ImageState.INITIALIZED);
+        jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", image.id(), image.uri().toString(), image.state().toString());
+        Image skippedImage = image.skip();
 
         // act
-        hsqldbCrawlerRepository.setImageState(image, ImageState.SKIPPED);
+        hsqldbCrawlerRepository.setImageState(skippedImage);
 
         // assert
-        ImageState processState = jdbcTemplate.queryForObject(
+        ImageState state = jdbcTemplate.queryForObject(
                 "select STATE from IMAGES where id = ?",
                 (rs, rowNum) -> ImageState.valueOf(rs.getString(1)),
                 image.id()
         );
-        assertThat(processState).isEqualTo(ImageState.SKIPPED);
+        assertThat(state).isEqualTo(skippedImage.state());
     }
 
     @Test

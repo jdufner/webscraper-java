@@ -76,23 +76,28 @@ public class ImageDownloader {
             return ImageStatus.DOWNLOADED;
         } else {
             LOGGER.debug("Skipping download image {}", image.uri());
-            setState(image, ImageState.SKIPPED);
-            record SkippedImageRecord(@NonNull Image image, @NonNull ImageState imageState) {}
-            jsonLogger.failsafeInfo(new SkippedImageRecord(image, ImageState.SKIPPED));
+            Image skippedImage = image.skip();
+            jsonLogger.failsafeInfo(skippedImage);
             return ImageStatus.SKIPPED;
         }
     }
 
     private void downloadAndSave(Image image) {
-        // TODO why to store the file locally instead of using S3 protocol (MinIO)
-        DownloadedImage downloadedImage = download(image);
-        record DownloadedImageRecord (@NonNull Image image, @NonNull DownloadedImage downloadedImage) {}
-        jsonLogger.failsafeInfo(new DownloadedImageRecord (image, downloadedImage));
-        crawlerRepository.saveDownloadedImage(downloadedImage);
+        try {
+            // TODO why to store the file locally instead of using S3 protocol (MinIO)
+            DownloadedImage downloadedImage = download(image);
+            record DownloadedImageRecord(@NonNull Image image, @NonNull DownloadedImage downloadedImage) {
+            }
+            jsonLogger.failsafeInfo(new DownloadedImageRecord(image, downloadedImage));
+            crawlerRepository.saveDownloadedImage(downloadedImage);
+        } catch (Exception e) {
+            LOGGER.error("downloadAndSave", e);
+            setState(image.error());
+        }
     }
 
-    void setState(@NonNull Image image, @NonNull ImageState state) {
-        crawlerRepository.setImageState(image, state);
+    void setState(@NonNull Image image) {
+        crawlerRepository.setImageState(image);
     }
 
     @NonNull DownloadedImage download(@NonNull Image image) {

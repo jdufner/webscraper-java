@@ -2,6 +2,7 @@ package de.jdufner.webscraper.crawler.image;
 
 import de.jdufner.webscraper.crawler.data.DownloadedImage;
 import de.jdufner.webscraper.crawler.data.Image;
+import de.jdufner.webscraper.crawler.data.ImageState;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +25,7 @@ class ImageDownloaderIT {
     void given_configuration_when_download_expect_output_file_created() {
         // arrange
         URI uri = URI.create("https://apod.nasa.gov/apod/image/2409/iss071e564695_4096.jpg");
-        Image image = new Image(1, uri);
+        Image image = new Image(1, uri, ImageState.INITIALIZED);
         String fileName = null;
 
         try {
@@ -86,7 +87,7 @@ class ImageDownloaderIT {
             // act
             Arrays.stream(urls).forEach(url -> {
                 URI uri = URI.create(url);
-                Image image = new Image(1, uri);
+                Image image = new Image(1, uri, ImageState.INITIALIZED);
                 DownloadedImage downloadedImage = imageDownloader.download(image);
                 fileNames.add(downloadedImage.fileName());
             });

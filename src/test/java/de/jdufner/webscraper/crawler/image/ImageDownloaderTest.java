@@ -49,7 +49,7 @@ class ImageDownloaderTest {
         // arrange
         when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
         URI uri = URI.create("https://localhost/image.jpg");
-        Image image = new Image(1, uri);
+        Image image = new Image(1, uri, ImageState.INITIALIZED);
         when(imageAnalyzer.analyze(any())).thenReturn(new AnalyzedImage(0L, null, null, null));
 
         // act
@@ -73,7 +73,7 @@ class ImageDownloaderTest {
         when(imageDownloaderConfigurationProperties.numberImages()).thenReturn(2);
         when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
         URI uri = URI.create("https://localhost/image.jpg");
-        Image image = new Image(1, uri);
+        Image image = new Image(1, uri, ImageState.INITIALIZED);
         when(crawlerRepository.getNextImageIfAvailable()).thenReturn(Optional.of(image));
         when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
         when(imageAnalyzer.analyze(any())).thenReturn(new AnalyzedImage(0L, null, null, null));
@@ -302,14 +302,13 @@ class ImageDownloaderTest {
     @Test
     void given_stat_when_skipped_expect_repository_called() {
         // arrange
-        Image image = new Image(1, URI.create("https://localhost"));
-        ImageState state = ImageState.SKIPPED;
+        Image image = new Image(1, URI.create("https://localhost"), ImageState.SKIPPED);
 
         // act
-        imageDownloader.setState(image, state);
+        imageDownloader.setState(image);
 
         // assert
-        verify(crawlerRepository).setImageState(image, state);
+        verify(crawlerRepository).setImageState(image);
     }
 
     @Test
@@ -331,7 +330,7 @@ class ImageDownloaderTest {
         when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
         when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
         when(imageAnalyzer.analyze(any())).thenReturn(new AnalyzedImage(0L, null, null, null));
-        Image image = new Image(1, URI.create("https://localhost/image.jpg"));
+        Image image = new Image(1, URI.create("https://localhost/image.jpg"), ImageState.INITIALIZED);
 
         // act
         ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
@@ -345,7 +344,7 @@ class ImageDownloaderTest {
     void given_image_when_image_blacklisted_expect_state_skipped() {
         // arrange
         when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(false);
-        Image image = new Image(1, URI.create("https://localhost/image.jpg"));
+        Image image = new Image(1, URI.create("https://localhost/image.jpg"), ImageState.INITIALIZED);
 
         // act
         ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
@@ -360,7 +359,7 @@ class ImageDownloaderTest {
         // arrange
         when(siteConfigurationProperties.isNotBlocked(any())).thenReturn(true);
         when(imageDownloaderConfigurationProperties.fileExtensions()).thenReturn(new String[]{"jpeg", "jpg", "png", "webp"});
-        Image image = new Image(1, URI.create("https://localhost/image.svg"));
+        Image image = new Image(1, URI.create("https://localhost/image.svg"), ImageState.INITIALIZED);
 
         // act
         ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
