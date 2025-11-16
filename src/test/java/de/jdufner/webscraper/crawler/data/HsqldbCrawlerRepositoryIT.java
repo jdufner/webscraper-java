@@ -132,12 +132,12 @@ class HsqldbCrawlerRepositoryIT {
     @Test
     public void given_link_when_link_exists_expect_updated() {
         // arrange
-        Link link = new Link(-1, URI.create("https://localhost/"));
-        jdbcTemplate.update("insert into LINKS (ID, URL, STATE) values (?, ?, ?)", link.id(), link.uri().toString(), LinkState.INITIALIZED.toString());
-        LinkState linkState = LinkState.SKIPPED;
+        Link link = new Link(-1, URI.create("https://localhost"), LinkState.INITIALIZED);
+        jdbcTemplate.update("insert into LINKS (ID, URL, STATE) values (?, ?, ?)", link.id(), link.uri().toString(), link.state().toString());
+        Link skippedLink = link.skip();
 
         // act
-        hsqldbCrawlerRepository.setLinkState(link, linkState);
+        hsqldbCrawlerRepository.setLinkState(skippedLink);
 
         // assert
         LinkState loadedLinkState = jdbcTemplate.queryForObject(
@@ -145,7 +145,7 @@ class HsqldbCrawlerRepositoryIT {
                 (rs, rowNum) -> LinkState.valueOf(rs.getString("STATE")),
                 link.id()
         );
-        assertThat(loadedLinkState).isEqualTo(linkState);
+        assertThat(loadedLinkState).isEqualTo(skippedLink.state());
     }
 
     @Test

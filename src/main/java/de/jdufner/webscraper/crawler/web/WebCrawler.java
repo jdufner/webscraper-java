@@ -72,7 +72,7 @@ public class WebCrawler {
         URI uri = URI.create(webCrawlerConfigurationProperties.startUrl());
         Optional<Number> linkId = crawlerRepository.saveUriAsLink(uri);
         linkId.ifPresent(number -> {
-            Link link = new Link(number.intValue(), uri);
+            Link link = new Link(number.intValue(), uri, LinkState.INITIALIZED);
             downloadLinkAndUpdateStatus(link);
         });
     }
@@ -108,8 +108,9 @@ public class WebCrawler {
 
     @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
         DownloadedDocument downloadedDocument = downloadAndSave(link.uri());
-        crawlerRepository.setLinkState(link, LinkState.DOWNLOADED);
-        failsafeLog(link, downloadedDocument);
+        Link downloadedLink = new Link(link.id(), link.uri(), LinkState.DOWNLOADED);
+        crawlerRepository.setLinkState(downloadedLink);
+        failsafeLog(downloadedLink, downloadedDocument);
         return LinkStatus.DOWNLOADED;
     }
 
@@ -121,14 +122,14 @@ public class WebCrawler {
 
     @NonNull LinkStatus skip(@NonNull Link link) {
         LOGGER.debug("Skip Link {}", link.uri());
-        crawlerRepository.setLinkState(link, LinkState.SKIPPED);
-        failsafeLog(link, LinkState.SKIPPED);
+        Link skippedLink = new Link(link.id(), link.uri(), LinkState.SKIPPED);
+        crawlerRepository.setLinkState(skippedLink);
+        failsafeLog(skippedLink);
         return LinkStatus.SKIPPED;
     }
 
-    void failsafeLog(@NonNull Link link, @NonNull LinkState linkState) {
-        record LinkSkippedDocument(@NonNull Link link, @NonNull LinkState linkState) {}
-        jsonLogger.failsafeInfo(new LinkSkippedDocument(link, linkState));
+    void failsafeLog(@NonNull Link link) {
+        jsonLogger.failsafeInfo(link);
     }
 
     @Transactional

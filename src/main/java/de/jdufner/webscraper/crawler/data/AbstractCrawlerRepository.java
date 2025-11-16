@@ -168,10 +168,12 @@ public abstract class AbstractCrawlerRepository {
     public @NonNull Optional<Link> getNextLinkIfAvailable() {
         return Objects.requireNonNull(
                 jdbcTemplate.query(
-                        "select ID, URL from LINKS where STATE = ? order by ID limit 1",
+                        "select ID, URL, STATE from LINKS where STATE = ? order by ID limit 1",
                         rs -> {
                             if (rs.next()) {
-                                return Optional.of(new Link(rs.getInt("ID"), URI.create(rs.getString("URL"))));
+                                return Optional.of(new Link(rs.getInt("ID"),
+                                        URI.create(rs.getString("URL")),
+                                        LinkState.valueOf(rs.getString("STATE"))));
                             }
                             return Optional.empty();
                         },
@@ -179,8 +181,8 @@ public abstract class AbstractCrawlerRepository {
         );
     }
 
-    public void setLinkState(@NonNull Link link, @NonNull LinkState linkState) {
-        jdbcTemplate.update("update LINKS set STATE = ?, DOWNLOADED_AT = ? where ID = ?", linkState.toString(), convert(new Date()), link.id());
+    public void setLinkState(@NonNull Link link) {
+        jdbcTemplate.update("update LINKS set STATE = ?, DOWNLOADED_AT = ? where ID = ?", link.state().toString(), convert(new Date()), link.id());
     }
 
     public void setImageState(@NonNull Image image, @NonNull ImageState state) {

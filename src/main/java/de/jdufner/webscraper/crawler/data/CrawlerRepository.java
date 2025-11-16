@@ -15,7 +15,7 @@ public interface CrawlerRepository {
 
     @NonNull Optional<Link> getNextLinkIfAvailable();
 
-    void setLinkState(@NonNull Link link, @NonNull LinkState linkState);
+    void setLinkState(@NonNull Link link);
 
     void setImageState(@NonNull Image image, @NonNull ImageState state);
 

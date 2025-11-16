@@ -147,13 +147,14 @@ class PostgresCrawlerRepositoryIT {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where ID > -1000");
         jdbcTemplate.update("delete from LINKS where id > -1000");
-        Link link = new Link(-1, URI.create("https://localhost"));
-        jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", link.uri().toString(), LinkState.INITIALIZED.toString());
-        Integer id = jdbcTemplate.queryForObject("select ID from LINKS where URL = ?", new Object[]{link.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
-        link = new Link(Optional.ofNullable(id).orElse(0), link.uri());
+        Link link = new Link(-1, URI.create("https://localhost"), LinkState.INITIALIZED);
+        jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", link.uri().toString(), link.state().toString());
+        // TODO read more columns from table to Object[]
+        Integer id = jdbcTemplate.queryForObject("select ID from LINKS where URL = ?", new Object[]{link.uri().toString(), }, new int[]{Types.VARCHAR}, Integer.class);
+        link = new Link(Optional.ofNullable(id).orElse(0), link.uri(), LinkState.INITIALIZED);
 
         // act
-        postgresCrawlerRepository.setLinkState(link, LinkState.DOWNLOADED);
+        postgresCrawlerRepository.setLinkState(link);
 
         // assert
         LinkState linkState = jdbcTemplate.queryForObject(
@@ -191,13 +192,14 @@ class PostgresCrawlerRepositoryIT {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where ID > -1000");
         jdbcTemplate.update("delete from LINKS where id > -1000");
-        Link link = new Link(-2, URI.create("https://localhost/"));
-        jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", link.uri().toString(), LinkState.INITIALIZED.toString());
+        Link link = new Link(-2, URI.create("https://localhost/"), LinkState.INITIALIZED);
+        jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", link.uri().toString(), link.state().toString());
+        // TODO read more columns from LINKS to Object[]
         Integer id = jdbcTemplate.queryForObject("select ID from LINKS where URL = ?", new Object[]{link.uri().toString()}, new int[]{Types.VARCHAR}, Integer.class);
-        link = new Link(Optional.ofNullable(id).orElse(0), link.uri());
+        link = new Link(Optional.ofNullable(id).orElse(0), link.uri(), LinkState.INITIALIZED);
 
         // act
-        postgresCrawlerRepository.setLinkState(link, LinkState.SKIPPED);
+        postgresCrawlerRepository.setLinkState(link);
 
         // assert
         LinkState linkState = jdbcTemplate.queryForObject(
