@@ -141,7 +141,8 @@ public class WebCrawler {
     }
 
     void failsafeLog(@NonNull Link link) {
-        jsonLogger.failsafeInfo(link);
+        record LinkLogger(@NonNull Link link) {}
+        jsonLogger.failsafeInfo(new LinkLogger(link));
     }
 
     void failsafeLog(@NonNull Link link, @NonNull DownloadedDocument downloadedDocument) {
@@ -174,11 +175,11 @@ public class WebCrawler {
         record AnalyzedDocumentData(@Nullable String title, @Nullable Date createAt, @NonNull List<String> authors,
                                     @NonNull List<String> categories, @NonNull Integer numberLinks,
                                     @NonNull Integer numberImages, @NonNull Date analysisStartedAt,
-                                    @NonNull Date analysisStoppedAt) { }
+                                    @NonNull Date analysisStoppedAt, @Nullable Integer contentLength) { }
         AnalyzedDocumentData analyzedDocumentData = new AnalyzedDocumentData(analyzedDocument.title(),
                 analyzedDocument.createdAt(), analyzedDocument.authors(), analyzedDocument.categories(),
                 analyzedDocument.links().size(), analyzedDocument.images().size(),
-                analyzedDocument.analysisStartedAt(), analyzedDocument.analysisStoppedAt());
+                analyzedDocument.analysisStartedAt(), analyzedDocument.analysisStoppedAt(), analyzedDocument.contentLength());
         record DownloadedAnalyzedDocument(@NonNull DownloadedDocument downloadedDocument, @NonNull AnalyzedDocumentData analyzedDocumentData) {}
         jsonLogger.failsafeInfo(new DownloadedAnalyzedDocument(shortContent, analyzedDocumentData));
     }

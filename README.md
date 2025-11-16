@@ -2,6 +2,57 @@
 
 ## Description
 
+### Data analytics
+
+Count number of document in different states.
+
+    select state, count(id)
+    from documents
+    group by state;
+
+Minimal, maximal and average download duration of documents. 
+
+    select min(download_stopped_at-download_started_at), avg(download_stopped_at-download_started_at), max(download_stopped_at-download_started_at)
+    from documents;
+
+Minimal, maximal and average size of documents.
+
+    select min(content_length), avg(content_length), max(content_length)
+    from documents
+    group by state;
+
+Count number of links in different states.
+
+    select state, count(id)
+    from links
+    group by state;
+
+Count number of images in different states.
+
+    select state, count(id)
+    from images
+    group by state;
+
+Create some sizes of interest and count number of documents belong to sizes.
+
+    select
+        case
+            when content_length < 10_000 then '01. <10k'
+            when content_length >= 10_000 and content_length < 100_000 then '02. <100k'
+            when content_length >= 100_000 and content_length < 200_000 then '03. <200k'
+            when content_length >= 200_000 and content_length < 300_000 then '04. <300k'
+            when content_length >= 300_000 and content_length < 400_000 then '05. <400k'
+            when content_length >= 400_000 and content_length < 500_000 then '06. <500k'
+            when content_length >= 500_000 and content_length < 1_000_000 then '07. <1m'
+            when content_length >= 1_000_000 and content_length < 10_000_000 then '08. <10m'
+            else '09. >=10m'
+        end as sizes,
+    count(id) as number,
+    avg(download_stopped_at-download_started_at) as time
+    from documents
+    group by sizes
+    order by sizes;
+
 
 
 ## Installation

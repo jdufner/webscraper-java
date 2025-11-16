@@ -21,9 +21,6 @@ public record Image(int id, @NonNull URI uri, @NonNull ImageState state) {
     }
 
     public Image error() {
-        if (state != ImageState.INITIALIZED) {
-            throw new IllegalStateException();
-        }
         return new Image(id, uri, ImageState.ERROR);
     }
 

@@ -270,7 +270,7 @@ class WebCrawlerTest {
         DownloadedDocument downloadedDocument = new DownloadedDocument(1, URI.create("https://localhost"),
                 "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED);
         AnalyzedDocument analyzedDocument = new AnalyzedDocument(1, "title", null,
-                List.of(), List.of(), List.of(), List.of(), new Date(), new Date());
+                List.of(), List.of(), List.of(), List.of(), new Date(), new Date(), null);
 
         // act
         webCrawler.failsafeLog(downloadedDocument, analyzedDocument);

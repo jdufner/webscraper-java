@@ -64,6 +64,7 @@ class HtmlAnalyzerTest {
         assertThat(analyzedDocument.images()).hasSize(1);
         assertThat(analyzedDocument.analysisStartedAt()).isNotNull();
         assertThat(analyzedDocument.analysisStoppedAt()).isNotNull();
+        assertThat(analyzedDocument.contentLength()).isGreaterThan(0);
     }
 
     @Test

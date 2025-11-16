@@ -37,9 +37,11 @@ public class HtmlAnalyzer {
         List<String> categories = extractCategories(document);
         List<URI> links = extractLinks(downloadedDocument.uri(), document);
         List<URI> images = extractImages(downloadedDocument.uri(), document);
+        int contentLength = downloadedDocument.content().length();
         Date analysisStoppedAt = new Date();
         return new AnalyzedDocument(Objects.requireNonNull(downloadedDocument.id()), title.orElse(null),
-                createdAt.orElse(null), authors, categories, links, images, analysisStartedAt, analysisStoppedAt);
+                createdAt.orElse(null), authors, categories, links, images, analysisStartedAt, analysisStoppedAt,
+                contentLength);
     }
 
     @NonNull

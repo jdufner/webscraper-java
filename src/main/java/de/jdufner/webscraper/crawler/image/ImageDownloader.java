@@ -112,7 +112,8 @@ public class ImageDownloader {
     }
 
     void failsafeLog(@NonNull Image image) {
-        jsonLogger.failsafeInfo(image);
+        record ImageLogger(@NonNull Image image) {}
+        jsonLogger.failsafeInfo(new ImageLogger(image));
     }
 
     void failsafeLog(Image image, DownloadedImage downloadedImage) {

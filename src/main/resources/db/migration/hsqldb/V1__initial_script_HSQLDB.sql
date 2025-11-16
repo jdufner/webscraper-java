@@ -2,6 +2,7 @@ create table if not exists DOCUMENTS (
     ID integer identity primary key,
     URL varchar(1000) not null,
     CONTENT varchar(10000000) not null,
+    CONTENT_LENGTH integer,
     DOWNLOAD_STARTED_AT timestamp not null,
     DOWNLOAD_STOPPED_AT timestamp not null,
     ANALYSIS_STARTED_AT timestamp,

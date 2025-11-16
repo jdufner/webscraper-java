@@ -52,7 +52,7 @@ class PostgresCrawlerRepositoryIT {
                 asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                 asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
                 asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")),
-                new Date(), new Date());
+                new Date(), new Date(), 100);
 
         // act
         postgresCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
@@ -66,7 +66,7 @@ class PostgresCrawlerRepositoryIT {
         deleteAllDataFromTables();
         int documentId = insertDownloadedDocument();
         AnalyzedDocument analyzedDocument = new AnalyzedDocument(documentId, null, null,
-                emptyList(), emptyList(), emptyList(), emptyList(), new Date(),  new Date());
+                emptyList(), emptyList(), emptyList(), emptyList(), new Date(),  new Date(), null);
 
         // act
         postgresCrawlerRepository.saveAnalyzedDocument(analyzedDocument);

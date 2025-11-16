@@ -54,13 +54,14 @@ public abstract class AbstractCrawlerRepository {
 
     protected void updateAnalyzedDocument(@NonNull AnalyzedDocument analyzedDocument) {
         PreparedStatementCreator psc = con -> {
-            PreparedStatement ps = con.prepareStatement("update DOCUMENTS set STATE = ?, TITLE = ?, CREATED_AT = ?, ANALYSIS_STARTED_AT = ?, ANALYSIS_STOPPED_AT = ? where ID = ?");
+            PreparedStatement ps = con.prepareStatement("update DOCUMENTS set STATE = ?, TITLE = ?, CREATED_AT = ?, ANALYSIS_STARTED_AT = ?, ANALYSIS_STOPPED_AT = ?, CONTENT_LENGTH = ? where ID = ?");
             ps.setString(1, DocumentState.ANALYZED.toString());
             ps.setString(2, analyzedDocument.title());
             ps.setTimestamp(3, convert(analyzedDocument.createdAt()));
             ps.setTimestamp(4, convert(analyzedDocument.analysisStartedAt()));
             ps.setTimestamp(5, convert(analyzedDocument.analysisStoppedAt()));
-            ps.setInt(6, analyzedDocument.documentId());
+            ps.setObject(6, analyzedDocument.contentLength());
+            ps.setInt(7, analyzedDocument.documentId());
             return ps;
         };
         jdbcTemplate.update(psc);

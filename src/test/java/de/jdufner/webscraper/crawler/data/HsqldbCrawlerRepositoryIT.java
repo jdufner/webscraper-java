@@ -49,7 +49,7 @@ class HsqldbCrawlerRepositoryIT {
                 asList("vorname nachname", "first name surname"), asList("nice", "excellent", "fantastic"),
                 asList(URI.create("https://www.google.com/"), URI.create("https://www.spiegel.de")),
                 asList(URI.create("https://www.google.com/image1.jpg"), URI.create("https://www.spiegel.de/image2.png")),
-                new Date(), new Date());
+                new Date(), new Date(), 100);
 
         // act
         hsqldbCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
@@ -67,7 +67,7 @@ class HsqldbCrawlerRepositoryIT {
                 -2, "https://localhost/", "<html></html>", new Timestamp((new Date()).getTime()),
                 new Timestamp((new Date()).getTime()), DocumentState.DOWNLOADED.toString());
         AnalyzedDocument analyzedDocument = new AnalyzedDocument(-2, null, null,
-                emptyList(), emptyList(), emptyList(), emptyList(), new Date(), new Date());
+                emptyList(), emptyList(), emptyList(), emptyList(), new Date(), new Date(), null);
 
         // act
         hsqldbCrawlerRepository.saveAnalyzedDocument(analyzedDocument);
