@@ -7,7 +7,7 @@ webscraper:
     image:
       start-download-automatically: false
       #download-path: .
-      number-images: 100
+      number-images: 1000
       file-extensions:
         - jpeg
         - jpg
