@@ -65,39 +65,60 @@ public class ImageDownloader {
 
     ImageStatus findAndDownloadNextImage() {
         Optional<Image> optionalImage = crawlerRepository.getNextImageIfAvailable();
-        return optionalImage.map(this::downloadImageIfNotBlocked).orElse(ImageStatus.NOT_FOUND);
+        return optionalImage.map(this::downloadImageAndUpdateStatus).orElse(ImageStatus.NOT_FOUND);
     }
 
-    @NonNull ImageStatus downloadImageIfNotBlocked(Image image) {
-        if (siteConfigurationProperties.isNotBlocked(image.uri()) &&
-                hasAcceptedFileExtension(image.uri().toString())) {
-            LOGGER.debug("Trying to download image {}", image.uri());
-            downloadAndSave(image);
-            return ImageStatus.DOWNLOADED;
-        } else {
-            LOGGER.debug("Skipping download image {}", image.uri());
-            Image skippedImage = image.skip();
-            jsonLogger.failsafeInfo(skippedImage);
-            return ImageStatus.SKIPPED;
-        }
-    }
-
-    private void downloadAndSave(Image image) {
+    @NonNull ImageStatus downloadImageAndUpdateStatus(Image image) {
         try {
-            // TODO why to store the file locally instead of using S3 protocol (MinIO)
-            DownloadedImage downloadedImage = download(image);
-            record DownloadedImageRecord(@NonNull Image image, @NonNull DownloadedImage downloadedImage) {
+            if (isEligible(image)) {
+                return downloadAndSave(image);
+            } else {
+                return skip(image);
             }
-            jsonLogger.failsafeInfo(new DownloadedImageRecord(image, downloadedImage));
-            crawlerRepository.saveDownloadedImage(downloadedImage);
         } catch (Exception e) {
-            LOGGER.error("downloadAndSave", e);
-            setState(image.error());
+            LOGGER.error("downloadImageAndUpdateStatus", e);
+            return error(image);
         }
     }
 
-    void setState(@NonNull Image image) {
-        crawlerRepository.setImageState(image);
+    private boolean isEligible(Image image) {
+        return siteConfigurationProperties.isNotBlocked(image.uri()) &&
+                hasAcceptedFileExtension(image.uri().toString());
+    }
+
+    @NonNull ImageStatus downloadAndSave(Image image) {
+        LOGGER.debug("Trying to download image {}", image.uri());
+        // TODO why to store the file locally instead of using S3 protocol (MinIO)
+        DownloadedImage downloadedImage = download(image);
+        crawlerRepository.saveDownloadedImage(downloadedImage);
+        failsafeLog(image, downloadedImage);
+        return ImageStatus.DOWNLOADED;
+    }
+
+    @NonNull ImageStatus skip(Image image) {
+        LOGGER.debug("Skipping to download image {}", image.uri());
+        Image skippedImage = image.skip();
+        crawlerRepository.setImageState(skippedImage);
+        failsafeLog(skippedImage);
+        return ImageStatus.SKIPPED;
+    }
+
+    @NonNull ImageStatus error(Image image) {
+        LOGGER.debug("Could not download image {}", image.uri());
+        Image errorImage = image.error();
+        crawlerRepository.setImageState(errorImage);
+        failsafeLog(errorImage);
+        return ImageStatus.ERROR;
+    }
+
+    void failsafeLog(@NonNull Image image) {
+        jsonLogger.failsafeInfo(image);
+    }
+
+    void failsafeLog(Image image, DownloadedImage downloadedImage) {
+        record DownloadedImageRecord(@NonNull Image image, @NonNull DownloadedImage downloadedImage) {
+        }
+        jsonLogger.failsafeInfo(new DownloadedImageRecord(image, downloadedImage));
     }
 
     @NonNull DownloadedImage download(@NonNull Image image) {

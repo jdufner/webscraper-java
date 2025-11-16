@@ -100,34 +100,32 @@ public class WebCrawler {
 
     @NonNull LinkStatus downloadLinkAndUpdateStatus(Link link) {
         try {
-            if (siteConfigurationProperties.isNotBlocked(link.uri())) {
+            if (isEligible(link)) {
                 return downloadAndSave(link);
             } else {
                 return skip(link);
             }
         } catch (Exception e) {
             LOGGER.error("downloadLinkAndUpdateStatus", e);
-            error(link);
-            return LinkStatus.ERROR;
+            return error(link);
         }
     }
 
+    private boolean isEligible(Link link) {
+        return siteConfigurationProperties.isNotBlocked(link.uri());
+    }
+
     @NonNull LinkStatus downloadAndSave(@NonNull Link link) {
+        LOGGER.debug("Trying to download link {}", link.uri());
         DownloadedDocument downloadedDocument = downloadAndSave(link.uri());
-        Link downloadedLink = new Link(link.id(), link.uri(), LinkState.DOWNLOADED);
+        Link downloadedLink = link.download();
         crawlerRepository.setLinkState(downloadedLink);
         failsafeLog(downloadedLink, downloadedDocument);
         return LinkStatus.DOWNLOADED;
     }
 
-    void failsafeLog(@NonNull Link link, @NonNull DownloadedDocument downloadedDocument) {
-        record LinkDownloadedDocument(@NonNull Link link, @NonNull DownloadedDocument downloadedDocument) {}
-        DownloadedDocument shortContent = cloneButShortenHtmlContent(downloadedDocument);
-        jsonLogger.failsafeInfo(new LinkDownloadedDocument(link, shortContent));
-    }
-
     @NonNull LinkStatus skip(@NonNull Link link) {
-        LOGGER.debug("Skip Link {}", link.uri());
+        LOGGER.debug("Skipping to download link {}", link.uri());
         Link skippedLink = link.skip();
         crawlerRepository.setLinkState(skippedLink);
         failsafeLog(skippedLink);
@@ -135,7 +133,7 @@ public class WebCrawler {
     }
 
     @NonNull LinkStatus error(@NonNull Link link) {
-        LOGGER.debug("Couldn't download Link {}", link.uri());
+        LOGGER.debug("Couldn't download link {}", link.uri());
         Link errorLink = link.error();
         crawlerRepository.setLinkState(errorLink);
         failsafeLog(errorLink);
@@ -144,6 +142,19 @@ public class WebCrawler {
 
     void failsafeLog(@NonNull Link link) {
         jsonLogger.failsafeInfo(link);
+    }
+
+    void failsafeLog(@NonNull Link link, @NonNull DownloadedDocument downloadedDocument) {
+        record LinkDownloadedDocument(@NonNull Link link, @NonNull DownloadedDocument downloadedDocument) {}
+        DownloadedDocument shortContent = cloneButShortenHtmlContent(downloadedDocument);
+        jsonLogger.failsafeInfo(new LinkDownloadedDocument(link, shortContent));
+    }
+
+    static @NonNull DownloadedDocument cloneButShortenHtmlContent(@NonNull DownloadedDocument downloadedDocument) {
+        return new DownloadedDocument(downloadedDocument.id(), downloadedDocument.uri(),
+                downloadedDocument.content().substring(0, min(downloadedDocument.content().length(), 200)),
+                downloadedDocument.downloadStartedAt(), downloadedDocument.downloadStoppedAt(),
+                downloadedDocument.documentState());
     }
 
     @Transactional
@@ -170,13 +181,6 @@ public class WebCrawler {
                 analyzedDocument.analysisStartedAt(), analyzedDocument.analysisStoppedAt());
         record DownloadedAnalyzedDocument(@NonNull DownloadedDocument downloadedDocument, @NonNull AnalyzedDocumentData analyzedDocumentData) {}
         jsonLogger.failsafeInfo(new DownloadedAnalyzedDocument(shortContent, analyzedDocumentData));
-    }
-
-    static @NonNull DownloadedDocument cloneButShortenHtmlContent(@NonNull DownloadedDocument downloadedDocument) {
-        return new DownloadedDocument(downloadedDocument.id(), downloadedDocument.uri(),
-                downloadedDocument.content().substring(0, min(downloadedDocument.content().length(), 200)),
-                downloadedDocument.downloadStartedAt(), downloadedDocument.downloadStoppedAt(),
-                downloadedDocument.documentState());
     }
 
 }

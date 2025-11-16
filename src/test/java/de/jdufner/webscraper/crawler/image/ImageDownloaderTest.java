@@ -302,13 +302,14 @@ class ImageDownloaderTest {
     @Test
     void given_stat_when_skipped_expect_repository_called() {
         // arrange
-        Image image = new Image(1, URI.create("https://localhost"), ImageState.SKIPPED);
+        Image image = new Image(1, URI.create("https://localhost"), ImageState.INITIALIZED);
+        Image skippedImage = image.skip();
 
         // act
-        imageDownloader.setState(image);
+        imageDownloader.skip(image);
 
         // assert
-        verify(crawlerRepository).setImageState(image);
+        verify(crawlerRepository).setImageState(skippedImage);
     }
 
     @Test
@@ -333,7 +334,7 @@ class ImageDownloaderTest {
         Image image = new Image(1, URI.create("https://localhost/image.jpg"), ImageState.INITIALIZED);
 
         // act
-        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
+        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageAndUpdateStatus(image);
 
         // assert
         verify(jsonLogger).failsafeInfo(any());
@@ -347,7 +348,7 @@ class ImageDownloaderTest {
         Image image = new Image(1, URI.create("https://localhost/image.jpg"), ImageState.INITIALIZED);
 
         // act
-        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
+        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageAndUpdateStatus(image);
 
         // assert
         verify(jsonLogger).failsafeInfo(any());
@@ -362,7 +363,7 @@ class ImageDownloaderTest {
         Image image = new Image(1, URI.create("https://localhost/image.svg"), ImageState.INITIALIZED);
 
         // act
-        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageIfNotBlocked(image);
+        ImageDownloader.ImageStatus imageStatus = imageDownloader.downloadImageAndUpdateStatus(image);
 
         // assert
         verify(jsonLogger).failsafeInfo(any());
