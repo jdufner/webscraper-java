@@ -26,6 +26,7 @@ public class RemoteWebDriverConfiguration {
         try {
             ChromeOptions chromeOptions = new ChromeOptions();
             webdriverConfigurationProperties.options().forEach(chromeOptions::addArguments);
+            chromeOptions.setPageLoadStrategy(webdriverConfigurationProperties.getPageLoadStrategy());
             return new RemoteWebDriver(URI.create("http://localhost:4444").toURL(), chromeOptions);
         } catch (MalformedURLException e) {
             throw new RuntimeException(e);

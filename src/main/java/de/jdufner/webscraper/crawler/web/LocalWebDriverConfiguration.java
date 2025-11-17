@@ -21,6 +21,7 @@ public class LocalWebDriverConfiguration {
     @Bean
     public @NonNull WebDriver webDriver() {
         ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.setPageLoadStrategy(webdriverConfigurationProperties.getPageLoadStrategy());
         webdriverConfigurationProperties.options().forEach(chromeOptions::addArguments);
         return new ChromeDriver(chromeOptions);
     }

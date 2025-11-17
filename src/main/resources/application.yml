@@ -40,6 +40,8 @@ webdriver:
 #      - --windows-size=1200x600
 #      - --disable-gpu
 #      - --disable-web-security
+    # page-load-strategy must be one of normal (blocks ), eager, none
+    page-load-strategy: none
 logging:
   level:
     de:
