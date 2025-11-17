@@ -3,6 +3,7 @@ package de.jdufner.webscraper.crawler.web;
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.*;
 import de.jdufner.webscraper.crawler.logger.JsonLogger;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
@@ -106,7 +107,7 @@ public class WebCrawler {
                 return skip(link);
             }
         } catch (Exception e) {
-            LOGGER.error("downloadLinkAndUpdateStatus", e);
+            LOGGER.error(ExceptionUtils.getStackTrace(e));
             return error(link);
         }
     }

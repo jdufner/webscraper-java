@@ -3,6 +3,7 @@ package de.jdufner.webscraper.crawler.image;
 import de.jdufner.webscraper.crawler.config.SiteConfigurationProperties;
 import de.jdufner.webscraper.crawler.data.*;
 import de.jdufner.webscraper.crawler.logger.JsonLogger;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public class ImageDownloader {
                 return skip(image);
             }
         } catch (Exception e) {
-            LOGGER.error("downloadImageAndUpdateStatus", e);
+            LOGGER.error(ExceptionUtils.getStackTrace(e));
             return error(image);
         }
     }
