@@ -43,6 +43,11 @@ webdriver:
     # page-load-strategy must be one of normal (blocks ), eager, none
     page-load-strategy: none
 logging:
+  structured:
+    format:
+      file: ecs
+  file:
+    name: \\wsl.localhost\Ubuntu\tmp\logs\webscraper.json
   level:
     de:
       jdufner:
