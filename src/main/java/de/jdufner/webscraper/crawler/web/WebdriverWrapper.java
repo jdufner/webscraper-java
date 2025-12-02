@@ -39,9 +39,9 @@ public class WebdriverWrapper {
     }
 
     private void waitUntilCookiesConsentedAndPageFullyLoaded() {
-        sleep(500);
+        sleep(1000);
         consentCookies();
-        sleep(500);
+        sleep(1000);
         executeScriptFromConfig();
         checkIfPageIsFullyLoaded();
     }

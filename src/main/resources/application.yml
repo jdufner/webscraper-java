@@ -47,7 +47,14 @@ logging:
     format:
       file: ecs
   file:
-    name: \\wsl.localhost\Ubuntu\tmp\logs\webscraper.json
+    name: \\wsl.localhost\Ubuntu\tmp\logs\webscraper.log
+  logback:
+    rollingpolicy:
+      file-name-pattern: ${LOG_FILE}.%d{yyyy-MM-dd}.%i.log
+      clean-history-on-start: false
+      max-file-size: 1MB
+      max-history: 7
+      total-size-cap: 10MB
   level:
     de:
       jdufner:
