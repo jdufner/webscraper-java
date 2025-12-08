@@ -10,6 +10,8 @@ import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @ExtendWith(MockitoExtension.class)
 class PictureFinderTest {
 
@@ -20,15 +22,26 @@ class PictureFinderTest {
         Path directory = Path.of(System.getProperty("java.io.tmpdir")+ separator + "webscraper");
         String pattern = "glob:*.{jpeg,jpg,png,webp}";
 
-        File file = new File(directory + separator + "file1.jpg");
-        FileUtils.touch(file);
+        File file1 = new File(directory + separator + "file1.jpg");
+        FileUtils.touch(file1);
+        File file2 = new File(directory + separator + "file2.jpeg");
+        FileUtils.touch(file2);
+        File file3 = new File(directory + separator + "file3.png");
+        FileUtils.touch(file3);
+        File file4 = new File(directory + separator + "file4.jpg");
+        FileUtils.touch(file4);
 
         // act
         PictureFinder pictureFinder = new PictureFinder(directory, pattern);
         List<String> pictures = pictureFinder.findPictures();
 
         // assert
-        boolean delete = file.delete();
+        assertThat(pictures).hasSize(4);
+
+        boolean delete1 = file1.delete();
+        boolean delete2 = file2.delete();
+        boolean delete3 = file3.delete();
+        boolean delete4 = file4.delete();
     }
 
 }
