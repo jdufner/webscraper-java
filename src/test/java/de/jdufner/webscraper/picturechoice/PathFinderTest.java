@@ -10,7 +10,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PictureFinderTest {
+class PathFinderTest {
 
     @Test
     void given_path_when_find_by_extension_expect_all_pictures() throws Exception{
@@ -29,7 +29,7 @@ class PictureFinderTest {
         FileUtils.touch(file4);
 
         // act
-        List<String> pictures = PictureFinder.findPictures(directory, pattern);
+        List<Path> pictures = PathFinder.find(directory, pattern);
 
         // assert
         assertThat(pictures).hasSize(4);

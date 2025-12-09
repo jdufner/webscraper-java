@@ -120,3 +120,4 @@ webscraper:
         - https://www.youtube.com/
   picturechoice:
     directory: C:\Users\jurge\AppData\Local\Temp\webscraper
+    filename-pattern: glob:*.{jpeg,jpg,png.webp}
