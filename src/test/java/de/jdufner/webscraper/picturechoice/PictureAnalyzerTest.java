@@ -17,6 +17,9 @@ class PictureAnalyzerTest {
     @Mock
     private PictureChoiceConfigurationProperties pictureChoiceConfigurationProperties;
 
+    @Mock
+    private PictureRepository pictureRepository;
+
     @InjectMocks
     private PictureAnalyzer pictureAnalyzer;
 
@@ -25,6 +28,7 @@ class PictureAnalyzerTest {
         // arrange
         when(pictureChoiceConfigurationProperties.directory()).thenReturn("C:\\Users\\jurge\\AppData\\Local\\Temp\\webscraper");
         when(pictureChoiceConfigurationProperties.filenamePattern()).thenReturn("glob:*.{jpeg,jpg,png,webp}");
+        //doNothing().when(pictureRepository).save(any(Picture.class));
 
         // act
         pictureAnalyzer.analyze();
@@ -39,7 +43,7 @@ class PictureAnalyzerTest {
         Path file = Path.of("C:\\Users\\jurge\\AppData\\Local\\Temp\\webscraper\\nature\\dd3f29vge00g1.jpeg");
 
         // act
-        String subPath = PictureAnalyzer.determinePath(staticLocationDirectory, file);
+        String subPath = PictureAnalyzer.determineHtmlFileName(staticLocationDirectory, file);
 
         // assert
         assertThat(subPath).isEqualTo("/nature/dd3f29vge00g1.jpeg");
@@ -52,7 +56,7 @@ class PictureAnalyzerTest {
         Path file = Path.of("C:\\Users\\jurge\\AppData\\Local\\Temp\\webscraper\\nature\\dd3f29vge00g1.jpeg");
 
         // act
-        String subPath = PictureAnalyzer.determinePath(staticLocationDirectory, file);
+        String subPath = PictureAnalyzer.determineHtmlFileName(staticLocationDirectory, file);
 
         // assert
         assertThat(subPath).isNull();

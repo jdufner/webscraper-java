@@ -16,23 +16,29 @@ class PictureAnalyzer {
 
     @NonNull
     private final PictureChoiceConfigurationProperties pictureChoiceConfigurationProperties;
+    @NonNull
+    private final PictureRepository pictureRepository;
 
-    PictureAnalyzer(@NonNull PictureChoiceConfigurationProperties pictureChoiceConfigurationProperties) {
+    PictureAnalyzer(@NonNull PictureChoiceConfigurationProperties pictureChoiceConfigurationProperties,
+                    @NonNull PictureRepository pictureRepository) {
         this.pictureChoiceConfigurationProperties = pictureChoiceConfigurationProperties;
+        this.pictureRepository = pictureRepository;
     }
 
     void analyze() {
         List<Path> files = PathFinder.find(pictureDirectory(), fileNamePattern());
         files.forEach(file -> {
-
+            String htmlFileName = determineHtmlFileName(pictureDirectory(), file);
+            Picture picture = new Picture(file, htmlFileName);
+            pictureRepository.save(picture);
         });
     }
 
-    static @Nullable String determinePath(@NonNull Path staticLocationDirectory, @NonNull Path file) {
-        String staticlocationDirectory = staticLocationDirectory.toAbsolutePath().toString();
+    static @Nullable String determineHtmlFileName(@NonNull Path staticLocationDirectory, @NonNull Path file) {
+        String directoryName = staticLocationDirectory.toAbsolutePath().toString();
         String fileName = file.toAbsolutePath().toString();
-        if (fileName.startsWith(staticlocationDirectory)) {
-            fileName = fileName.substring(staticlocationDirectory.length());
+        if (fileName.startsWith(directoryName)) {
+            fileName = fileName.substring(directoryName.length());
             fileName = fileName.replace('\\', '/');
             if (!fileName.startsWith("/")) {
                 fileName = "/" + fileName;
