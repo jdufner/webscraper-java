@@ -8,22 +8,14 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PictureFinder {
+class PictureFinder {
 
-    private final Path directory;
-    private final String pattern;
+    static List<String> findPictures(@NonNull Path directory, @NonNull String pattern) throws IOException {
+        List<String> list = new ArrayList<>();
 
-    public PictureFinder(Path directory, String pattern) {
-        this.directory = directory;
-        this.pattern = pattern;
-    }
-
-    List<String> findPictures() throws IOException {
-        List<String> list = new ArrayList<String>();
-
-        FileVisitor<Path> matcherVisitor = new SimpleFileVisitor<Path>() {
+        FileVisitor<Path> matcherVisitor = new SimpleFileVisitor<>() {
             @Override
-            public @NonNull FileVisitResult visitFile(@NonNull Path file, @NonNull BasicFileAttributes attribs) throws IOException {
+            public @NonNull FileVisitResult visitFile(@NonNull Path file, @NonNull BasicFileAttributes attribs) {
                 FileSystem fs = FileSystems.getDefault();
                 PathMatcher matcher = fs.getPathMatcher(pattern);
                 Path name = file.getFileName();
@@ -34,6 +26,7 @@ public class PictureFinder {
                 return FileVisitResult.CONTINUE;
             }
         };
+
         Files.walkFileTree(directory, matcherVisitor);
         return list;
     }
