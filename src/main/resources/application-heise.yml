@@ -2,11 +2,14 @@ spring:
   config:
     activate:
       on-profile: heise
+  web:
+    resources:
+      static-locations: file:C:\Users\jurge\AppData\Local\Temp\webscraper
 webscraper:
   crawler:
     image:
       start-download-automatically: false
-      #download-path: .
+      directory: C:\Users\jurge\AppData\Local\Temp\webscraper
       number-images: 1000
       file-extensions:
         - jpeg
@@ -115,3 +118,5 @@ webscraper:
         - https://www.twitter.com/
         - https://www.xing.com/
         - https://www.youtube.com/
+  picturechoice:
+    directory: C:\Users\jurge\AppData\Local\Temp\webscraper
