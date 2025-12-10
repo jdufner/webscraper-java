@@ -25,9 +25,10 @@ public abstract class AbstractPictureRepository {
     public int save(@NonNull Picture picture) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         PreparedStatementCreator preparedStatementCreator = con -> {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO PICTURE VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = con.prepareStatement("INSERT INTO PICTURES (FILENAME, HTML_FILENAME, STATE) VALUES (?, ?, ?) ", PreparedStatement.RETURN_GENERATED_KEYS);
             ps.setString(1, picture.file().toAbsolutePath().toString());
             ps.setString(2, picture.htmlFileName());
+            ps.setString(3, picture.state().toString());
             return ps;
         };
         jdbcTemplate.update(preparedStatementCreator, keyHolder);

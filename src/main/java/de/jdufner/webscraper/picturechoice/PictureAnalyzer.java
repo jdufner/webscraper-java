@@ -29,8 +29,8 @@ class PictureAnalyzer {
         List<Path> files = PathFinder.find(pictureDirectory(), fileNamePattern());
         files.forEach(file -> {
             String htmlFileName = determineHtmlFileName(Path.of(staticLocations), file);
-            Picture picture = new Picture(file, htmlFileName);
-            pictureRepository.save(picture);
+            Picture picture = new Picture(file, htmlFileName, Picture.State.INITIALIZED);
+            int id = pictureRepository.save(picture);
         });
     }
 
