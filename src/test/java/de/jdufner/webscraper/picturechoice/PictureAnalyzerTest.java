@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,7 +27,9 @@ class PictureAnalyzerTest {
     @Test
     void given_picture_directory_when_analyzing_expect_picture_metadata_stored_in_database() {
         // arrange
-        when(pictureChoiceConfigurationProperties.directory()).thenReturn("C:\\Users\\jurge\\AppData\\Local\\Temp\\webscraper");
+        String separator = FileSystems.getDefault().getSeparator();
+        Path directory = Path.of(System.getProperty("java.io.tmpdir")+ separator + "webscraper-test");
+        when(pictureChoiceConfigurationProperties.directory()).thenReturn(directory.toString());
         when(pictureChoiceConfigurationProperties.filenamePattern()).thenReturn("glob:*.{jpeg,jpg,png,webp}");
         //doNothing().when(pictureRepository).save(any(Picture.class));
 
