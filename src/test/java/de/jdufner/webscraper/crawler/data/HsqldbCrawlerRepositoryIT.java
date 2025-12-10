@@ -39,7 +39,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void when_analyzed_document_fully_populated_expect_everything_saved() {
+    void when_analyzed_document_fully_populated_expect_everything_saved() {
         // arrange
         deleteAllDataFromTables();
         jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, STATE) values (?, ?, ?, ?, ?, ?)",
@@ -60,7 +60,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void when_analyzed_date_almost_empty_expect_saved() {
+    void when_analyzed_date_almost_empty_expect_saved() {
         // arrange
         deleteAllDataFromTables();
         jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, STATE) values (?, ?, ?, ?, ?, ?)",
@@ -77,7 +77,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_at_least_one_image_in_database_when_get_next_image_expect_image() {
+    void given_at_least_one_image_in_database_when_get_next_image_expect_image() {
         // arrange
         deleteAllDataFromTables();
         jdbcTemplate.update("insert into IMAGES (URL, STATE) values (?, ?)", "https://www.google.com/image.jpg", ImageState.INITIALIZED.toString());
@@ -91,7 +91,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_no_images_in_database_when_get_no_images_available_expect_empty() {
+    void given_no_images_in_database_when_get_no_images_available_expect_empty() {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where IMAGE_ID >= 0");
         jdbcTemplate.update("delete from IMAGES where ID >= 0");
@@ -104,7 +104,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_at_least_one_link_in_database_when_get_next_link_expect_link() {
+    void given_at_least_one_link_in_database_when_get_next_link_expect_link() {
         // arrange
         jdbcTemplate.update("insert into LINKS (URL, STATE) values (?, ?)", "https://www.google.com", LinkState.INITIALIZED.toString());
 
@@ -117,7 +117,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_no_link_in_database_when_get_next_link_expect_empty() {
+    void given_no_link_in_database_when_get_next_link_expect_empty() {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS where LINK_ID >= 0");
         jdbcTemplate.update("delete from LINKS where id >= 0");
@@ -130,7 +130,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_link_when_link_exists_expect_updated() {
+    void given_link_when_link_exists_expect_updated() {
         // arrange
         Link link = new Link(-1, URI.create("https://localhost"), LinkState.INITIALIZED);
         jdbcTemplate.update("insert into LINKS (ID, URL, STATE) values (?, ?, ?)", link.id(), link.uri().toString(), link.state().toString());
@@ -149,7 +149,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_image_when_image_exists_expect_skip_updated() {
+    void given_image_when_image_exists_expect_skip_updated() {
         // arrange
         jdbcTemplate.update("delete from DOCUMENTS_TO_IMAGES where IMAGE_ID <= 0");
         jdbcTemplate.update("delete from IMAGES where id <= 0");
@@ -170,7 +170,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_downloaded_document_when_save_document_then_id() {
+    void given_downloaded_document_when_save_document_then_id() {
         // arrange
         DownloadedDocument downloadedDocument = new DownloadedDocument(null, URI.create("https://localhost/"),
                 "<html></html>", new Date(), new Date(), DocumentState.INITIALIZED);
@@ -183,7 +183,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_saved_downloaded_document_when_load_document_then_downloaded_document_with_id() {
+    void given_saved_downloaded_document_when_load_document_then_downloaded_document_with_id() {
         // arrange
         deleteAllDataFromTables();
         jdbcTemplate.update("insert into DOCUMENTS (ID, URL, CONTENT, DOWNLOAD_STARTED_AT, DOWNLOAD_STOPPED_AT, STATE) values (?, ?, ?, ?, ?, ?)", 1, "https://localhost/", "<html></html>", new Date(), new Date(), DocumentState.DOWNLOADED.toString());
@@ -196,7 +196,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_not_yet_saved_uri_when_save_expect_new_id() {
+    void given_not_yet_saved_uri_when_save_expect_new_id() {
         try {
             // arrange
             jdbcTemplate.update("delete from DOCUMENTS_TO_LINKS");
@@ -213,7 +213,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_already_saved_uri_when_save_expect_existing_id() {
+    void given_already_saved_uri_when_save_expect_existing_id() {
         try {
             // arrange
             jdbcTemplate.update("delete from LINKS");
@@ -231,7 +231,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_downloaded_image_when_save_fully_populated_expect_all_saved() {
+    void given_downloaded_image_when_save_fully_populated_expect_all_saved() {
         try {
             // arrange
             jdbcTemplate.update("insert into IMAGES (ID, URL, STATE) values (?, ?, ?)", "1", "https://localhost/image.jpg", ImageState.INITIALIZED.toString());
@@ -256,7 +256,7 @@ class HsqldbCrawlerRepositoryIT {
     }
 
     @Test
-    public void given_downloaded_image_when_save_almost_empty_expect_all_saved() {
+    void given_downloaded_image_when_save_almost_empty_expect_all_saved() {
         try {
             // arrange
             int imageId = 2;
