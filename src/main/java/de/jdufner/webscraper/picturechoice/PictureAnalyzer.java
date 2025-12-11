@@ -2,6 +2,8 @@ package de.jdufner.webscraper.picturechoice;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -9,7 +11,9 @@ import java.nio.file.Path;
 import java.util.List;
 
 @Service
-class PictureAnalyzer {
+public class PictureAnalyzer {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PictureAnalyzer.class);
 
     @Value("spring.web.resources.static-locations")
     private String staticLocations;
@@ -19,7 +23,7 @@ class PictureAnalyzer {
     @NonNull
     private final PictureRepository pictureRepository;
 
-    PictureAnalyzer(@NonNull PictureChoiceConfigurationProperties pictureChoiceConfigurationProperties,
+    public PictureAnalyzer(@NonNull PictureChoiceConfigurationProperties pictureChoiceConfigurationProperties,
                     @NonNull PictureRepository pictureRepository) {
         this.pictureChoiceConfigurationProperties = pictureChoiceConfigurationProperties;
         this.pictureRepository = pictureRepository;
@@ -28,6 +32,7 @@ class PictureAnalyzer {
     void analyze() {
         List<Path> files = PathFinder.find(pictureDirectory(), fileNamePattern());
         files.forEach(file -> {
+            LOGGER.info("{} found", file);
             String htmlFileName = determineHtmlFileName(Path.of(staticLocations), file);
             Picture picture = new Picture(file, htmlFileName, Picture.State.INITIALIZED);
             int id = pictureRepository.save(picture);

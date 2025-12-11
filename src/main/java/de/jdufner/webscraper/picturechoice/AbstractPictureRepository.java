@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
 import java.sql.PreparedStatement;
+import java.util.Optional;
 
 public abstract class AbstractPictureRepository {
 
@@ -33,6 +34,11 @@ public abstract class AbstractPictureRepository {
         };
         jdbcTemplate.update(preparedStatementCreator, keyHolder);
         return getIdFromKeyholder(keyHolder).intValue();
+    }
+
+    public int totalNumberPictures() {
+        Integer totalNumberPictures = jdbcTemplate.queryForObject("SELECT count(ID) FROM PICTURES", Integer.class);
+        return Optional.ofNullable(totalNumberPictures).orElse(0);
     }
 
 }

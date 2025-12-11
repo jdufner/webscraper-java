@@ -38,4 +38,14 @@ class HsqldbPictureRepositoryIT {
         assertThat(id).isGreaterThanOrEqualTo(0);
     }
 
+    @Test
+    void given_when_total_number_pictures_expect_number() {
+        // arrange
+
+
+        // act
+
+        // assert
+    }
+
 }

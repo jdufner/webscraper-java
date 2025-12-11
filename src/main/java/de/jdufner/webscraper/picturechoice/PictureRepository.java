@@ -6,4 +6,6 @@ public interface PictureRepository {
 
     int save(@NonNull Picture picture);
 
+    int totalNumberPictures();
+
 }
