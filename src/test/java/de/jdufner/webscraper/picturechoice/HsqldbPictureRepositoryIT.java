@@ -39,13 +39,47 @@ class HsqldbPictureRepositoryIT {
     }
 
     @Test
-    void given_when_total_number_pictures_expect_number() {
+    void given_zero_picture_when_total_number_pictures_expect_zero() {
         // arrange
-
+        // intentionally insert no data
 
         // act
+        int totalNumberPictures = hsqldbPictureRepository.totalNumberPictures();
 
         // assert
+        assertThat(totalNumberPictures).isEqualTo(0);
+    }
+
+    @Test
+    void given_one_picture_when_total_number_pictures_expect_one() {
+        // arrange
+        jdbcTemplate.update("insert into PICTURES (FILENAME, HTML_FILENAME, STATE) values (?, ?, ?)", ps -> {
+            ps.setString(1, "/tmp/webscraper/image1.jpg");
+            ps.setString(2, "/webscraper/image1.jpg");
+            ps.setString(3, Picture.State.INITIALIZED.toString());
+        });
+
+        // act
+        int totalNumberPictures = hsqldbPictureRepository.totalNumberPictures();
+
+        // assert
+        assertThat(totalNumberPictures).isEqualTo(1);
+    }
+
+    @Test
+    void given_one_picture_when_load_picture_expect_one() {
+        // arrange
+        jdbcTemplate.update("insert into PICTURES (FILENAME, HTML_FILENAME, STATE) values (?, ?, ?)", ps -> {
+            ps.setString(1, "/tmp/webscraper/image1.jpg");
+            ps.setString(2, "/webscraper/image1.jpg");
+            ps.setString(3, Picture.State.INITIALIZED.toString());
+        });
+
+        // act
+        Picture picture = hsqldbPictureRepository.loadPictureOrNextAfter(0);
+
+        // assert
+        assertThat(picture).isNotNull();
     }
 
 }

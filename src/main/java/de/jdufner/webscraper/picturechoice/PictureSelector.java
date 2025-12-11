@@ -15,9 +15,9 @@ class PictureSelector {
 
     Picture[] selectTwoRandomPictures() {
         int totalNumberPictures = pictureRepository.totalNumberPictures();
-        int picture1Index = randInt(1,  totalNumberPictures);
+        int picture1Index = randInt(0,  totalNumberPictures - 1);
         Picture picture1 = pictureRepository.loadPictureOrNextAfter(picture1Index);
-        int picture2Index = randInt(1,  totalNumberPictures, picture1Index);
+        int picture2Index = randInt(0,  totalNumberPictures - 1, picture1Index);
         Picture picture2 = pictureRepository.loadPictureOrNextAfter(picture2Index);
         return new Picture[]{picture1, picture2};
     }

@@ -44,7 +44,7 @@ public abstract class AbstractPictureRepository {
 
     public Picture loadPictureOrNextAfter(int picture1Index) {
         return jdbcTemplate.queryForObject(
-                "SELECT ID, FILENAME, HTML_FILENAME, STATE FROM PICTURES WHERE ID > = ? LIMIT 2",
+                "SELECT ID, FILENAME, HTML_FILENAME, STATE FROM PICTURES WHERE ID >= ? LIMIT 1",
                 (rs, rowNum) -> new Picture(
                         Path.of(rs.getString("FILENAME")),
                         rs.getString("HTML_FILENAME"),
