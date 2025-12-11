@@ -1,6 +1,5 @@
 package de.jdufner.webscraper.picturechoice;
 
-import ch.qos.logback.core.joran.sanity.Pair;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
@@ -14,11 +13,13 @@ class PictureSelector {
         this.pictureRepository = pictureRepository;
     }
 
-    Pair<Picture, Picture> selectTwoRandomPictures() {
+    Picture[] selectTwoRandomPictures() {
         int totalNumberPictures = pictureRepository.totalNumberPictures();
         int picture1Index = randInt(1,  totalNumberPictures);
+        Picture picture1 = pictureRepository.loadPictureOrNextAfter(picture1Index);
         int picture2Index = randIntExclude(1,  totalNumberPictures, picture1Index);
-        return null;
+        Picture picture2 = pictureRepository.loadPictureOrNextAfter(picture2Index);
+        return new Picture[]{picture1, picture2};
     }
 
     private static int randInt(int min, int max) {

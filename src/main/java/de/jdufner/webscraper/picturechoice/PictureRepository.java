@@ -8,4 +8,6 @@ public interface PictureRepository {
 
     int totalNumberPictures();
 
+    Picture loadPictureOrNextAfter(int picture1Index);
+
 }

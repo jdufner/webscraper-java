@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
+import java.nio.file.Path;
 import java.sql.PreparedStatement;
 import java.util.Optional;
 
@@ -39,6 +40,16 @@ public abstract class AbstractPictureRepository {
     public int totalNumberPictures() {
         Integer totalNumberPictures = jdbcTemplate.queryForObject("SELECT count(ID) FROM PICTURES", Integer.class);
         return Optional.ofNullable(totalNumberPictures).orElse(0);
+    }
+
+    public Picture loadPictureOrNextAfter(int picture1Index) {
+        return jdbcTemplate.queryForObject(
+                "SELECT ID, FILENAME, HTML_FILENAME, STATE FROM PICTURES WHERE ID > = ? LIMIT 2",
+                (rs, rowNum) -> new Picture(
+                        Path.of(rs.getString("FILENAME")),
+                        rs.getString("HTML_FILENAME"),
+                        Picture.State.valueOf(rs.getString("STATE"))),
+                picture1Index);
     }
 
 }
