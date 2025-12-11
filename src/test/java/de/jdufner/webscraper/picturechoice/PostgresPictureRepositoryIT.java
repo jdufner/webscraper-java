@@ -3,6 +3,10 @@ package de.jdufner.webscraper.picturechoice;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,7 +15,16 @@ import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = {
+        PictureRepository.class,
+        HsqldbPictureRepository.class,
+        PostgresPictureRepository.class
+})
+@ImportAutoConfiguration({
+        DataSourceAutoConfiguration.class,
+        FlywayAutoConfiguration.class,
+        JdbcTemplateAutoConfiguration.class
+})
 @Profile("postgres")
 class PostgresPictureRepositoryIT {
 
@@ -36,6 +49,50 @@ class PostgresPictureRepositoryIT {
 
         // assert
         assertThat(id).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
+    void given_zero_picture_when_total_number_pictures_expect_zero() {
+        // arrange
+        // intentionally insert no data
+
+        // act
+        int totalNumberPictures = postgresPictureRepository.totalNumberPictures();
+
+        // assert
+        assertThat(totalNumberPictures).isEqualTo(0);
+    }
+
+    @Test
+    void given_one_picture_when_total_number_pictures_expect_one() {
+        // arrange
+        jdbcTemplate.update("insert into PICTURES (FILENAME, HTML_FILENAME, STATE) values (?, ?, ?)", ps -> {
+            ps.setString(1, "/tmp/webscraper/image1.jpg");
+            ps.setString(2, "/webscraper/image1.jpg");
+            ps.setString(3, Picture.State.INITIALIZED.toString());
+        });
+
+        // act
+        int totalNumberPictures = postgresPictureRepository.totalNumberPictures();
+
+        // assert
+        assertThat(totalNumberPictures).isEqualTo(1);
+    }
+
+    @Test
+    void given_one_picture_when_load_picture_expect_one() {
+        // arrange
+        jdbcTemplate.update("insert into PICTURES (FILENAME, HTML_FILENAME, STATE) values (?, ?, ?)", ps -> {
+            ps.setString(1, "/tmp/webscraper/image1.jpg");
+            ps.setString(2, "/webscraper/image1.jpg");
+            ps.setString(3, Picture.State.INITIALIZED.toString());
+        });
+
+        // act
+        Picture picture = postgresPictureRepository.loadPictureOrNextAfter(0);
+
+        // assert
+        assertThat(picture).isNotNull();
     }
 
 }
