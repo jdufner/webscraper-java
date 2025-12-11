@@ -22,11 +22,11 @@ class PictureSelector {
         return new Picture[]{picture1, picture2};
     }
 
-    private static int randInt(int min, int max) {
+    static int randInt(int min, int max) {
         return (int) (Math.random() * (max - min + 1)) + min;
     }
 
-    private static int randIntExclude(int min, int max, int exclude) {
+    static int randIntExclude(int min, int max, int exclude) {
         int candidate = randInt(min, max);
         while (candidate == exclude) {
             candidate = randInt(min, max);
