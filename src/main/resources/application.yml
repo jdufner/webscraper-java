@@ -69,3 +69,6 @@ logging:
               WebCrawlerTrigger: INFO
               WebdriverWrapper: INFO
               WebFetcher: INFO
+          picturechoice:
+            PictureAnalyzer: DEBUG
+            PictureChoiceController: DEBUG

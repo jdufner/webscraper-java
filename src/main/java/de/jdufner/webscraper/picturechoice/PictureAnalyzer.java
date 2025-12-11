@@ -15,7 +15,7 @@ public class PictureAnalyzer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PictureAnalyzer.class);
 
-    @Value("spring.web.resources.static-locations")
+    @Value("${spring.web.resources.static-locations}")
     private String staticLocations;
 
     @NonNull
@@ -30,6 +30,10 @@ public class PictureAnalyzer {
     }
 
     void analyze() {
+        LOGGER.debug("staticLocationDirectory: {}", staticLocations);
+        if (staticLocations.startsWith("file:")) {
+            staticLocations = staticLocations.substring("file:".length());
+        }
         List<Path> files = PathFinder.find(pictureDirectory(), fileNamePattern());
         files.forEach(file -> {
             LOGGER.info("{} found", file);

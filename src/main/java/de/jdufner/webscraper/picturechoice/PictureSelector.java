@@ -4,12 +4,12 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
-class PictureSelector {
+public class PictureSelector {
 
     @NonNull
     private final PictureRepository pictureRepository;
 
-    PictureSelector(@NonNull PictureRepository pictureRepository) {
+    public PictureSelector(@NonNull PictureRepository pictureRepository) {
         this.pictureRepository = pictureRepository;
     }
 
