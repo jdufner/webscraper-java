@@ -2,13 +2,27 @@ package de.jdufner.webscraper.picturechoice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.jdbc.JdbcTemplateAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.nio.file.Path;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SpringBootTest
+@SpringBootTest(classes = {
+        PictureSelector.class,
+        PictureRepository.class,
+        HsqldbPictureRepository.class,
+        PostgresPictureRepository.class
+})
+@ImportAutoConfiguration({
+        DataSourceAutoConfiguration.class,
+        FlywayAutoConfiguration.class,
+        JdbcTemplateAutoConfiguration.class
+})
 public class PictureSelectorIT {
 
     @Autowired
