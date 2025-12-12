@@ -1,13 +1,327 @@
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Picture Choice - Click your preferred picture!</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --control-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Hauptcontainer für das Layout */
+        .split-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: all 0.5s ease;
+        }
+
+        /* Die Wrapper für die einzelnen Bilder */
+        .image-wrapper {
+            position: relative;
+            height: 100%;
+            /* Standardwert, wird per JS überschrieben */
+            flex: 1;
+            overflow: hidden;
+            transition: flex 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            border-right: 2px solid #333;
+            background-color: #000;
+        }
+
+        /* NEU: Pseudo-Element für den unscharfen Hintergrund */
+        .image-wrapper::before {
+            content: "";
+            position: absolute;
+            /* Negative Werte, damit der Blur am Rand nicht ausbleicht */
+            top: -50px;
+            left: -50px;
+            right: -50px;
+            bottom: -50px;
+            /* Die Bild-URL kommt aus der CSS-Variable, die per JS gesetzt wird */
+            background-image: var(--bg-image);
+            background-size: cover;
+            background-position: center;
+            /* Hier passiert die Magie: Weichzeichnen und Abdunkeln */
+            filter: blur(20px) brightness(0.4);
+            z-index: 0;
+        }
+
+        .image-wrapper:last-child {
+            border-right: none;
+        }
+
+        /* Das Bild selbst */
+        .image-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            /* Wichtig: Relativ positionieren, damit es ÜBER dem ::before Hintergrund liegt */
+            position: relative;
+            z-index: 1;
+            /* Optional: Ein leichter Schatten, um das Bild vom Hintergrund abzuheben */
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+        }
+
+        /* Overlay für Datei-Uploads (Hover Effekt) */
+        .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            z-index: 10; /* Über dem Bild */
+        }
+
+        .image-wrapper:hover .upload-overlay {
+            opacity: 1;
+        }
+
+        /* Verstecktes Input Feld */
+        .file-input {
+            display: none;
+        }
+
+        /* Steuerleiste unten */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--control-bg);
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            gap: 15px;
+            z-index: 100;
+            backdrop-filter: blur(5px);
+        }
+
+        button {
+            border: none;
+            background: #333;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #555;
+        }
+
+        button.accent {
+            background: #007bff;
+        }
+        button.accent:hover {
+            background: #0056b3;
+        }
+
+        /* Info Anzeige für Verhältnisse */
+        .debug-info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Mobile Anpassung */
+        @media (max-width: 600px) {
+            .split-container {
+                flex-direction: column;
+            }
+            .image-wrapper {
+                width: 100% !important;
+                flex-basis: auto;
+                border-right: none;
+                border-bottom: 2px solid #333;
+            }
+            .image-wrapper:last-child {
+                border-bottom: none;
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>Picture 1</p>
-    <img th:src="@{${picture1}}" alt="Picture 1" />
-    <p>Picture 2</p>
-    <img th:src="@{${picture2}}" alt="Picture 2" />
+    <!--p>Picture 1</p>
+    <img th:src="@{${picture1}}" alt="Picture 1" /-->
+    <!--p>Picture 2</p>
+    <img th:src="@{${picture2}}" alt="Picture 2" /-->
+    <div class="split-container" id="container">
+
+        <!-- Bild Bereich 1 -->
+        <div class="image-wrapper" id="wrap1">
+            <span class="debug-info" id="info1">Loading...</span>
+            <!-- Platzhalter Bild: Hochformat (Portrait) -->
+            <!--img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1000&auto=format&fit=crop" id="img1" alt="Bild 1"-->
+            <img th:src="@{${picture1}}" id="img1" alt="Picture 1" />
+            <label class="upload-overlay">
+                Bild 1 ändern
+                <input type="file" class="file-input" accept="image/*" onchange="loadFile(event, 'img1')">
+            </label>
+        </div>
+
+        <!-- Bild Bereich 2 -->
+        <div class="image-wrapper" id="wrap2">
+            <span class="debug-info" id="info2">Loading...</span>
+            <!-- Platzhalter Bild: Querformat (Landscape) -->
+            <!--img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?q=80&w=2000&auto=format&fit=crop" id="img2" alt="Bild 2"-->
+            <img th:src="@{${picture2}}" id="img2" alt="Picture 2" />
+            <label class="upload-overlay">
+                Bild 2 ändern
+                <input type="file" class="file-input" accept="image/*" onchange="loadFile(event, 'img2')">
+            </label>
+        </div>
+
+    </div>
+    <script>
+        const img1 = document.getElementById('img1');
+        const img2 = document.getElementById('img2');
+        const wrap1 = document.getElementById('wrap1');
+        const wrap2 = document.getElementById('wrap2');
+        const info1 = document.getElementById('info1');
+        const info2 = document.getElementById('info2');
+        const container = document.getElementById('container');
+
+        // Funktion zum Berechnen der optimalen Aufteilung
+        function recalculateLayout() {
+            // Wir prüfen, ob die Bilder geladen sind
+            if (!img1.naturalWidth || !img2.naturalWidth) return;
+
+            // Update: Hintergrundbilder für den Blur-Effekt synchronisieren
+            // Das sorgt dafür, dass das CSS ::before Element immer das korrekte Bild hat
+            wrap1.style.setProperty('--bg-image', `url(${img1.src})`);
+            wrap2.style.setProperty('--bg-image', `url(${img2.src})`);
+
+            // Seitenverhältnisse der Bilder (Breite / Höhe)
+            const r1 = img1.naturalWidth / img1.naturalHeight;
+            const r2 = img2.naturalWidth / img2.naturalHeight;
+
+            // Verfügbarer Platz im Container
+            const W = container.clientWidth;
+            const H = container.clientHeight;
+
+            // SZENARIO 1: Horizontal (Row)
+            const scale_row = Math.min(H, W / (r1 + r2));
+
+            // SZENARIO 2: Vertikal (Column)
+            const scale_col = Math.min(W, H / ((1 / r1) + (1 / r2)));
+
+            // Entscheidung
+            const useRow = scale_row >= scale_col;
+
+            if (useRow) {
+                container.style.flexDirection = 'row';
+                wrap1.style.borderRight = '2px solid #333';
+                wrap1.style.borderBottom = 'none';
+
+                const idealW1 = H * r1;
+                const idealW2 = H * r2;
+
+                if (idealW1 + idealW2 < W) {
+                    // Smart Logic für gemischte Formate mit "Löchern"
+                    let grow1 = 1, grow2 = 1;
+
+                    if (r1 < 1 && r2 >= 1) {
+                        grow1 = 0.0001;
+                        grow2 = 1;
+                    } else if (r1 >= 1 && r2 < 1) {
+                        grow1 = 1;
+                        grow2 = 0.0001;
+                    }
+
+                    wrap1.style.flex = `${grow1} 1 ${idealW1}px`;
+                    wrap2.style.flex = `${grow2} 1 ${idealW2}px`;
+
+                    info1.innerText = `Modus: Horizontal (Smart)\n(Breite: ${Math.round(idealW1)}px)`;
+                    info2.innerText = `Modus: Horizontal (Smart)\n(Breite: ${Math.round(idealW2)}px + Rest)`;
+
+                } else {
+                    wrap1.style.flex = r1;
+                    wrap2.style.flex = r2;
+
+                    info1.innerText = `Modus: Horizontal (Tight)\n(Scale: ${Math.round(scale_row)})`;
+                    info2.innerText = `Modus: Horizontal (Tight)\n(Scale: ${Math.round(scale_row)})`;
+                }
+
+            } else {
+                container.style.flexDirection = 'column';
+                wrap1.style.flex = 1 / r1;
+                wrap2.style.flex = 1 / r2;
+                wrap1.style.borderRight = 'none';
+                wrap1.style.borderBottom = '2px solid #333';
+
+                info1.innerText = `Modus: Vertikal\n(Scale: ${Math.round(scale_col)})`;
+                info2.innerText = `Modus: Vertikal\n(Scale: ${Math.round(scale_col)})`;
+            }
+        }
+
+        // Event Listener
+        img1.onload = recalculateLayout;
+        img2.onload = recalculateLayout;
+        window.onresize = recalculateLayout;
+
+        // Funktion zum Laden lokaler Bilder
+        function loadFile(event, imgId) {
+            const file = event.target.files[0];
+            if(!file) return;
+            const output = document.getElementById(imgId);
+            output.src = URL.createObjectURL(file);
+            // onload feuert recalculateLayout, welches nun auch den Background setzt
+            output.onload = function() {
+                URL.revokeObjectURL(output.src);
+                recalculateLayout();
+            }
+        }
+
+        // Funktion für neue Zufallsbilder
+        function setRandomImages() {
+            const randW1 = Math.random() > 0.5 ? 600 : 1200;
+            const randH1 = Math.random() > 0.5 ? 800 : 1200;
+            const randW2 = Math.random() > 0.5 ? 1200 : 600;
+            const randH2 = Math.random() > 0.5 ? 1200 : 800;
+            const t = new Date().getTime();
+
+            img1.src = `https://picsum.photos/${randW1}/${randH1}?random=${t}1`;
+            img2.src = `https://picsum.photos/${randW2}/${randH2}?random=${t}2`;
+        }
+
+        // Initiale Berechnung
+        if (img1.complete && img2.complete) {
+            recalculateLayout();
+        }
+    </script>
 </body>
 </html>
