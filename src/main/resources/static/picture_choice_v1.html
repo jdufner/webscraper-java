@@ -32,7 +32,6 @@
         .image-wrapper {
             position: relative;
             height: 100%;
-            /* Standardwert, wird per JS überschrieben */
             flex: 1;
             overflow: hidden;
             transition: flex 0.8s cubic-bezier(0.25, 1, 0.5, 1);
@@ -68,7 +67,7 @@
             position: relative;
             z-index: 1;
             box-shadow: 0 0 30px rgba(0,0,0,0.5);
-            pointer-events: none; /* Keine Interaktion mit dem Bild direkt */
+            pointer-events: none;
             transition: opacity 0.3s ease;
         }
 
@@ -90,7 +89,6 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        /* Hover-Effekt: Overlay einblenden */
         .image-wrapper:hover .action-overlay {
             opacity: 1;
             transform: translateX(-50%) translateY(0);
@@ -116,15 +114,13 @@
             background-color: rgba(255,255,255,0.1);
         }
 
-        /* Aktiver Zustand für Like Button */
         .icon-btn.liked {
-            color: #4dabf7; /* Blau */
+            color: #4dabf7;
         }
         .icon-btn.liked svg {
             fill: rgba(77, 171, 247, 0.2);
         }
 
-        /* SVG Icons Größe */
         .icon-btn svg {
             width: 24px;
             height: 24px;
@@ -133,6 +129,7 @@
             fill: none;
             stroke-linecap: round;
             stroke-linejoin: round;
+            transition: all 0.3s ease;
         }
 
         /* Steuerleiste ganz unten (Global) */
@@ -173,7 +170,6 @@
             background: #0056b3;
         }
 
-        /* Info Anzeige für Verhältnisse */
         .debug-info {
             position: absolute;
             top: 10px;
@@ -187,7 +183,6 @@
             z-index: 10;
         }
 
-        /* Mobile Anpassung */
         @media (max-width: 600px) {
             .split-container {
                 flex-direction: column;
@@ -201,9 +196,8 @@
             .image-wrapper:last-child {
                 border-bottom: none;
             }
-            /* Auf Mobile Overlay immer anzeigen oder leichter zugänglich machen */
             .action-overlay {
-                opacity: 1; /* Immer sichtbar auf Mobile */
+                opacity: 1;
                 bottom: 10px;
                 padding: 8px 20px;
                 transform: translateX(-50%) translateY(0);
@@ -227,7 +221,7 @@
             <button class="icon-btn" title="Gefällt mir" onclick="toggleLike(this)">
                 <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
             </button>
-            <button class="icon-btn" title="Vollbild" onclick="toggleFullscreen('wrap1')">
+            <button class="icon-btn btn-fullscreen" title="Vollbild" onclick="toggleFullscreen('wrap1')">
                 <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
             </button>
         </div>
@@ -245,7 +239,7 @@
             <button class="icon-btn" title="Gefällt mir" onclick="toggleLike(this)">
                 <svg viewBox="0 0 24 24"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
             </button>
-            <button class="icon-btn" title="Vollbild" onclick="toggleFullscreen('wrap2')">
+            <button class="icon-btn btn-fullscreen" title="Vollbild" onclick="toggleFullscreen('wrap2')">
                 <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
             </button>
         </div>
@@ -267,8 +261,13 @@
     const info2 = document.getElementById('info2');
     const container = document.getElementById('container');
 
-    // Funktion zum Berechnen der optimalen Aufteilung
+    // SVG Pfade für Maximieren und Minimieren
+    const maximizeIconPath = "M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3";
+    const minimizeIconPath = "M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3";
+
+    // Layout Berechnung (Diese Funktion nutzt *immer* die echten Bilddimensionen)
     function recalculateLayout() {
+        // HIER werden die ECHTEN Dimensionen aus dem geladenen Bild genutzt:
         if (!img1.naturalWidth || !img2.naturalWidth) return;
 
         wrap1.style.setProperty('--bg-image', `url(${img1.src})`);
@@ -285,6 +284,7 @@
             return;
         }
 
+        // Berechnung anhand echter Pixel (z.B. 1000px / 1500px)
         const r1 = img1.naturalWidth / img1.naturalHeight;
         const r2 = img2.naturalWidth / img2.naturalHeight;
         const W = container.clientWidth;
@@ -331,7 +331,7 @@
         }
     }
 
-    // --- FUNKTIONEN ---
+    // --- ICON AKTIONEN ---
 
     function toggleLike(btn) {
         btn.classList.toggle('liked');
@@ -340,24 +340,56 @@
     function deleteImage(wrapId) {
         const wrap = document.getElementById(wrapId);
         wrap.style.display = 'none';
-        // Hover Status zurücksetzen, da Element weg ist
         if (hoveredWrapperId === wrapId) hoveredWrapperId = null;
+
+        const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+        if (fsElement === wrap && document.exitFullscreen) {
+            document.exitFullscreen();
+        }
+
         recalculateLayout();
     }
 
+    // --- VOLLBILD LOGIK ---
+
     function toggleFullscreen(wrapId) {
         const wrap = document.getElementById(wrapId);
-        if (!document.fullscreenElement) {
+        const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+
+        if (!fsElement) {
             if (wrap.requestFullscreen) {
                 wrap.requestFullscreen();
-            } else if (wrap.webkitRequestFullscreen) { /* Safari */
+            } else if (wrap.webkitRequestFullscreen) {
                 wrap.webkitRequestFullscreen();
             }
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
             }
         }
+    }
+
+    document.addEventListener('fullscreenchange', updateFullscreenIcons);
+    document.addEventListener('webkitfullscreenchange', updateFullscreenIcons);
+
+    function updateFullscreenIcons() {
+        const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+
+        ['wrap1', 'wrap2'].forEach(id => {
+            const wrap = document.getElementById(id);
+            const btn = wrap.querySelector('.btn-fullscreen');
+            const path = btn.querySelector('path');
+
+            if (fsElement === wrap) {
+                path.setAttribute('d', minimizeIconPath);
+                btn.setAttribute('title', 'Normale Ansicht');
+            } else {
+                path.setAttribute('d', maximizeIconPath);
+                btn.setAttribute('title', 'Vollbild');
+            }
+        });
     }
 
     // --- SHORTCUT LOGIK & HOVER TRACKING ---
@@ -365,25 +397,25 @@
     let hoveredWrapperId = null;
     let lastKeyDTime = 0;
     let lastKeyDWrapperId = null;
-    const DOUBLE_PRESS_THRESHOLD = 500; // ms für Doppelklick
+    const DOUBLE_PRESS_THRESHOLD = 500;
 
-    // Maus-Hover Tracking
     wrap1.addEventListener('mouseenter', () => hoveredWrapperId = 'wrap1');
     wrap1.addEventListener('mouseleave', () => { if(hoveredWrapperId === 'wrap1') hoveredWrapperId = null; });
 
     wrap2.addEventListener('mouseenter', () => hoveredWrapperId = 'wrap2');
     wrap2.addEventListener('mouseleave', () => { if(hoveredWrapperId === 'wrap2') hoveredWrapperId = null; });
 
-    // Keydown Handler
     document.addEventListener('keydown', (e) => {
-        // Nur ausführen, wenn Maus über einem Bild ist
-        if (!hoveredWrapperId) return;
+        const fsElement = document.fullscreenElement || document.webkitFullscreenElement;
+        const targetId = fsElement ? fsElement.id : hoveredWrapperId;
+
+        if (!targetId) return;
 
         const key = e.key.toLowerCase();
-        const wrapper = document.getElementById(hoveredWrapperId);
+        const wrapper = document.getElementById(targetId);
 
         if (key === 'f') {
-            toggleFullscreen(hoveredWrapperId);
+            toggleFullscreen(targetId);
         }
         else if (key === 'a') {
             const btn = wrapper.querySelector('.icon-btn[title="Gefällt mir"]');
@@ -392,50 +424,45 @@
         else if (key === 'd') {
             const now = new Date().getTime();
 
-            // Prüfen ob es ein Doppelklick ("d" + "d") auf dasselbe Element ist
-            if (lastKeyDWrapperId === hoveredWrapperId && (now - lastKeyDTime) < DOUBLE_PRESS_THRESHOLD) {
-                // Zweites Drücken -> Aktion ausführen
-                deleteImage(hoveredWrapperId);
-
-                // Reset
+            if (lastKeyDWrapperId === targetId && (now - lastKeyDTime) < DOUBLE_PRESS_THRESHOLD) {
+                deleteImage(targetId);
                 lastKeyDWrapperId = null;
                 lastKeyDTime = 0;
             } else {
-                // Erstes Drücken -> Timer starten
-                lastKeyDWrapperId = hoveredWrapperId;
+                lastKeyDWrapperId = targetId;
                 lastKeyDTime = now;
 
-                // Visuelles Feedback: Mülleimer kurz rot färben
                 const delBtn = wrapper.querySelector('.icon-btn[title="Löschen"]');
                 if(delBtn) {
                     const originalColor = delBtn.style.color;
-                    delBtn.style.color = '#ff4d4f'; // Warnfarbe
-                    setTimeout(() => {
-                        delBtn.style.color = originalColor;
-                    }, DOUBLE_PRESS_THRESHOLD);
+                    delBtn.style.color = '#ff4d4f';
+                    setTimeout(() => { delBtn.style.color = originalColor; }, DOUBLE_PRESS_THRESHOLD);
                 }
             }
         }
     });
 
-    // Event Listener für Bilder
     img1.onload = recalculateLayout;
     img2.onload = recalculateLayout;
     window.onresize = recalculateLayout;
 
-    // Reset Funktion
+    // Reset Funktion für Testzwecke
     function setRandomImages() {
         wrap1.style.display = 'block';
         wrap2.style.display = 'block';
 
-        const randW1 = Math.random() > 0.5 ? 600 : 1200;
-        const randH1 = Math.random() > 0.5 ? 800 : 1200;
-        const randW2 = Math.random() > 0.5 ? 1200 : 600;
-        const randH2 = Math.random() > 0.5 ? 1200 : 800;
-        const t = new Date().getTime();
+        // DIESE ZAHLEN SIND NUR FÜR DIE BILD-API DA, NICHT FÜR DAS LAYOUT
+        const requestWidth1 = Math.random() > 0.5 ? 600 : 1200;
+        const requestHeight1 = Math.random() > 0.5 ? 800 : 1200;
 
-        img1.src = `https://picsum.photos/${randW1}/${randH1}?random=${t}1`;
-        img2.src = `https://picsum.photos/${randW2}/${randH2}?random=${t}2`;
+        const requestWidth2 = Math.random() > 0.5 ? 1200 : 600;
+        const requestHeight2 = Math.random() > 0.5 ? 1200 : 800;
+
+        const t = new Date().getTime(); // Verhindert Cache-Probleme
+
+        // Die URL sagt picsum.photos: "Generiere mir ein neues Bild in X mal Y Pixeln"
+        img1.src = `https://picsum.photos/${requestWidth1}/${requestHeight1}?random=${t}1`;
+        img2.src = `https://picsum.photos/${requestWidth2}/${requestHeight2}?random=${t}2`;
 
         document.querySelectorAll('.icon-btn.liked').forEach(btn => btn.classList.remove('liked'));
     }
