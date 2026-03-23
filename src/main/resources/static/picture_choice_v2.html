@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maximale Randlose Bildanzeige</title>
+  <style>
+    /* Grund-Reset für absolute Randlosigkeit */
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      background-color: #000;
+      overflow: hidden; /* Verhindert Scrollbalken */
+    }
+
+    #main-container {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+
+    .img-slot {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background-color: #000;
+    }
+
+    img {
+      /* Wichtig: Nutzt die Fläche des Slots voll aus */
+      width: 100%;
+      height: 100%;
+      display: block;
+      /* 'contain' verhindert Verzerrung, lässt aber bei falschem Format schwarze Ränder */
+      /* 'cover' füllt alles randlos aus, schneidet aber evtl. Bildinhalte ab */
+      object-fit: contain;
+    }
+
+    /* Hilfsklasse für den Randlos-Modus */
+    .edge-to-edge img {
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+
+<div id="main-container">
+  <div class="img-slot"><img id="img1" src="https://picsum.photos/seed/1/1200/800"></div>
+  <div class="img-slot"><img id="img2" src="https://picsum.photos/seed/2/800/1200"></div>
+</div>
+
+<script>
+  const container = document.getElementById('main-container');
+  const img1 = document.getElementById('img1');
+  const img2 = document.getElementById('img2');
+
+  function updateLayout() {
+    const viewW = window.innerWidth;
+    const viewH = window.innerHeight;
+
+    // Natürliche Seitenverhältnisse (Breite / Höhe)
+    const r1 = (img1.naturalWidth / img1.naturalHeight) || 1;
+    const r2 = (img2.naturalWidth / img2.naturalHeight) || 1;
+
+    // Berechnung der genutzten Fläche für beide Varianten
+    // Variante: Nebeneinander
+    const areaH = calc(r1, viewW / 2, viewH) + calc(r2, viewW / 2, viewH);
+    // Variante: Übereinander
+    const areaV = calc(r1, viewW, viewH / 2) + calc(r2, viewW, viewH / 2);
+
+    // Setze die Richtung basierend auf der größeren Fläche
+    container.style.flexDirection = (areaH > areaV) ? 'row' : 'column';
+  }
+
+  function calc(imgR, slotW, slotH) {
+    const slotR = slotW / slotH;
+    return (imgR > slotR) ? (slotW * (slotW / imgR)) : (slotH * (slotH * imgR));
+  }
+
+  window.addEventListener('resize', updateLayout);
+  img1.onload = updateLayout;
+  img2.onload = updateLayout;
+</script>
+</body>
+</html>
