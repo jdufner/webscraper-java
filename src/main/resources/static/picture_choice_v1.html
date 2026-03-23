@@ -34,6 +34,7 @@
             height: 100%;
             flex: 1;
             overflow: hidden;
+            min-width: 0;
             transition: flex 0.8s cubic-bezier(0.25, 1, 0.5, 1);
             border-right: 2px solid #333;
             background-color: #000;
@@ -292,7 +293,10 @@
 
         const scale_row = Math.min(H, W / (r1 + r2));
         const scale_col = Math.min(W, H / ((1 / r1) + (1 / r2)));
-        const useRow = scale_row >= scale_col;
+
+        // NEU: Wenn Bildschirmhöhe > Bildschirmbreite, erzwinge vertikales Layout
+        const isPortraitScreen = H > W;
+        const useRow = !isPortraitScreen && (scale_row >= scale_col);
 
         if (useRow) {
             container.style.flexDirection = 'row';
@@ -301,33 +305,68 @@
 
             const idealW1 = H * r1;
             const idealW2 = H * r2;
+            const minWidthRemaining = W * 0.15; // Mindestens 15% Breite für das andere Bild lassen
 
-            if (idealW1 + idealW2 < W) {
-                let grow1 = 1, grow2 = 1;
-                if (r1 < 1 && r2 >= 1) {
-                    grow1 = 0.0001; grow2 = 1;
-                } else if (r1 >= 1 && r2 < 1) {
-                    grow1 = 1; grow2 = 0.0001;
-                }
-                wrap1.style.flex = `${grow1} 1 ${idealW1}px`;
-                wrap2.style.flex = `${grow2} 1 ${idealW2}px`;
-                info1.innerText = `Modus: Horizontal (Smart)\n(Breite: ${Math.round(idealW1)}px)`;
-                info2.innerText = `Modus: Horizontal (Smart)\n(Breite: ${Math.round(idealW2)}px + Rest)`;
+            if (r1 < 1 && r2 >= 1 && idealW1 <= (W - minWidthRemaining)) {
+                // Bild 1 ist Hochformat, Bild 2 Querformat.
+                // Zwinge Bild 1 auf seine exakte Idealbreite für 100% Höhe!
+                wrap1.style.flex = `0 0 ${idealW1}px`;
+                wrap2.style.flex = `1 1 0%`;
+                info1.innerText = `Prio Hochformat\n(Volle Höhe)`;
+                info2.innerText = `Restplatz\n(Flexibel)`;
+            } else if (r2 < 1 && r1 >= 1 && idealW2 <= (W - minWidthRemaining)) {
+                // Bild 2 ist Hochformat, Bild 1 Querformat.
+                wrap1.style.flex = `1 1 0%`;
+                wrap2.style.flex = `0 0 ${idealW2}px`;
+                info1.innerText = `Restplatz\n(Flexibel)`;
+                info2.innerText = `Prio Hochformat\n(Volle Höhe)`;
+            } else if (idealW1 + idealW2 < W) {
+                wrap1.style.flex = `${r1} 1 0%`;
+                wrap2.style.flex = `${r2} 1 0%`;
+                info1.innerText = `Optimal\n(Proportional)`;
+                info2.innerText = `Optimal\n(Proportional)`;
             } else {
+                // Platz reicht nicht aus, um Querformat voll darzustellen, beide skalieren
                 wrap1.style.flex = r1;
                 wrap2.style.flex = r2;
-                info1.innerText = `Modus: Horizontal (Tight)\n(Scale: ${Math.round(scale_row)})`;
-                info2.innerText = `Modus: Horizontal (Tight)\n(Scale: ${Math.round(scale_row)})`;
+                info1.innerText = `Eingepasst\n(Proportional)`;
+                info2.innerText = `Eingepasst\n(Proportional)`;
             }
 
         } else {
             container.style.flexDirection = 'column';
-            wrap1.style.flex = 1 / r1;
-            wrap2.style.flex = 1 / r2;
             wrap1.style.borderRight = 'none';
             wrap1.style.borderBottom = '2px solid #333';
-            info1.innerText = `Modus: Vertikal\n(Scale: ${Math.round(scale_col)})`;
-            info2.innerText = `Modus: Vertikal\n(Scale: ${Math.round(scale_col)})`;
+
+            const idealH1 = W / r1;
+            const idealH2 = W / r2;
+            const minHeightRemaining = H * 0.15; // Mindestens 15% Höhe für das andere Bild lassen
+
+            if (r1 >= 1 && r2 < 1 && idealH1 <= (H - minHeightRemaining)) {
+                // Bild 1 ist Querformat, Bild 2 Hochformat.
+                // Zwinge Bild 1 auf seine exakte Idealhöhe für 100% Breite!
+                wrap1.style.flex = `0 0 ${idealH1}px`;
+                wrap2.style.flex = `1 1 0%`;
+                info1.innerText = `Prio Querformat\n(Volle Breite)`;
+                info2.innerText = `Restplatz\n(Flexibel)`;
+            } else if (r2 >= 1 && r1 < 1 && idealH2 <= (H - minHeightRemaining)) {
+                // Bild 2 ist Querformat, Bild 1 Hochformat.
+                wrap1.style.flex = `1 1 0%`;
+                wrap2.style.flex = `0 0 ${idealH2}px`;
+                info1.innerText = `Restplatz\n(Flexibel)`;
+                info2.innerText = `Prio Querformat\n(Volle Breite)`;
+            } else if (idealH1 + idealH2 < H) {
+                wrap1.style.flex = `${1 / r1} 1 0%`;
+                wrap2.style.flex = `${1 / r2} 1 0%`;
+                info1.innerText = `Optimal\n(Proportional)`;
+                info2.innerText = `Optimal\n(Proportional)`;
+            } else {
+                // Platz reicht nicht aus, beide skalieren proportional
+                wrap1.style.flex = 1 / r1;
+                wrap2.style.flex = 1 / r2;
+                info1.innerText = `Eingepasst\n(Proportional)`;
+                info2.innerText = `Eingepasst\n(Proportional)`;
+            }
         }
     }
 

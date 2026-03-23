@@ -2,3 +2,57 @@ spring:
   config:
     activate:
       on-profile: hot
+webscraper:
+  crawler:
+    image:
+      start-download-automatically: false
+      #download-path: .
+      number-images: 1000
+      file-extensions:
+        - jpeg
+        - jpg
+        - png
+        - webp
+    web:
+      start-url: https://sexygirlspics.com
+      start-download-automatically: false
+      number-pages: 100
+      start-analysis-automatically: false
+      consent-cookies: false
+      consent-css-selector:
+        - button[title='Zustimmen']
+        #- button[title='Agree']
+      javascript:
+        - document.querySelectorAll('a-sticky-footer button[data-hide-trigger]').forEach((element) => element.click())
+    sites:
+      whitelist:
+        - https://sexygirlspics.com
+        - https://cdni.sexygirlspics.com
+      blacklist:
+        - https://bustypics.com
+        - https://cambuilder.com
+        - https://go.sexygirlspics.live
+        - https://idealmilf.com
+        - https://maturepornpics.com
+        - https://nastypornpics.com
+        - https://pineapplesupport.org
+        - https://sexygirlspics.com/cam
+        - https://sexygirlspics.com/contact
+        - https://sexygirlspics.com/non-nude
+        - https://sexygirlspics.com/porn-sites
+        - https://sexygirlspics.com/search
+        - https://sexygirlspics.com/sex-chat
+        - https://sexygirlspics.com/to
+        - https://static-cdn.strpst.com
+        - https://stripcash.com
+        - https://stripchat.com
+        - https://support.stripchat.com
+        - https://theporndude.com
+        - https://twitter.com
+        - https://viewgals.com
+        - https://wa.me
+        - https://www.asacp.org
+        - https://www.reddit.com
+        - https://www.rtalabel.org
+        - https://www.theyarehuge.com
+        - https://www.unseenuk.org
